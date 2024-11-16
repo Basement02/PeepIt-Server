@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: peep-it
+  profiles:
+    active:

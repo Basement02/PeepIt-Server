@@ -1,0 +1,3 @@
+[submodule "PeepIt-ServerConfig"]
+	path = PeepIt-ServerConfig
+	url = https://github.com/Basement02/PeepIt-ServerConfig.git
