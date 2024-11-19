@@ -3,6 +3,7 @@ package com.b02.peep_it.domain;
 import com.b02.peep_it.domain.constant.Role;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,9 +14,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member extends BaseTimeEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
-    private Long id; // 회원 고유 ID
+    private String id; // 회원 고유 ID
 
     @Column(nullable = false)
     private String nickname; // 닉네임
@@ -43,6 +43,19 @@ public class Member extends BaseTimeEntity {
     private Boolean isTerminated; // 탈퇴 요청 여부
 
     @OneToOne(optional = false)
-    @JoinColumn(name = "member_social_id", nullable = false)
-    private MemberSocial memberSocial;
+    @JoinColumn(name = "member_social_id")
+    private MemberSocial memberSocial; // 소셜로그인 정보 고유 ID
+
+    @OneToOne(optional = true)
+    @JoinColumn(name = "termination_id")
+    private Termination termination; // 탈퇴 요청 고유 ID
+
+    @Builder
+    public Member(String uid, String nickname, MemberSocial memberSocial) {
+        this.id =uid;
+        this.nickname = nickname;
+        this.role = Role.UNCERT;
+        this.isTerminated = Boolean.FALSE;
+        this.memberSocial = memberSocial;
+    }
 }
