@@ -50,6 +50,9 @@ public class Member extends BaseTimeEntity {
     @JoinColumn(name = "termination_id")
     private Termination termination; // 탈퇴 요청 고유 ID
 
+    @OneToOne(mappedBy = "member")
+    private Town town; // 단순 조회용 필드 (등록 동네)
+
     @Builder
     public Member(String uid, String nickname, MemberSocial memberSocial) {
         this.id =uid;
