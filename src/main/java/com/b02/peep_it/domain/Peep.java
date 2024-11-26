@@ -5,6 +5,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -30,4 +32,7 @@ public class Peep extends BaseTimeEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "member_id")
     private Member member; // 회원 고유 ID
+
+    @OneToMany(mappedBy = "peep")
+    private List<PeepReSticker> peepReStickerList; //  단순 조회용 필드 (핍 반응)
 }
