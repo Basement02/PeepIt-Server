@@ -33,6 +33,9 @@ public class Peep extends BaseTimeEntity {
     @JoinColumn(name = "member_id")
     private Member member; // 회원 고유 ID
 
+    @OneToOne(mappedBy = "peep")
+    private PeepLocation peepLocation; // 단순 조회용 필드 (핍 위치)
+
     @OneToMany(mappedBy = "peep")
     private List<PeepReSticker> peepReStickerList; //  단순 조회용 필드 (핍 반응)
 }
