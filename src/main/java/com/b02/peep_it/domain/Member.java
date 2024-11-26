@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Entity
@@ -52,6 +53,9 @@ public class Member extends BaseTimeEntity {
 
     @OneToOne(mappedBy = "member")
     private Town town; // 단순 조회용 필드 (등록 동네)
+
+    @OneToMany(mappedBy = "member")
+    private List<Peep> peepList; // 단순 조회용 필드 (등록 핍 리스트)
 
     @Builder
     public Member(String uid, String nickname, MemberSocial memberSocial) {
