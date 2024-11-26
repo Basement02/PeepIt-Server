@@ -61,4 +61,12 @@ public class Member extends BaseTimeEntity {
         this.isTerminated = Boolean.FALSE;
         this.memberSocial = memberSocial;
     }
+
+    public Member setAdditionalInfo(String phone, String profileImg, LocalDateTime birth, CustomGender gender) {
+        this.phone = phone;
+        this.profileImg = profileImg;
+        this.birth = birth;
+        this.gender = gender;
+        return this;
+    }
 }
