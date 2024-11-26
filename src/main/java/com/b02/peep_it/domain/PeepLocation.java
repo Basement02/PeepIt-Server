@@ -1,9 +1,6 @@
 package com.b02.peep_it.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class PeepLocation {
     @Id
     @OneToOne(optional = false)
-    @Column(name = "peep_id")
+    @JoinColumn(name = "peep_id")
     private Peep peep; // 핍 고유 ID
 
     @Column(nullable = false, name = "latitude")
