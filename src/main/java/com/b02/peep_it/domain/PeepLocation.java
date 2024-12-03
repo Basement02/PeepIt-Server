@@ -10,8 +10,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PeepLocation {
     @Id
+    @Column(name = "peep_id")
+    private Long id; // 핍 고유 ID (외래키)
+
     @OneToOne(optional = false)
-    @JoinColumn(name = "peep_id")
+    @MapsId
+    @JoinColumn
     private Peep peep; // 핍 고유 ID
 
     @Column(nullable = false, name = "latitude")

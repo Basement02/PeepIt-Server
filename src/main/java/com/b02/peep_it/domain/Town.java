@@ -10,8 +10,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Town extends BaseTimeEntity {
     @Id
+    @Column(name = "member_id")
+    private String id; // 회원 고유 ID (외래키)
+
     @OneToOne(optional = false)
-    @JoinColumn(name = "member_id")
+    @MapsId
+    @JoinColumn
     private Member member; // 회원 고유 ID
 
     @ManyToOne(optional = true)
