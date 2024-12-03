@@ -37,5 +37,4 @@ public class PushMsg extends BaseTimeEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "member_id")
     private Member member; // 회원 고유 ID
-
 }
