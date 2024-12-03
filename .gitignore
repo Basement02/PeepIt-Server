@@ -1,0 +1,83 @@
+# yml files
+*.yml
+!application.yml
+
+# Compiled source files
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Package files
+*.jar
+*.war
+*.ear
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE and editor specific files
+*.iml
+.idea/
+.vscode/
+
+# Node dependencies
+/node_modules/
+/.pnp
+.pnp.js
+
+# Python virtual environment
+venv/
+
+# macOS generated files
+*.DS_Store
+
+# Windows generated files
+*.lnk
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Build directories
+dist/
+build/
+
+# Environment variables file
+.env
+
+# Coverage reports
+.coverage
+coverage/
+
+# Temporary files
+*.tmp
+*.swp
+
+# Database files
+*.sqlite3
+
+# Generated metadata
+*.lock
+
+# Java specific
+*.class
+
+# Gradle specific
+.gradle/
+
+# Maven specific
+target/
+
+# JetBrains specific
+.idea/
+*.iml
+
+# Git directory
+/.git/
