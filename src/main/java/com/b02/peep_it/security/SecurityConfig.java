@@ -1,7 +1,7 @@
 package com.b02.peep_it.security;
 
-import com.b02.peep_it.security.token.JwtUtils;
-import com.b02.peep_it.security.token.TokenFilter;
+import com.b02.peep_it.security.token.AccessTokenFilter;
+import com.b02.peep_it.security.token.RefreshTokenFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +17,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig {
-    private JwtUtils jwtUtils;
+    private final AccessTokenFilter accessTokenFilter;
+    private final RefreshTokenFilter refreshTokenFilter;
     private String[] permitList = {
             "/**",
     };
@@ -34,7 +35,8 @@ public class SecurityConfig {
                             .requestMatchers(permitList).permitAll()
                             .anyRequest().authenticated();
                 })
-                .addFilterBefore(new TokenFilter(jwtUtils), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(accessTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(refreshTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 ;
 
         return http.build();
