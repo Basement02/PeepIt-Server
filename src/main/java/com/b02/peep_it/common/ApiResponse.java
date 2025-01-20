@@ -6,7 +6,7 @@ import org.springframework.lang.Nullable;
 
 public record ApiResponse<T>(
         boolean success,
-        T data,
+        @Nullable T data,
         @Nullable ExceptionDto error
 ) {
 

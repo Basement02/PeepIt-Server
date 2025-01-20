@@ -2,7 +2,7 @@ package com.b02.peep_it.security.token;
 
 import com.b02.peep_it.domain.Member;
 import com.b02.peep_it.dto.member.MemberDto;
-import com.b02.peep_it.dto.token.ReTokenResponseDto;
+import com.b02.peep_it.dto.token.CreateTokenResponseDto;
 import com.b02.peep_it.repository.MemberRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -39,7 +39,7 @@ public class RefreshTokenFilter extends OncePerRequestFilter {
                 String newRefreshToken = jwtUtils.createRefreshToken(memberDto);
                 log.info("Refresh Token validated and new Tokens issued.");
 
-                ReTokenResponseDto responseDto = ReTokenResponseDto.builder()
+                CreateTokenResponseDto responseDto = CreateTokenResponseDto.builder()
                         .accessToken(newAccessToken)
                         .refreshToken(newRefreshToken)
                         .build();
