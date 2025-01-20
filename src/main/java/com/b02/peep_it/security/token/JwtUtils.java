@@ -1,8 +1,8 @@
 package com.b02.peep_it.security.token;
 
 import com.b02.peep_it.dto.member.MemberDto;
-import com.b02.peep_it.exception.CustomError;
-import com.b02.peep_it.exception.UnauthorizedException;
+import com.b02.peep_it.common.exception.CustomError;
+import com.b02.peep_it.common.exception.UnauthorizedException;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
