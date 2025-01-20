@@ -29,4 +29,12 @@ public class AuthContoller {
     public ApiResponse<Object> checkId(@RequestParam("id") String id){
         return authService.isIdDuplicated(id);
     }
+
+    /*
+    전화번호 중복 확인
+     */
+    @GetMapping("/check/phone")
+    public ApiResponse<Object> checkPhone(@RequestParam("phone") String phone){
+        return authService.isPhoneDuplicated(phone);
+    }
 }

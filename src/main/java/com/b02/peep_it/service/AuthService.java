@@ -54,7 +54,8 @@ public class AuthService {
         // 기존 회원은 access/refresh token 발급 (로그인)
         if (memberSocial.isPresent()) {
             isMember = Boolean.TRUE;
-            Member member = memberRepository.findByMemberSocial(memberSocial.get());
+            Optional<Member> memberOptional = memberRepository.findByMemberSocial(memberSocial.get());
+            Member member = memberOptional.get();
             MemberDto memberDto = MemberDto.builder()
                         .id(member.getId())
                         .role(member.getRole())
@@ -87,6 +88,14 @@ public class AuthService {
         Optional<Member> memberOptional = memberRepository.findById(id);
         if (memberOptional.isPresent()) {
             return ApiResponse.failed(CustomError.DUPLICATED_ID);
+        }
+        return ApiResponse.ok(null);
+    }
+
+    public ApiResponse<Object> isPhoneDuplicated(String phone) {
+        Optional<Member> memberOptional = memberRepository.findByPhone(phone);
+        if (memberOptional.isPresent()) {
+            return ApiResponse.failed(CustomError.DUPLICATED_PHONE);
         }
         return ApiResponse.ok(null);
     }
