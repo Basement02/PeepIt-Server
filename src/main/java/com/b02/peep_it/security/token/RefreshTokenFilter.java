@@ -59,7 +59,7 @@ public class RefreshTokenFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return !path.startsWith("/api/auth/refresh"); // 지정 경로 이외의 요청은 통과 시킴
+        return !path.startsWith("/auth/refresh"); // 지정 경로 이외의 요청은 통과 시킴
     }
 }
 
