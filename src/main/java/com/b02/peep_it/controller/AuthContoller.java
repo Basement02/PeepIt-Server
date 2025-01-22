@@ -1,6 +1,7 @@
 package com.b02.peep_it.controller;
 
 import com.b02.peep_it.common.ApiResponse;
+import com.b02.peep_it.dto.RequestSignUpDto;
 import com.b02.peep_it.dto.RequestSocialLoginDto;
 import com.b02.peep_it.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -37,4 +38,12 @@ public class AuthContoller {
     public ApiResponse<Object> checkPhone(@RequestParam("phone") String phone){
         return authService.isPhoneDuplicated(phone);
     }
+
+    /*
+    계정 등록
+     */
+//    @PostMapping("/signUp")
+//    public ApiResponse<Object> signUp(@RequestBody RequestSignUpDto requestDto) {
+//        return authService.createAccount(requestDto);
+//    }
 }

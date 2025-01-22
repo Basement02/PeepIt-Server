@@ -4,6 +4,7 @@ import com.b02.peep_it.common.ApiResponse;
 import com.b02.peep_it.common.exception.CustomError;
 import com.b02.peep_it.domain.Member;
 import com.b02.peep_it.domain.MemberSocial;
+import com.b02.peep_it.dto.RequestSignUpDto;
 import com.b02.peep_it.dto.RequestSocialLoginDto;
 import com.b02.peep_it.dto.ResponseSocialLoginDto;
 import com.b02.peep_it.dto.member.MemberDto;
@@ -99,4 +100,11 @@ public class AuthService {
         }
         return ApiResponse.ok(null);
     }
+
+    /*
+    신규 계정 생성
+     */
+//    public ApiResponse<Object> createAccount(RequestSignUpDto requestDto) {
+//
+//    }
 }
