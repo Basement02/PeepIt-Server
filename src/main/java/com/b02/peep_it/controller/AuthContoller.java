@@ -1,7 +1,6 @@
 package com.b02.peep_it.controller;
 
 import com.b02.peep_it.common.ApiResponse;
-import com.b02.peep_it.dto.RequestSignUpDto;
 import com.b02.peep_it.dto.RequestSocialLoginDto;
 import com.b02.peep_it.service.AuthService;
 import lombok.RequiredArgsConstructor;

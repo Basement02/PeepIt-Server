@@ -1,5 +1,6 @@
 # yml files
 *.yml
+!appspec.yml
 !application.yml
 
 # Compiled source files

@@ -33,8 +33,8 @@ public class JwtUtils {
     private long refreshTokenTime; // 30일
     @Value("${jwt.key}")
     private String jwtSecretKey;
-
-    private final String issuer = "https://auth.peepit.com";
+    @Value("${jwt.issuer}")
+    private String issuer;
     private final StringRedisTemplate stringRedisTemplate;
 
 
