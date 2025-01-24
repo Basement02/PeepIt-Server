@@ -20,7 +20,7 @@ public class SecurityConfig {
     private final AccessTokenFilter accessTokenFilter;
     private final RefreshTokenFilter refreshTokenFilter;
     private String[] permitList = {
-            "/**",
+            "/api/test", "/api/test/**",
     };
 
     @Bean
