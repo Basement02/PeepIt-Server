@@ -2,4 +2,4 @@ spring:
   application:
     name: peep-it
   profiles:
-    active: localdb, jwt, lettuce, swagger
+    active: jwt, lettuce, swagger, rds
