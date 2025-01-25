@@ -16,4 +16,12 @@ public class TestController {
     public String checkdeploy() {
         return "Hello World!";
     }
+
+    /*
+    https health check
+     */
+    @GetMapping("/healthcheck")
+    public String healthcheck() {
+        return "OK";
+    }
 }
