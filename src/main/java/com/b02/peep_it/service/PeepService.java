@@ -1,7 +1,8 @@
 package com.b02.peep_it.service;
 
-import com.b02.peep_it.common.ApiResponse;
+import com.b02.peep_it.common.response.ApiResponse;
 import com.b02.peep_it.common.exception.CustomError;
+import com.b02.peep_it.common.response.PagedResponse;
 import com.b02.peep_it.common.s3.S3Utils;
 import com.b02.peep_it.common.util.AuthUtils;
 import com.b02.peep_it.common.util.TimeAgoUtils;
@@ -13,10 +14,14 @@ import com.b02.peep_it.dto.peep.RequestPeepUploadDto;
 import com.b02.peep_it.repository.PeepRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -114,5 +119,44 @@ public class PeepService {
 
         // 3. response 반환
         return ApiResponse.created(responseDto);
+    }
+
+    /*
+    사용자가 업로드한 핍 리스트 조회
+     */
+    public ApiResponse<PagedResponse<CommonPeepDto>> getMyUploadPeepList(int page, int size) {
+        // 1. 현재 로그인 사용자 ID 조회
+        String memberId = userInfo.getCurrentMemberUid();
+
+        // 2. 페이징 처리하여 Peep 리스트 조회
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")); // 최신순 정렬
+        Page<Peep> peepPage = peepRepository.findAllByMember_Id(memberId, pageRequest);
+
+        // 3. Peep 객체 리스트를 CommonPeepDto 리스트로 변환
+        List<CommonPeepDto> responseDto = peepPage.getContent().stream().map(p -> CommonPeepDto.builder()
+                .peepId(p.getId())
+                .memberId(p.getMember().getId())
+                .legalDistrictCode(p.getLegalDistrictCode())
+                .imageUrl(p.getImageUrl())
+                .content(p.getContent())
+                .isEdited(p.getIsEdited())
+                .profileUrl(p.getMember().getProfileImg())
+                .uploadAt(TimeAgoUtils.getTimeAgo(p.getCreatedAt()))
+                .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
+                .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
+                .build()
+        ).toList();
+
+        // 4. PagedResponse 객체 생성
+        PagedResponse<CommonPeepDto> pagedResponse = PagedResponse.create(
+                responseDto,
+                peepPage.getNumber(),
+                peepPage.getSize(),
+                peepPage.getTotalPages(),
+                peepPage.getTotalElements()
+        );
+
+        // 5. response 반환
+        return ApiResponse.created(pagedResponse);
     }
 }

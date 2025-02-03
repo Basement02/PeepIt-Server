@@ -1,6 +1,6 @@
 package com.b02.peep_it.service;
 
-import com.b02.peep_it.common.ApiResponse;
+import com.b02.peep_it.common.response.ApiResponse;
 import com.b02.peep_it.common.exception.CustomError;
 import com.b02.peep_it.domain.Member;
 import com.b02.peep_it.domain.MemberSocial;

@@ -1,6 +1,5 @@
 package com.b02.peep_it.controller;
 
-import com.b02.peep_it.common.ApiResponse;
 import com.b02.peep_it.common.s3.S3Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

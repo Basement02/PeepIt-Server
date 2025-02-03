@@ -1,6 +1,7 @@
 package com.b02.peep_it.controller;
 
-import com.b02.peep_it.common.ApiResponse;
+import com.b02.peep_it.common.response.ApiResponse;
+import com.b02.peep_it.common.response.PagedResponse;
 import com.b02.peep_it.dto.CommonPeepDto;
 import com.b02.peep_it.dto.peep.RequestPeepUploadDto;
 import com.b02.peep_it.service.PeepService;
@@ -52,7 +53,13 @@ public class PeepController {
     - 지도 내 핍 리스트 조회
      */
 
-    // 내가 업로드한 핍 리스트 조회
+    // 사용자가 업로드한 핍 리스트 조회
+    @Operation(summary = "내가 업로드한 핍 리스트 조회", description = "내가 업로드한 핍을 리스트로 조회합니다.")
+    @GetMapping("/my/upload")
+    public ApiResponse<PagedResponse<CommonPeepDto>> getMyPeepList(@RequestParam(defaultValue = "0") int page,
+    @RequestParam(defaultValue = "10") int size) {
+        return peepService.getMyUploadPeepList(page, size);
+    }
     // 내가 반응한 핍 리스트 조회
     // 내가 댓글 단 핍 리스트 조회
     // 특정 사용자가 업로드한 핍 리스트 조회

@@ -1,4 +1,4 @@
-package com.b02.peep_it.common;
+package com.b02.peep_it.common.response;
 
 import com.b02.peep_it.common.exception.CustomError;
 import com.b02.peep_it.common.exception.ExceptionDto;
