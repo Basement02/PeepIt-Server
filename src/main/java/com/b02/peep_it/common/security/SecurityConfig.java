@@ -1,7 +1,7 @@
-package com.b02.peep_it.security;
+package com.b02.peep_it.common.security;
 
-import com.b02.peep_it.security.token.AccessTokenFilter;
-import com.b02.peep_it.security.token.RefreshTokenFilter;
+import com.b02.peep_it.common.security.token.AccessTokenFilter;
+import com.b02.peep_it.common.security.token.RefreshTokenFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package com.b02.peep_it.security.token;
+package com.b02.peep_it.common.security.token;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;

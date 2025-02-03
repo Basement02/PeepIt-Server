@@ -1,4 +1,4 @@
-package com.b02.peep_it.security.token;
+package com.b02.peep_it.common.security.token;
 
 import com.b02.peep_it.domain.Member;
 import com.b02.peep_it.domain.constant.Role;

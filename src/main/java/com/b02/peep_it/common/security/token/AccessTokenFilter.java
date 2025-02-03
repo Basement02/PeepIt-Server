@@ -1,4 +1,4 @@
-package com.b02.peep_it.security.token;
+package com.b02.peep_it.common.security.token;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
