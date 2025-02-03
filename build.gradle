@@ -32,11 +32,11 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	// open-api
+	// open-api (swagger)
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
 //	implementation 'com.google.cloud:spring-cloud-gcp-starter-storage'
-	// h2 db
-//	runtimeOnly 'com.h2database:h2'
+	// aws s3
+	implementation 'software.amazon.awssdk:s3:2.20.10'
 	// jpa
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	// mysql db
@@ -49,8 +49,6 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	// JSON 처리 (Jackson 사용)
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
-	// open api
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 	annotationProcessor 'org.projectlombok:lombok'
