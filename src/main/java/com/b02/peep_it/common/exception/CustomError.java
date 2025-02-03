@@ -12,6 +12,12 @@ public enum CustomError {
     NEED_TO_CUSTOM("00000", "NEED TO ERROR CUSTOM!"),
 
     /*
+    404
+    -01: 존재하지 않는 핍입니다
+     */
+    PEEP_NOT_FOUND("40401", "존재하지 않는 핍입니다"),
+
+    /*
     409
     -01: 이미 사용 중인 아이디입니다
     -02: 이미 사용 중인 전화번호입니다

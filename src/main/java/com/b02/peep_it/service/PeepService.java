@@ -86,4 +86,33 @@ public class PeepService {
         }
     }
 
+    /*
+    핍 고유 ID로 개별 핍 상세 조회
+     */
+    public ApiResponse<CommonPeepDto> getPeepById(Long peepId) {
+        // 1. 핍 객체 조회
+        Optional<Peep> optionalPeep = peepRepository.findById(peepId);
+        if (optionalPeep.isEmpty()) {
+            return ApiResponse.failed(CustomError.PEEP_NOT_FOUND);
+        }
+
+        Peep peep = optionalPeep.get();
+
+        // 2. response dto 생성
+        CommonPeepDto responseDto = CommonPeepDto.builder()
+                .peepId(peep.getId())
+                .memberId(peep.getMember().getId())
+                .legalDistrictCode(peep.getLegalDistrictCode())
+                .imageUrl(peep.getImageUrl())
+                .content(peep.getContent())
+                .isEdited(peep.getIsEdited())
+                .profileUrl(peep.getMember().getProfileImg())
+                .uploadAt(TimeAgoUtils.getTimeAgo(peep.getCreatedAt()))
+                .stickerNum(Optional.ofNullable(peep.getPeepReStickerList()).map(l -> l.size()).orElse(0))
+                .chatNum(Optional.ofNullable(peep.getChatList()).map(l -> l.size()).orElse(0))
+                .build();
+
+        // 3. response 반환
+        return ApiResponse.created(responseDto);
+    }
 }

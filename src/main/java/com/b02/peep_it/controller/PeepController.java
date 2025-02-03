@@ -7,10 +7,7 @@ import com.b02.peep_it.service.PeepService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Peep API", description = "핍 관련 API")
@@ -23,7 +20,7 @@ public class PeepController {
     /*
     신규 핍 등록 (텍스트 + 이미지/영상)
      */
-    @Operation(summary = "핍 업로드", description = "이미지와 함께 새로운 핍을 업로드합니다.")
+    @Operation(summary = "신규 핍 등록 (텍스트 + 이미지/영상)", description = "이미지와 함께 새로운 핍을 업로드합니다.")
     @PostMapping("/post")
     public ApiResponse<CommonPeepDto> uploadPeep(
             @RequestPart("peepData") RequestPeepUploadDto requestDto,
@@ -38,6 +35,11 @@ public class PeepController {
     /*
     개별 핍 조회
      */
+    @Operation(summary = "개별 핍 조회", description = "개별 핍을 조회합니다.")
+    @GetMapping("/{peepId}")
+    public ApiResponse<CommonPeepDto> getPeep(@PathVariable("peepId") Long peepId) {
+        return peepService.getPeepById(peepId);
+    }
 
     /*
     핍 리스트 조회
