@@ -1,5 +1,6 @@
-package com.b02.peep_it.common.security.token;
+package com.b02.peep_it.common.util;
 
+import com.b02.peep_it.common.security.token.CustomUserDetails;
 import com.b02.peep_it.domain.Member;
 import com.b02.peep_it.domain.constant.Role;
 import com.b02.peep_it.repository.MemberRepository;

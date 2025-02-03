@@ -1,14 +1,20 @@
 package com.b02.peep_it.controller;
 
+import com.b02.peep_it.common.ApiResponse;
+import com.b02.peep_it.common.s3.S3Utils;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Slf4j
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/test")
+@RequestMapping("/test")
 public class TestController {
+    private final S3Utils s3Utils;
     /*
     배포 테스트
      */
@@ -23,5 +29,18 @@ public class TestController {
     @GetMapping("/healthcheck")
     public String healthcheck() {
         return "OK";
+    }
+
+    /*
+    s3 upload
+     */
+    @PostMapping("/upload")
+    public String uploadImage(@RequestParam("file") MultipartFile file) {
+        try {
+            String imageUrl = s3Utils.uploadFile(file);
+            return imageUrl;
+        } catch (IOException e) {
+            return "ERROR! 이미지 업로드 실패";
+        }
     }
 }

@@ -2,6 +2,7 @@ package com.b02.peep_it.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -35,4 +36,19 @@ public class PeepLocation {
 
     @Column(nullable = false)
     private String building; // 건물 이름
+
+    /*
+    신규 PeepLocation 생성
+     */
+    @Builder
+    public PeepLocation(Peep peep, Double latitude, Double longitude,String postalCode,
+                        String roadNameAddress, String roadNameCode,  String building) {
+        this.peep = peep;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.postalCode = postalCode;
+        this.roadNameAddress = roadNameAddress;
+        this.roadNameCode = roadNameCode;
+        this.building = building;
+    }
 }

@@ -4,13 +4,12 @@ import com.b02.peep_it.common.ApiResponse;
 import com.b02.peep_it.common.exception.CustomError;
 import com.b02.peep_it.domain.Member;
 import com.b02.peep_it.domain.MemberSocial;
-import com.b02.peep_it.dto.RequestSignUpDto;
 import com.b02.peep_it.dto.RequestSocialLoginDto;
 import com.b02.peep_it.dto.ResponseSocialLoginDto;
-import com.b02.peep_it.dto.member.MemberDto;
+import com.b02.peep_it.dto.member.CommonMemberDto;
 import com.b02.peep_it.repository.MemberRepository;
 import com.b02.peep_it.repository.MemberSocialRepository;
-import com.b02.peep_it.security.token.JwtUtils;
+import com.b02.peep_it.common.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -57,13 +56,13 @@ public class AuthService {
             isMember = Boolean.TRUE;
             Optional<Member> memberOptional = memberRepository.findByMemberSocial(memberSocial.get());
             Member member = memberOptional.get();
-            MemberDto memberDto = MemberDto.builder()
+            CommonMemberDto commonMemberDto = CommonMemberDto.builder()
                         .id(member.getId())
                         .role(member.getRole())
                         .name(member.getNickname())
                     .build();
-            accessToken = jwtUtils.createAccessToken(memberDto);
-            refreshToken = jwtUtils.createRefreshToken(memberDto);
+            accessToken = jwtUtils.createAccessToken(commonMemberDto);
+            refreshToken = jwtUtils.createRefreshToken(commonMemberDto);
             name = member.getNickname();
             id = member.getId();
         }
