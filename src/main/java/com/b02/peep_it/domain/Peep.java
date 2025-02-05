@@ -2,6 +2,7 @@ package com.b02.peep_it.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -38,4 +39,25 @@ public class Peep extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "peep")
     private List<PeepReSticker> peepReStickerList; //  단순 조회용 필드 (핍 반응)
+
+    @OneToMany(mappedBy = "peep")
+    private List<Chat> chatList; // 단순 조회용 필드 (댓글)
+
+    /*
+    신규 핍 생성
+     */
+    @Builder
+    public Peep(String legalDistrictCode, String imageUrl,
+                                  String content, Member member) {
+        this.legalDistrictCode = legalDistrictCode;
+        this.imageUrl = imageUrl;
+        this.content = content;
+        this.isEdited = false;
+        this.member = member;
+    }
+
+    public Peep updatePeepLocation(PeepLocation peepLocation) {
+        this.peepLocation = peepLocation;
+        return this;
+    }
 }

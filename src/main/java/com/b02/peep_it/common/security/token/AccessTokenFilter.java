@@ -1,5 +1,6 @@
-package com.b02.peep_it.security.token;
+package com.b02.peep_it.common.security.token;
 
+import com.b02.peep_it.common.util.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,6 +41,6 @@ public class AccessTokenFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return path.startsWith("/auth"); // auth 경로로 접근하는 모든 요청은 필터 제외
+        return path.startsWith("/auth") || path.startsWith("/test"); // auth 경로로 접근하는 모든 요청은 필터 제외
     }
 }

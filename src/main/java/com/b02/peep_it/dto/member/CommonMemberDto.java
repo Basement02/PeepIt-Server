@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 @Builder
-public record MemberDto(
+public record CommonMemberDto(
         @NotNull String id,
         Role role,
         String name
