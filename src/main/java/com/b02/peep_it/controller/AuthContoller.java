@@ -18,7 +18,9 @@ public class AuthContoller {
     private final AuthService authService;
 
     /*
-    register token 발급
+    소셜 로그인
+    - 최초: register token 발급
+    - 재: access/refresh token 발급
      */
     @PostMapping("/social")
     public ResponseEntity<CommonResponse<ResponseSocialLoginDto>> socialLogin(@RequestBody RequestSocialLoginDto requstDto) {

@@ -1,5 +1,6 @@
 package com.b02.peep_it.common.util;
 
+import com.b02.peep_it.domain.constant.CustomProvider;
 import com.b02.peep_it.dto.member.CommonMemberDto;
 import com.b02.peep_it.common.exception.CustomError;
 import com.b02.peep_it.common.exception.UnauthorizedException;
@@ -126,21 +127,53 @@ public class JwtUtils {
 
     /*
     common token utils
-    - validateRegister: register token 유효성 검사 (null, exp, login, iss)
+    - validateRegister: register token 유효성 검사 (null, exp, login, iss), provider별 검증
     - validateAccess: access token 유효성 검사 (null, exp, login, iss)
     - validateRefresh: refresh token 유효성 검사 (null, exp, login, iss)
      */
+
+    public boolean validateRegisterToken(String token) {
+        if (!StringUtils.hasText(token)) {
+            return false;
+        }
+        if (!isIss(token)) {
+            return false;
+        }
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(jwtSecretKey)
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            // 토큰에서 필드 추출
+            String provider = (String) claims.get("provider");
+            String providerId = (String) claims.get("providerId");
+
+            // provider에 따른 social uid 추출
+            String socialUid = getSocialUid(provider, providerId);
+
+            return true;
+
+
+        } catch (MalformedJwtException e) {
+            throw new UnauthorizedException(CustomError.NEED_TO_CUSTOM);
+        } catch (ExpiredJwtException e) {
+            throw new UnauthorizedException(CustomError.NEED_TO_CUSTOM);
+        } catch (UnauthorizedException e) {
+            return false;
+        }
+    }
 
     public boolean validateAccessToken(String token) {
         if (!StringUtils.hasText(token)) {
 //            throw new UnauthorizedException(ErrorCode.JWT_TOKEN_NOT_EXISTS);
             return false;
         }
-        if(isLogout(token)) {
+        if (isLogout(token)) {
 //            throw new UnauthorizedException(ErrorCode.LOG_OUT_JWT_TOKEN);
             return false;
         }
-        if(!isIss(token)) {
+        if (!isIss(token)) {
             return false;
         }
         try {
@@ -168,7 +201,7 @@ public class JwtUtils {
         if (!StringUtils.hasText(token)) {
             return false;
         }
-        if(!isIss(token)) {
+        if (!isIss(token)) {
             return false;
         }
         try {
@@ -197,6 +230,25 @@ public class JwtUtils {
     // Refresh Token 검증
     private boolean validateRefreshToken(Claims claims) {
         return issuer.equals(claims.getIssuer());
+    }
+
+    /*
+    id token으로 소셜 고유 ID 조회
+    - provider별 idToken 유효성 검사
+    - provider별 고유 ID 조회 및 반환
+        - kakao
+        - naver
+        - apple
+     */
+    public String getSocialUid(CustomProvider provider, String providerId) {
+        String socialUid = "";
+        // kakao
+
+        // naver
+
+        // apple
+
+        return socialUid;
     }
 
     /*
