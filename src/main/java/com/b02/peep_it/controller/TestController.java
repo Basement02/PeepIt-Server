@@ -1,8 +1,10 @@
 package com.b02.peep_it.controller;
 
+import com.b02.peep_it.common.response.CommonResponse;
 import com.b02.peep_it.common.s3.S3Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,4 +44,13 @@ public class TestController {
             return "ERROR! 이미지 업로드 실패";
         }
     }
+
+    /*
+    테스트 사용자 토큰 발급
+     */
+//    @PostMapping("/giver/test")
+//    public ResponseEntity<CommonResponse> getGiverToken(@RequestBody AuthTestDto authTestDto) {
+//        log.info("입력된 값 -> {}", authTestDto);
+//        return authService.createGiverToken(authTestDto);
+//    }
 }

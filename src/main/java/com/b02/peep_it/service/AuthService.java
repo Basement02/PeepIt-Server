@@ -1,9 +1,10 @@
 package com.b02.peep_it.service;
 
-import com.b02.peep_it.common.response.ApiResponse;
+import com.b02.peep_it.common.response.CommonResponse;
 import com.b02.peep_it.common.exception.CustomError;
 import com.b02.peep_it.domain.Member;
 import com.b02.peep_it.domain.MemberSocial;
+import com.b02.peep_it.dto.RequestSignUpDto;
 import com.b02.peep_it.dto.RequestSocialLoginDto;
 import com.b02.peep_it.dto.ResponseSocialLoginDto;
 import com.b02.peep_it.dto.member.CommonMemberDto;
@@ -12,6 +13,7 @@ import com.b02.peep_it.repository.MemberSocialRepository;
 import com.b02.peep_it.common.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -35,7 +37,7 @@ public class AuthService {
     - 40101: 유효하지 않은 소셜 계정입니다
     - 50000: 서버 내부 오류가 발생했습니다
      */
-    public ApiResponse<Object> getRegisterToken(RequestSocialLoginDto requstDto) {
+    public ResponseEntity<CommonResponse<ResponseSocialLoginDto>> getRegisterToken(RequestSocialLoginDto requstDto) {
         Boolean isMember = Boolean.FALSE;
         String registerToken = "";
         String accessToken = "";
@@ -71,7 +73,7 @@ public class AuthService {
             // register token 생성
             registerToken = jwtUtils.createRegisterToken(requstDto.provider().getCode(), providerId);
         }
-        return ApiResponse.created(ResponseSocialLoginDto.builder()
+        return CommonResponse.created(ResponseSocialLoginDto.builder()
                     .isMember(isMember)
                     .registerToken(registerToken)
                     .accessToken(accessToken)
@@ -84,26 +86,19 @@ public class AuthService {
     /*
     사용자 고유 id 중복 확인
      */
-    public ApiResponse<Object> isIdDuplicated(String id) {
+    public ResponseEntity<CommonResponse<Object>> isIdDuplicated(String id) {
         Optional<Member> memberOptional = memberRepository.findById(id);
         if (memberOptional.isPresent()) {
-            return ApiResponse.failed(CustomError.DUPLICATED_ID);
+            return CommonResponse.failed(CustomError.DUPLICATED_ID);
         }
-        return ApiResponse.ok(null);
+        return CommonResponse.ok(null);
     }
 
-    public ApiResponse<Object> isPhoneDuplicated(String phone) {
+    public ResponseEntity<CommonResponse<Object>> isPhoneDuplicated(String phone) {
         Optional<Member> memberOptional = memberRepository.findByPhone(phone);
         if (memberOptional.isPresent()) {
-            return ApiResponse.failed(CustomError.DUPLICATED_PHONE);
+            return CommonResponse.failed(CustomError.DUPLICATED_PHONE);
         }
-        return ApiResponse.ok(null);
+        return CommonResponse.ok(null);
     }
-
-    /*
-    신규 계정 생성
-     */
-//    public ApiResponse<Object> createAccount(RequestSignUpDto requestDto) {
-//
-//    }
 }

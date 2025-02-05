@@ -1,6 +1,6 @@
 package com.b02.peep_it.service;
 
-import com.b02.peep_it.common.response.ApiResponse;
+import com.b02.peep_it.common.response.CommonResponse;
 import com.b02.peep_it.common.exception.CustomError;
 import com.b02.peep_it.common.response.PagedResponse;
 import com.b02.peep_it.common.s3.S3Utils;
@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,7 +36,7 @@ public class PeepService {
     /*
     신규 핍 등록 (텍스트 + 이미지/영상)
      */
-    public ApiResponse<CommonPeepDto> createPeep(
+    public ResponseEntity<CommonResponse<CommonPeepDto>> createPeep(
             RequestPeepUploadDto requestDto, MultipartFile media) {
         try {
             // 1. S3에 파일 업로드 후 URL 받기
@@ -83,10 +84,10 @@ public class PeepService {
                     .build();
 
             // 7. response 반환
-            return ApiResponse.created(responseDto);
+            return CommonResponse.created(responseDto);
 
         } catch (IOException e) {
-            return ApiResponse.failed(CustomError.NEED_TO_CUSTOM);
+            return CommonResponse.failed(CustomError.NEED_TO_CUSTOM);
 //            throw new RuntimeException(e);
         }
     }
@@ -94,11 +95,11 @@ public class PeepService {
     /*
     핍 고유 ID로 개별 핍 상세 조회
      */
-    public ApiResponse<CommonPeepDto> getPeepById(Long peepId) {
+    public ResponseEntity<CommonResponse<CommonPeepDto>> getPeepById(Long peepId) {
         // 1. 핍 객체 조회
         Optional<Peep> optionalPeep = peepRepository.findById(peepId);
         if (optionalPeep.isEmpty()) {
-            return ApiResponse.failed(CustomError.PEEP_NOT_FOUND);
+            return CommonResponse.failed(CustomError.PEEP_NOT_FOUND);
         }
 
         Peep peep = optionalPeep.get();
@@ -118,13 +119,13 @@ public class PeepService {
                 .build();
 
         // 3. response 반환
-        return ApiResponse.created(responseDto);
+        return CommonResponse.created(responseDto);
     }
 
     /*
     사용자가 업로드한 핍 리스트 조회
      */
-    public ApiResponse<PagedResponse<CommonPeepDto>> getMyUploadPeepList(int page, int size) {
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMyUploadPeepList(int page, int size) {
         // 1. 현재 로그인 사용자 ID 조회
         String memberId = userInfo.getCurrentMemberUid();
 
@@ -157,6 +158,6 @@ public class PeepService {
         );
 
         // 5. response 반환
-        return ApiResponse.created(pagedResponse);
+        return CommonResponse.created(pagedResponse);
     }
 }
