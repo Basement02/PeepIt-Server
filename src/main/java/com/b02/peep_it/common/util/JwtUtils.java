@@ -146,7 +146,7 @@ public class JwtUtils {
                     .getBody();
 
             // 토큰에서 필드 추출
-            String provider = (String) claims.get("provider");
+            CustomProvider provider = (CustomProvider) claims.get("provider");
             String providerId = (String) claims.get("providerId");
 
             // provider에 따른 social uid 추출
