@@ -9,7 +9,7 @@ import com.b02.peep_it.common.util.TimeAgoUtils;
 import com.b02.peep_it.domain.Member;
 import com.b02.peep_it.domain.Peep;
 import com.b02.peep_it.domain.PeepLocation;
-import com.b02.peep_it.dto.CommonPeepDto;
+import com.b02.peep_it.dto.peep.CommonPeepDto;
 import com.b02.peep_it.dto.peep.RequestPeepUploadDto;
 import com.b02.peep_it.repository.PeepRepository;
 import lombok.RequiredArgsConstructor;

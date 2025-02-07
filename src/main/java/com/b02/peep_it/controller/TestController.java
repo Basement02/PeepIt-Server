@@ -27,7 +27,7 @@ public class TestController {
     /*
     https health check
      */
-    @GetMapping("/healthcheck")
+    @GetMapping("/health-check")
     public String healthcheck() {
         return "OK";
     }

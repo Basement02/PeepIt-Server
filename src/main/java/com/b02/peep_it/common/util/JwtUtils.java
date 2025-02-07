@@ -1,5 +1,6 @@
 package com.b02.peep_it.common.util;
 
+import com.b02.peep_it.common.security.token.CustomUserDetails;
 import com.b02.peep_it.domain.constant.CustomProvider;
 import com.b02.peep_it.dto.member.CommonMemberDto;
 import com.b02.peep_it.common.exception.CustomError;
@@ -12,8 +13,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -152,7 +151,7 @@ public class JwtUtils {
             // provider에 따른 social uid 추출
             String socialUid = getSocialUid(provider, providerId);
 
-            return true;
+            return socialUid != null;
 
 
         } catch (MalformedJwtException e) {
@@ -253,23 +252,64 @@ public class JwtUtils {
 
     /*
     Authentication 객체 생성
+    - getAuthentication: access token 활용
+    - getTempAuthentication: register token 활용
      */
     public Authentication getAuthentication(String token) {
         // 토큰 복호화
         Claims claims = getClaims(token);
 
         if (claims.get("role") == null) {
+            log.info("토큰에 role값 부재!!");
             throw new UnauthorizedException(CustomError.NEED_TO_CUSTOM);
         }
 
-        // 클레임에서 권한 정보 취득
-        String role = getRoleValueFromToken(token);
+        String uid = claims.get("uid").toString(); // 사용자 ID
+        String username = claims.getSubject(); // 닉네임
+        String role = claims.get("role").toString();
+        String provider = "";
+        String providerId = "";
 
-        // 권한 객체 생성
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role);
 
-        // UserDetails 객체 생성
-        UserDetails principal = new User(getUidfromToken(token), "", Collections.singleton(authority));
+        // CustomUserDetails 사용
+        CustomUserDetails principal = CustomUserDetails.builder()
+                .username(username)
+                .uid(uid)
+                .provider(provider)
+                .providerId(providerId)
+                .authorities(Collections.singleton(authority))
+                .build();
+
+        // Authentication 반환
+        return new UsernamePasswordAuthenticationToken(principal, "", Collections.singleton(authority));
+    }
+
+    public Authentication getTempAuthentication(String token) {
+        // 토큰 복호화
+        Claims claims = getClaims(token);
+
+        String uid = "";
+        String username = "";
+        String role = "register";
+        String provider = claims.get("provider").toString();
+        String providerId = claims.get("providerId").toString();
+
+        if (provider == null || providerId == null) {
+            log.info("토큰에 문제가 있다!! provider || providerId 부재!!");
+            throw new UnauthorizedException(CustomError.NEED_TO_CUSTOM);
+        }
+
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role);
+
+        // CustomUserDetails 사용
+        CustomUserDetails principal = CustomUserDetails.builder()
+                .username(username)
+                .uid(uid)
+                .provider(provider)
+                .providerId(providerId)
+                .authorities(Collections.singleton(authority))
+                .build();
 
         // Authentication 반환
         return new UsernamePasswordAuthenticationToken(principal, "", Collections.singleton(authority));
@@ -290,10 +330,6 @@ public class JwtUtils {
 
     public String getUidfromToken(String token) {
         return getClaims(token).get("uid").toString();
-    }
-
-    public String getRoleValueFromToken(String token) {
-        return getClaims(token).get("role").toString();
     }
 
     public Claims getClaims(String token) {

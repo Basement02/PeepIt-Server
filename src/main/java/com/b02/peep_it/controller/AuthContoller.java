@@ -3,7 +3,7 @@ package com.b02.peep_it.controller;
 import com.b02.peep_it.common.response.CommonResponse;
 import com.b02.peep_it.dto.RequestSignUpDto;
 import com.b02.peep_it.dto.RequestSocialLoginDto;
-import com.b02.peep_it.dto.ResponseSocialLoginDto;
+import com.b02.peep_it.dto.ResponseLoginDto;
 import com.b02.peep_it.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ public class AuthContoller {
     - 재: access/refresh token 발급
      */
     @PostMapping("/social")
-    public ResponseEntity<CommonResponse<ResponseSocialLoginDto>> socialLogin(@RequestBody RequestSocialLoginDto requstDto) {
+    public ResponseEntity<CommonResponse<ResponseLoginDto>> socialLogin(@RequestBody RequestSocialLoginDto requstDto) {
         return authService.getRegisterToken(requstDto);
     }
 
@@ -41,5 +41,13 @@ public class AuthContoller {
     @GetMapping("/check/phone")
     public ResponseEntity<CommonResponse<Object>> checkPhone(@RequestParam("phone") String phone){
         return authService.isPhoneDuplicated(phone);
+    }
+
+    /*
+    계정 생성
+     */
+    @PostMapping("/sign-up")
+    public ResponseEntity<CommonResponse<ResponseLoginDto>> signUp(@RequestBody RequestSignUpDto requestDto){
+        return authService.createAccount(requestDto);
     }
 }

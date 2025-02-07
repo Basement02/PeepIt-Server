@@ -1,18 +1,21 @@
 package com.b02.peep_it.common.security.token;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
 @Getter
-@RequiredArgsConstructor
+@Builder
+@AllArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
     private final String username; // 닉네임
-    private final String password = "";
     private final String uid;  // DB의 사용자 ID
+    private final String provider; // 소셜 로그인 공급자
+    private final String providerId; // 소셜 로그인 고유 ID
     private final Collection<? extends GrantedAuthority> authorities;
 
     @Override
@@ -22,7 +25,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return password;
+        return null;
     }
 
     @Override

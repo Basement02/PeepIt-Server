@@ -1,5 +1,6 @@
 package com.b02.peep_it.common.security.token;
 
+import com.b02.peep_it.common.util.AuthUtils;
 import com.b02.peep_it.common.util.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -17,20 +18,22 @@ import java.io.IOException;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class AccessTokenFilter extends OncePerRequestFilter {
+public class RegisterTokenFilter extends OncePerRequestFilter {
     private final JwtUtils jwtUtils;
+    private final AuthUtils authUtils;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            String token = bearerToken.substring(7);
-            if (jwtUtils.validateAccessToken(token)) {
-                Authentication authentication = jwtUtils.getAuthentication(token);
+        if (bearerToken != null && bearerToken.startsWith("Register ")) {
+            String token = bearerToken.substring(9);
+            if (jwtUtils.validateRegisterToken(token)) {
+                Authentication authentication = jwtUtils.getTempAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                log.info("Request to {}: JWT(access)={}", request.getRequestURI(), token);
-                CustomUserDetails userDetails = (CustomUserDetails) authentication.getDetails();
+
+                CustomUserDetails userDetails = authUtils.getPrincipal();
+                log.info("Request to {}: REGISTER(access)={}", request.getRequestURI(), token);
                 log.info("✅CustomUserDetails 객체 적용됨!");
                 log.info("User ID (uid): " + userDetails.getUid());
                 log.info("Username (닉네임): " + userDetails.getUsername());

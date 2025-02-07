@@ -3,6 +3,7 @@ package com.b02.peep_it.domain;
 import com.b02.peep_it.domain.constant.CustomProvider;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -22,6 +23,9 @@ public class MemberSocial {
     @Column(name = "provider_id", nullable = false)
     private String providerId; // 제공받은 식별자
 
-    @Column(nullable = false)
-    private String email; // 이메일
+    @Builder
+    public MemberSocial(CustomProvider provider, String providerId, String email) {
+        this.provider = provider;
+        this.providerId = providerId;
+    }
 }

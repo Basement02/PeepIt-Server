@@ -5,7 +5,7 @@ import lombok.Builder;
 import org.springframework.lang.Nullable;
 
 @Builder
-public record ResponseSocialLoginDto(
+public record ResponseLoginDto(
         @NotNull Boolean isMember,
         @Nullable String registerToken,
         @Nullable String accessToken,

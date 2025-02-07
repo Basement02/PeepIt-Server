@@ -27,6 +27,9 @@ public record RequestSignUpDto(
         @Nullable
         CustomGender gender,
 
+        @NotNull
+        Boolean isAgree, // 마케팅 약관 동의 여부
+
         @Nullable
         @Pattern(regexp = "^\\d{11}$", message = "전화번호는 11자리 숫자만 입력 가능합니다.")
         String phone
