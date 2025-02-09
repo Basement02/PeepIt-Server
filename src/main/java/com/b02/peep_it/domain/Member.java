@@ -61,11 +61,10 @@ public class Member extends BaseTimeEntity {
     private List<Peep> peepList; // 단순 조회용 필드 (등록 핍 리스트)
 
     @Builder
-    public Member(String id, String nickname, String phone, String profileImg,
+    public Member(String id, String nickname, String profileImg,
                   LocalDateTime birth, CustomGender gender, MemberSocial memberSocial) {
         this.id =id;
         this.nickname = nickname;
-        this.phone = phone;
         this.profileImg = profileImg;
         if (birth != null) {
             this.birth = birth;

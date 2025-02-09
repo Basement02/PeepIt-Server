@@ -2,6 +2,9 @@ package com.b02.peep_it.controller;
 
 import com.b02.peep_it.common.response.CommonResponse;
 import com.b02.peep_it.common.s3.S3Utils;
+import com.b02.peep_it.dto.RequestSignUpDto;
+import com.b02.peep_it.dto.ResponseLoginDto;
+import com.b02.peep_it.service.TestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +19,8 @@ import java.io.IOException;
 @RequestMapping("/test")
 public class TestController {
     private final S3Utils s3Utils;
+    private final TestService testService;
+
     /*
     배포 테스트
      */
@@ -48,9 +53,9 @@ public class TestController {
     /*
     테스트 사용자 토큰 발급
      */
-//    @PostMapping("/giver/test")
-//    public ResponseEntity<CommonResponse> getGiverToken(@RequestBody AuthTestDto authTestDto) {
-//        log.info("입력된 값 -> {}", authTestDto);
-//        return authService.createGiverToken(authTestDto);
-//    }
+    @PostMapping("/giver/test")
+    public ResponseEntity<CommonResponse<ResponseLoginDto>> getGiverToken(@RequestBody RequestSignUpDto requestDto) {
+        log.info("입력된 값 -> {}", requestDto);
+        return testService.createAccount(requestDto);
+    }
 }

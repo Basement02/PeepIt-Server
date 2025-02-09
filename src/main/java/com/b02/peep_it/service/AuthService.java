@@ -138,7 +138,6 @@ public class AuthService {
         Member member = Member.builder()
                 .id(requestDto.id())
                 .nickname(requestDto.nickname())
-                .phone(requestDto.phone())
                 .profileImg(DEFAULT_PROFILE_IMG)
                 .birth(requestDto.birth())
                 .gender(requestDto.gender())

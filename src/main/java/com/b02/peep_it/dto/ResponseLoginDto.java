@@ -10,7 +10,7 @@ public record ResponseLoginDto(
         @Nullable String registerToken,
         @Nullable String accessToken,
         @Nullable String refreshToken,
-        @Nullable String name,
-        @Nullable String id
+        @Nullable String name, // 닉네임
+        @Nullable String id // 핍잇 사용자 고유 ID
 ) {
 }
