@@ -73,13 +73,20 @@ public class PeepController {
                                                                                       @RequestParam(defaultValue = "10") int size) {
         return peepService.getUploadedPeepList(page, size);
     }
+
     // 사용자가 반응한 핍 리스트 조회
     @Operation(summary = "사용자가 반응한 핍 리스트 조회", description = "사용자가 반응한 핍 리스트를 조회합니다.")
     public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMyReactedPeepList(@RequestParam(defaultValue = "0") int page,
                                                                             @RequestParam(defaultValue = "10") int size) {
         return peepService.getReactedPeepList(page, size);
     }
-    // 내가 댓글 단 핍 리스트 조회
+
+    // 사용자가 댓글 단 핍 리스트 조회
+    @Operation(summary = "사용자가 댓글 단 핍 리스트 조회", description = "사용자가 댓글 단 핍 리스트를 조회합니다.")
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMyChatPeepList(@RequestParam(defaultValue = "0") int page,
+                                                                                          @RequestParam(defaultValue = "10") int size) {
+        return peepService.getChatPeepList(page, size);
+    }
     // 특정 사용자가 업로드한 핍 리스트 조회
     // 내 실시간 활성 핍 리스트 조회
     // 인기 핍 리스트 조회

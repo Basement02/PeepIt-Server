@@ -6,12 +6,10 @@ import com.b02.peep_it.common.response.PagedResponse;
 import com.b02.peep_it.common.s3.S3Utils;
 import com.b02.peep_it.common.util.AuthUtils;
 import com.b02.peep_it.common.util.TimeAgoUtils;
-import com.b02.peep_it.domain.Member;
-import com.b02.peep_it.domain.Peep;
-import com.b02.peep_it.domain.PeepLocation;
-import com.b02.peep_it.domain.PeepReSticker;
+import com.b02.peep_it.domain.*;
 import com.b02.peep_it.dto.peep.CommonPeepDto;
 import com.b02.peep_it.dto.peep.RequestPeepUploadDto;
+import com.b02.peep_it.repository.ChatRepository;
 import com.b02.peep_it.repository.PeepReStickerRepository;
 import com.b02.peep_it.repository.PeepRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +33,7 @@ public class PeepService {
     private final S3Utils s3Utils;
     private final PeepRepository peepRepository;
     private final PeepReStickerRepository peepReStickerRepository;
+    private final ChatRepository chatRepository;
 
     /*
     신규 핍 등록 (텍스트 + 이미지/영상)
@@ -174,12 +173,58 @@ public class PeepService {
         String memberId = userInfo.getCurrentMemberUid();
 
         // 2. 페이징 처리하여 `PeepReSticker`를 조회하면서 `peep`을 함께 가져오기
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")); // 최신순 정렬
-        Page<PeepReSticker> peepReStickerPage = peepReStickerRepository.findAllByMember_Id(memberId, pageRequest);
+        // 최신순 정렬
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Peep> peepReStickerPage = peepReStickerRepository.findAllByMember_Id(memberId, pageRequest);
 
-        // 3. `PeepReSticker`에서 `CommonPeepDto`로 직접 변환하여 새로운 Page 객체 생성
-        Page<CommonPeepDto> responseDtoPage = peepReStickerPage.map(pr -> {
-            Peep p = pr.getPeep(); // `PeepReSticker`에서 `Peep` 가져오기
+        // 3. `PeepReSticker`에서 `CommonPeepDto`로 직접 변환하여 새로운 Page 객체 생성 (Page.map() 사용)
+        // Page.map()을 사용하면 JPA 내부적으로 최적화된 변환(내부적으로 PageImpl을 변환하여 Page<CommonPeepDto>를 바로 생성) 제공
+        // stream().map().toList()를 사용하는 것보다 성능이 더 좋음
+        Page<CommonPeepDto> responseDtoPage = peepReStickerPage.map(p -> {
+            return CommonPeepDto.builder()
+                    .peepId(p.getId())
+                    .memberId(p.getMember().getId())
+                    .legalDistrictCode(p.getLegalDistrictCode())
+                    .imageUrl(p.getImageUrl())
+                    .content(p.getContent())
+                    .isEdited(p.getIsEdited())
+                    .profileUrl(p.getMember().getProfileImg())
+                    .uploadAt(TimeAgoUtils.getTimeAgo(p.getCreatedAt()))
+                    .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
+                    .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
+                    .build();
+        });
+
+        // 4. PagedResponse 객체 생성
+        PagedResponse<CommonPeepDto> pagedResponse = PagedResponse.create(
+                responseDtoPage.getContent(),
+                responseDtoPage.getNumber(),
+                responseDtoPage.getSize(),
+                responseDtoPage.getTotalPages(),
+                responseDtoPage.getTotalElements()
+        );
+
+        // 5. response 반환
+        return CommonResponse.ok(pagedResponse);
+    }
+
+    /*
+    사용자가 댓글 단 핍 리스트 조회
+     */
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getChatPeepList(int page, int size) {
+        // 1. 현재 로그인 사용자 ID 조회
+        String memberId = userInfo.getCurrentMemberUid();
+
+        // 2. 페이징 처리하여 `Chat`을 조회하면서 `peep`을 함께 가져오기
+        // memberId로 Chat의 peep을 중복없이 조회
+        // 최신순 정렬
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Peep> chatPage = chatRepository.findDistinctPeepsByMemberId(memberId, pageRequest);
+
+        // 3. `PeepReSticker`에서 `CommonPeepDto`로 직접 변환하여 새로운 Page 객체 생성 (Page.map() 사용)
+        // Page.map()을 사용하면 JPA 내부적으로 최적화된 변환(내부적으로 PageImpl을 변환하여 Page<CommonPeepDto>를 바로 생성) 제공
+        // stream().map().toList()를 사용하는 것보다 성능이 더 좋음
+        Page<CommonPeepDto> responseDtoPage = chatPage.map(p -> {
             return CommonPeepDto.builder()
                     .peepId(p.getId())
                     .memberId(p.getMember().getId())
