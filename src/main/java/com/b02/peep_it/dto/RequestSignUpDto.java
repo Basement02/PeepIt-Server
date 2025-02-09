@@ -1,6 +1,5 @@
 package com.b02.peep_it.dto;
 
-import com.b02.peep_it.domain.CustomGender;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -25,7 +24,7 @@ public record RequestSignUpDto(
         LocalDateTime birth,
 
         @Nullable
-        CustomGender gender,
+        String gender,
 
         @NotNull
         Boolean isAgree // 마케팅 약관 동의 여부

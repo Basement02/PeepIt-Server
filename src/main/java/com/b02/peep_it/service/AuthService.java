@@ -4,10 +4,7 @@ import com.b02.peep_it.common.response.CommonResponse;
 import com.b02.peep_it.common.exception.CustomError;
 import com.b02.peep_it.common.security.token.CustomUserDetails;
 import com.b02.peep_it.common.util.AuthUtils;
-import com.b02.peep_it.domain.Member;
-import com.b02.peep_it.domain.MemberSocial;
-import com.b02.peep_it.domain.PushSetting;
-import com.b02.peep_it.domain.TermsAgreement;
+import com.b02.peep_it.domain.*;
 import com.b02.peep_it.domain.constant.CustomProvider;
 import com.b02.peep_it.dto.RequestSignUpDto;
 import com.b02.peep_it.dto.RequestSocialLoginDto;
@@ -59,12 +56,13 @@ public class AuthService {
         String refreshToken = "";
         String name = "";
         String id = "";
+        CustomProvider provider = CustomProvider.valueOf(requestDto.provider());
 
         // idtoken에서 고유 id 추출
-        String socialUid = jwtUtils.getSocialUid(requestDto.provider(), requestDto.idToken());
+        String socialUid = jwtUtils.getSocialUid(provider, requestDto.idToken());
 
         // 기존 회원과 provider 고유 id 중복 확인
-        Optional<MemberSocial> memberSocial = memberSocialRepository.findByProviderAndProviderId(requestDto.provider().getCode(), socialUid);
+        Optional<MemberSocial> memberSocial = memberSocialRepository.findByProviderAndProviderId(provider.getCode(), socialUid);
 
         // 기존 회원은 access/refresh token 발급 (로그인)
         if (memberSocial.isPresent()) {
@@ -84,7 +82,7 @@ public class AuthService {
         // 신규 회원은 register token 발급 (가입 대기)
         else {
             // register token 생성
-            registerToken = jwtUtils.createRegisterToken(requestDto.provider().getCode(), requestDto.idToken());
+            registerToken = jwtUtils.createRegisterToken(provider.getCode(), requestDto.idToken());
         }
         return CommonResponse.created(ResponseLoginDto.builder()
                 .isMember(isMember)
@@ -146,7 +144,7 @@ public class AuthService {
                 .nickname(requestDto.nickname())
                 .profileImg(DEFAULT_PROFILE_IMG)
                 .birth(requestDto.birth())
-                .gender(requestDto.gender())
+                .gender(new CustomGender(requestDto.gender()))
                 .memberSocial(memberSocial)
                 .build();
 

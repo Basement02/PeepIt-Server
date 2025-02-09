@@ -23,8 +23,8 @@ public class AuthContoller {
     - 재: access/refresh token 발급
      */
     @PostMapping("/social")
-    public ResponseEntity<CommonResponse<ResponseLoginDto>> socialLogin(@RequestBody RequestSocialLoginDto requstDto) {
-        return authService.getRegisterToken(requstDto);
+    public ResponseEntity<CommonResponse<ResponseLoginDto>> socialLogin(@RequestBody RequestSocialLoginDto requestDto) {
+        return authService.getRegisterToken(requestDto);
     }
 
     /*
