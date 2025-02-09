@@ -98,7 +98,14 @@ public class PeepController {
                                                                                           @RequestParam(defaultValue = "10") int size) {
         return peepService.getMemberPeepList(memberId, page, size);
     }
-    // 내 실시간 활성 핍 리스트 조회
+
+    // 사용자 실시간 활성 핍 리스트 조회
+    @Operation(summary = "사용자가 업로드한 실시간 핍 리스트 조회", description = "사용자가 업로드한 활성화 상태의 핍 리스트를 조회합니다.")
+    @GetMapping("/my/active")
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMyActivePeepList(@RequestParam(defaultValue = "0") int page,
+                                                                                            @RequestParam(defaultValue = "10") int size) {
+        return peepService.getActivePeepList(page, size);
+    }
     // 인기 핍 리스트 조회
     // 지도 내 핍 리스트 조회
 }
