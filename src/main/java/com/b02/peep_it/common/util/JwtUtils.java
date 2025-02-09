@@ -19,6 +19,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -148,7 +149,7 @@ public class JwtUtils {
             CustomProvider provider = (CustomProvider) claims.get("provider");
             String providerId = (String) claims.get("providerId");
 
-            // provider에 따른 social uid 추출
+            // provider에 따른 social uid 추출 (추출 시, 유효성 검증 거침)
             String socialUid = getSocialUid(provider, providerId);
 
             return socialUid != null;
@@ -241,13 +242,64 @@ public class JwtUtils {
      */
     public String getSocialUid(CustomProvider provider, String providerId) {
         String socialUid = "";
+        if (validateIdToken(provider, providerId) == false) {
+            log.info("유효하지 않은 id token");
+            throw new UnauthorizedException(CustomError.NEED_TO_CUSTOM);
+        }
         // kakao
+        if (provider.equals(CustomProvider.KAKAO)) {
+
+        }
 
         // naver
+        if (provider.equals(CustomProvider.NAVER)) {
+
+        }
 
         // apple
+        if (provider.equals(CustomProvider.APPLE)) {
+
+        }
+
+        // tester
+        if (provider.equals(CustomProvider.TESTER)) {
+            // 테스터 계정 생성 시, 임의의 랜덤 UUID값으로 social 고유 ID를 대체
+            socialUid = UUID.randomUUID().toString();
+        }
 
         return socialUid;
+    }
+
+    /*
+    idToken 검증
+    - provider별 idToken 유효성 검증
+        - kakao
+        - naver
+        - apple
+        - tester
+     */
+    public boolean validateIdToken(CustomProvider provider, String providerId) {
+        // kakao
+        if (provider.equals(CustomProvider.KAKAO)) {
+            return true;
+        }
+
+        // naver
+        if (provider.equals(CustomProvider.NAVER)) {
+            return true;
+        }
+
+        // apple
+        if (provider.equals(CustomProvider.APPLE)) {
+            return true;
+        }
+
+        // tester
+        if (provider.equals(CustomProvider.TESTER)) {
+            return true;
+        }
+
+        return false;
     }
 
     /*

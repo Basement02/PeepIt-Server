@@ -61,10 +61,10 @@ public class AuthService {
         String id = "";
 
         // idtoken에서 고유 id 추출
-        String providerId = jwtUtils.getSocialUid(requestDto.provider(), requestDto.idToken());
+        String socialUid = jwtUtils.getSocialUid(requestDto.provider(), requestDto.idToken());
 
         // 기존 회원과 provider 고유 id 중복 확인
-        Optional<MemberSocial> memberSocial = memberSocialRepository.findByProviderAndProviderId(requestDto.provider().getCode(), providerId);
+        Optional<MemberSocial> memberSocial = memberSocialRepository.findByProviderAndProviderId(requestDto.provider().getCode(), socialUid);
 
         // 기존 회원은 access/refresh token 발급 (로그인)
         if (memberSocial.isPresent()) {
@@ -84,7 +84,7 @@ public class AuthService {
         // 신규 회원은 register token 발급 (가입 대기)
         else {
             // register token 생성
-            registerToken = jwtUtils.createRegisterToken(requestDto.provider().getCode(), providerId);
+            registerToken = jwtUtils.createRegisterToken(requestDto.provider().getCode(), requestDto.idToken());
         }
         return CommonResponse.created(ResponseLoginDto.builder()
                 .isMember(isMember)
@@ -123,6 +123,12 @@ public class AuthService {
         CustomUserDetails userDetails = authUtils.getPrincipal();
         CustomProvider provider = CustomProvider.valueOf(userDetails.getProvider());
         String providerId = userDetails.getProviderId();
+
+        // idtoken 유효성 검증
+        if (!jwtUtils.validateIdToken(provider, providerId)) {
+            log.info("유효하지 않은 id token");
+            return CommonResponse.failed(CustomError.NEED_TO_CUSTOM);
+        }
 
         // 소셜 로그인 객체 생성 & 저장
         MemberSocial memberSocial = MemberSocial.builder()
