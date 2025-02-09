@@ -89,7 +89,15 @@ public class PeepController {
                                                                                           @RequestParam(defaultValue = "10") int size) {
         return peepService.getChatPeepList(page, size);
     }
+
     // 특정 사용자가 업로드한 핍 리스트 조회
+    @Operation(summary = "특정 사용자가 업로드한 핍 리스트 조회", description = "특정 사용자가 업로드한 핍 리스트를 조회합니다.")
+    @GetMapping
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMemberPeepList(@RequestParam("memberId") String memberId,
+                                                                                          @RequestParam(defaultValue = "0") int page,
+                                                                                          @RequestParam(defaultValue = "10") int size) {
+        return peepService.getMemberPeepList(memberId, page, size);
+    }
     // 내 실시간 활성 핍 리스트 조회
     // 인기 핍 리스트 조회
     // 지도 내 핍 리스트 조회

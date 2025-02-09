@@ -18,6 +18,9 @@ public class Peep extends BaseTimeEntity {
     @Column(name = "peep_id")
     private Long id; // 핍 고유 ID
 
+    @Column(nullable = false, name = "town")
+    private String town; // 법정동명
+
     @Column(nullable = false, name = "legal_district_code")
     private String legalDistrictCode; // 법정동 코드
 
@@ -47,8 +50,9 @@ public class Peep extends BaseTimeEntity {
     신규 핍 생성
      */
     @Builder
-    public Peep(String legalDistrictCode, String imageUrl,
+    public Peep(String town, String legalDistrictCode, String imageUrl,
                                   String content, Member member) {
+        this.town = town;
         this.legalDistrictCode = legalDistrictCode;
         this.imageUrl = imageUrl;
         this.content = content;

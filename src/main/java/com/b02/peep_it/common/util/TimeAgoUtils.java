@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Component
 public class TimeAgoUtils {
-    public static String getTimeAgo(LocalDateTime createdAt) {
+    public String getTimeAgo(LocalDateTime createdAt) {
         LocalDateTime now = LocalDateTime.now();
         Duration duration = Duration.between(createdAt, now);
 
@@ -31,6 +31,15 @@ public class TimeAgoUtils {
         } else {
             return (days / 365) + "년 전";
         }
+    }
+
+    // 24시간 이내 활성 상태 여부 체크
+    public boolean isActiveWithin24Hours(LocalDateTime createdAt) {
+        LocalDateTime now = LocalDateTime.now();
+        Duration duration = Duration.between(createdAt, now);
+
+        // 24시간(= 86,400초) 이내인지 확인
+        return duration.toHours() < 24;
     }
 }
 
