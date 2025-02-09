@@ -2,6 +2,7 @@ package com.b02.peep_it.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -42,4 +43,17 @@ public class PushSetting extends BaseTimeEntity {
     @OneToOne(optional = true)
     @JoinColumn(name = "member_id")
     private Member member; // 회원 고유 ID
+
+    @Builder
+    public PushSetting(Member member) {
+        this.pushPeepChat = true;
+        this.pushPeepSticker = true;
+        this.pushPeepMypop = true;
+        this.pushPeepNowpop = true;
+        this.pushPeepNews = true;
+        this.pushServiceNews = true;
+        this.pushServiceAlarm = true;
+        this.pushServiceMarketing = true;
+        this.member = member;
+    }
 }

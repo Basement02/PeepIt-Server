@@ -2,7 +2,7 @@ package com.b02.peep_it.controller;
 
 import com.b02.peep_it.common.response.CommonResponse;
 import com.b02.peep_it.common.response.PagedResponse;
-import com.b02.peep_it.dto.CommonPeepDto;
+import com.b02.peep_it.dto.peep.CommonPeepDto;
 import com.b02.peep_it.dto.peep.RequestPeepUploadDto;
 import com.b02.peep_it.service.PeepService;
 import io.swagger.v3.oas.annotations.Operation;

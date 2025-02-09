@@ -1,4 +1,4 @@
-package com.b02.peep_it.dto;
+package com.b02.peep_it.dto.peep;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
