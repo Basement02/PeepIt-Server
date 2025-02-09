@@ -76,6 +76,7 @@ public class PeepController {
 
     // 사용자가 반응한 핍 리스트 조회
     @Operation(summary = "사용자가 반응한 핍 리스트 조회", description = "사용자가 반응한 핍 리스트를 조회합니다.")
+    @GetMapping("/my/react")
     public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMyReactedPeepList(@RequestParam(defaultValue = "0") int page,
                                                                             @RequestParam(defaultValue = "10") int size) {
         return peepService.getReactedPeepList(page, size);
@@ -83,6 +84,7 @@ public class PeepController {
 
     // 사용자가 댓글 단 핍 리스트 조회
     @Operation(summary = "사용자가 댓글 단 핍 리스트 조회", description = "사용자가 댓글 단 핍 리스트를 조회합니다.")
+    @GetMapping("/my/chat")
     public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMyChatPeepList(@RequestParam(defaultValue = "0") int page,
                                                                                           @RequestParam(defaultValue = "10") int size) {
         return peepService.getChatPeepList(page, size);
