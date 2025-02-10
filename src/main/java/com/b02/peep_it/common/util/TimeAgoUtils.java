@@ -1,5 +1,6 @@
 package com.b02.peep_it.common.util;
 
+import com.b02.peep_it.domain.Peep;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -33,10 +34,12 @@ public class TimeAgoUtils {
         }
     }
 
-    // 24시간 이내 활성 상태 여부 체크
-    public boolean isActiveWithin24Hours(LocalDateTime createdAt) {
+    /*
+     활성 상태 확인
+     */
+    public boolean isActiveWithin24Hours(LocalDateTime activeTime) {
         LocalDateTime now = LocalDateTime.now();
-        Duration duration = Duration.between(createdAt, now);
+        Duration duration = Duration.between(activeTime, now);
 
         // 24시간(= 86,400초) 이내인지 확인
         return duration.toHours() < 24;

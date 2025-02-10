@@ -106,6 +106,14 @@ public class PeepController {
                                                                                             @RequestParam(defaultValue = "10") int size) {
         return peepService.getActivePeepList(page, size);
     }
+
     // 인기 핍 리스트 조회
+    @Operation(summary = "인기 핍 리스트 조회", description = "실시간 인기 핍으로 선정된 핍 리스트를 조회합니다.")
+    @GetMapping("/hot")
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getHotPeepList(@RequestParam(defaultValue = "0") int page,
+                                                                                       @RequestParam(defaultValue = "10") int size) {
+        return peepService.getHotPeepList(page, size);
+    }
+
     // 지도 내 핍 리스트 조회
 }

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -305,51 +306,93 @@ public class PeepService {
         return CommonResponse.ok(pagedResponse);
     }
 
+    /*
+    사용자 활성 핍 리스트 조회
+     */
     public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getActivePeepList(int page, int size) {
         // 1. 현재 로그인 사용자 ID 조회
         String memberId = userInfo.getCurrentMemberUid();
 
-        // 2. 페이징 처리하여 `Chat`을 조회하면서 `peep`을 함께 가져오기
-        // memberId로 Chat의 peep을 중복없이 조회
-        // 최신순 정렬
+        // 2. 페이징 처리하여 `Chat`을 조회하면서 `Peep`을 함께 가져오기 (최신순 정렬)
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Peep> chatPage = chatRepository.findDistinctPeepsByMemberId(memberId, pageRequest);
 
-        // 3. `PeepReSticker`에서 `CommonPeepDto`로 직접 변환하여 새로운 Page 객체 생성 (Page.map() 사용)
-        // Page.map()을 사용하면 JPA 내부적으로 최적화된 변환(내부적으로 PageImpl을 변환하여 Page<CommonPeepDto>를 바로 생성) 제공
-        // stream().map().toList()를 사용하는 것보다 성능이 더 좋음
-        Page<CommonPeepDto> responseDtoPage = chatPage.map(p -> {
-            return CommonPeepDto.builder()
-                    .peepId(p.getId())
-                    .memberId(p.getMember().getId())
-                    .town(p.getTown())
-                    .legalDistrictCode(p.getLegalDistrictCode())
-                    .imageUrl(p.getImageUrl())
-                    .content(p.getContent())
-                    .isEdited(p.getIsEdited())
-                    .profileUrl(p.getMember().getProfileImg())
-                    .isActive(timeAgoUtils.isActiveWithin24Hours(p.getCreatedAt()))
-                    .uploadAt(timeAgoUtils.getTimeAgo(p.getCreatedAt()))
-                    .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
-                    .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
-                    .build();
-        });
+        // 3. `Peep`에서 `CommonPeepDto`로 변환하며, 동시에 `isActive == false`인 항목을 제거
+        List<CommonPeepDto> filteredDtoList = chatPage.getContent().stream()
+                .map(p -> CommonPeepDto.builder()
+                        .peepId(p.getId())
+                        .memberId(p.getMember().getId())
+                        .town(p.getTown())
+                        .legalDistrictCode(p.getLegalDistrictCode())
+                        .imageUrl(p.getImageUrl())
+                        .content(p.getContent())
+                        .isEdited(p.getIsEdited())
+                        .profileUrl(p.getMember().getProfileImg())
+                        .isActive(timeAgoUtils.isActiveWithin24Hours(p.getActiveTime()))
+                        .uploadAt(timeAgoUtils.getTimeAgo(p.getActiveTime()))
+                        .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
+                        .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
+                        .build())
+                .filter(CommonPeepDto::isActive) // 🔥 `isActive == false`인 항목은 제거
+                .toList(); // ✅ 최종 리스트 변환
 
-        // 4. `isActive == false`인 항목을 최종 응답에서 제거
-        List<CommonPeepDto> filteredDtoList = responseDtoPage.getContent().stream()
-                .filter(CommonPeepDto::isActive)
-                .toList();
-
-        // 5. 새로운 `Page` 객체 생성 (filteredDtoList 크기에 맞게 `PageImpl` 사용)
+        // 4. 필터링된 데이터를 기반으로 새로운 Page 객체 생성
         Page<CommonPeepDto> filteredPage = new PageImpl<>(filteredDtoList, pageRequest, filteredDtoList.size());
 
-        // 6. PagedResponse 객체 생성
+        // 5. PagedResponse 객체 생성
         PagedResponse<CommonPeepDto> pagedResponse = PagedResponse.create(
                 filteredPage.getContent(),
                 filteredPage.getNumber(),
                 filteredPage.getSize(),
                 filteredPage.getTotalPages(),
                 filteredPage.getTotalElements()
+        );
+
+        // 6. response 반환
+        return CommonResponse.ok(pagedResponse);
+    }
+
+    /*
+    인기 핍 리스트 조회
+     */
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getHotPeepList(int page, int size) {
+        // 1. 현재 로그인 사용자 ID 조회
+        String memberId = userInfo.getCurrentMemberUid();
+
+        // 2. 페이징 처리하여 `Peep`을 조회
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<Peep> peepPage = peepRepository.findAllByMember_Id(memberId, pageRequest);
+
+        // 3. `Peep`에서 `CommonPeepDto`로 변환 후, 인기도 순으로 정렬
+        List<CommonPeepDto> sortedPeepList = peepPage.getContent().stream()
+                // 인기순 정렬 (추후 수정 필요)
+                .sorted(Comparator.comparingDouble(Peep::calculatePopularityScore).reversed())
+                .map(p -> CommonPeepDto.builder()
+                        .peepId(p.getId())
+                        .memberId(p.getMember().getId())
+                        .town(p.getTown())
+                        .legalDistrictCode(p.getLegalDistrictCode())
+                        .imageUrl(p.getImageUrl())
+                        .content(p.getContent())
+                        .isEdited(p.getIsEdited())
+                        .profileUrl(p.getMember().getProfileImg())
+                        .isActive(timeAgoUtils.isActiveWithin24Hours(p.getCreatedAt()))
+                        .uploadAt(timeAgoUtils.getTimeAgo(p.getCreatedAt()))
+                        .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
+                        .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
+                        .build())
+                .toList();
+
+        // 4. 정렬된 데이터를 기반으로 새로운 Page 객체 생성
+        Page<CommonPeepDto> sortedPage = new PageImpl<>(sortedPeepList, pageRequest, sortedPeepList.size());
+
+        // 5. PagedResponse 객체 생성
+        PagedResponse<CommonPeepDto> pagedResponse = PagedResponse.create(
+                sortedPage.getContent(),
+                sortedPage.getNumber(),
+                sortedPage.getSize(),
+                sortedPage.getTotalPages(),
+                sortedPage.getTotalElements()
         );
 
         // 6. response 반환
