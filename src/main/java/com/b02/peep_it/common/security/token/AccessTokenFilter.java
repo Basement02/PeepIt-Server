@@ -1,5 +1,6 @@
-package com.b02.peep_it.security.token;
+package com.b02.peep_it.common.security.token;
 
+import com.b02.peep_it.common.util.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,6 +30,13 @@ public class AccessTokenFilter extends OncePerRequestFilter {
                 Authentication authentication = jwtUtils.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 log.info("Request to {}: JWT(access)={}", request.getRequestURI(), token);
+                CustomUserDetails userDetails = (CustomUserDetails) authentication.getDetails();
+                log.info("✅CustomUserDetails 객체 적용됨!");
+                log.info("User ID (uid): " + userDetails.getUid());
+                log.info("Username (닉네임): " + userDetails.getUsername());
+                log.info("Provider (공급자): " + userDetails.getProvider());
+                log.info("ProviderId (소셜 고유 ID): " + userDetails.getProviderId());
+                log.info("Authorities: " + userDetails.getAuthorities());
             } else {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
@@ -40,6 +48,6 @@ public class AccessTokenFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return path.startsWith("/auth"); // auth 경로로 접근하는 모든 요청은 필터 제외
+        return path.startsWith("/auth") || path.startsWith("/test"); // auth 경로로 접근하는 모든 요청은 필터 제외
     }
 }
