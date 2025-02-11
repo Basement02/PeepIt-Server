@@ -17,11 +17,11 @@ public class Chat extends BaseTimeEntity {
     @Column(nullable = false)
     private String content; // 본문
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "peep_id")
     private Peep peep; // 핍 고유 ID
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member; // 회원 고유 ID
 }

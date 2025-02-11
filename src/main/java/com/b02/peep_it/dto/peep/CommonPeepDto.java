@@ -7,13 +7,15 @@ import lombok.Builder;
 public record CommonPeepDto(
         @NotNull Long peepId,
         @NotNull String memberId,
-        String legalDistrictCode,
-        String imageUrl,
-        String content,
-        Boolean isEdited,
-        String profileUrl,
-        String uploadAt,
-        Integer stickerNum,
-        Integer chatNum
+        @NotNull String town,
+        @NotNull String legalDistrictCode,
+        @NotNull String imageUrl,
+        @NotNull String content,
+        @NotNull Boolean isEdited,
+        @NotNull String profileUrl,
+        @NotNull Boolean isActive, // 활성화(24시간 이내) 여부
+        @NotNull String uploadAt,
+        @NotNull Integer stickerNum,
+        @NotNull Integer chatNum
         ) {
 }

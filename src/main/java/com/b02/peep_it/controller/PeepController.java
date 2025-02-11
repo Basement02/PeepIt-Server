@@ -67,16 +67,53 @@ public class PeepController {
      */
 
     // 사용자가 업로드한 핍 리스트 조회
-    @Operation(summary = "내가 업로드한 핍 리스트 조회", description = "내가 업로드한 핍을 리스트로 조회합니다.")
+    @Operation(summary = "사용자가 업로드한 핍 리스트 조회", description = "사용자가 업로드한 핍을 리스트로 조회합니다.")
     @GetMapping("/my/upload")
-    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMyPeepList(@RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMyDefaultPeepList(@RequestParam(defaultValue = "0") int page,
                                                                                       @RequestParam(defaultValue = "10") int size) {
-        return peepService.getMyUploadPeepList(page, size);
+        return peepService.getUploadedPeepList(page, size);
     }
-    // 내가 반응한 핍 리스트 조회
-    // 내가 댓글 단 핍 리스트 조회
+
+    // 사용자가 반응한 핍 리스트 조회
+    @Operation(summary = "사용자가 반응한 핍 리스트 조회", description = "사용자가 반응한 핍 리스트를 조회합니다.")
+    @GetMapping("/my/react")
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMyReactedPeepList(@RequestParam(defaultValue = "0") int page,
+                                                                            @RequestParam(defaultValue = "10") int size) {
+        return peepService.getReactedPeepList(page, size);
+    }
+
+    // 사용자가 댓글 단 핍 리스트 조회
+    @Operation(summary = "사용자가 댓글 단 핍 리스트 조회", description = "사용자가 댓글 단 핍 리스트를 조회합니다.")
+    @GetMapping("/my/chat")
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMyChatPeepList(@RequestParam(defaultValue = "0") int page,
+                                                                                          @RequestParam(defaultValue = "10") int size) {
+        return peepService.getChatPeepList(page, size);
+    }
+
     // 특정 사용자가 업로드한 핍 리스트 조회
-    // 내 실시간 활성 핍 리스트 조회
+    @Operation(summary = "특정 사용자가 업로드한 핍 리스트 조회", description = "특정 사용자가 업로드한 핍 리스트를 조회합니다.")
+    @GetMapping
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMemberPeepList(@RequestParam("memberId") String memberId,
+                                                                                          @RequestParam(defaultValue = "0") int page,
+                                                                                          @RequestParam(defaultValue = "10") int size) {
+        return peepService.getMemberPeepList(memberId, page, size);
+    }
+
+    // 사용자 실시간 활성 핍 리스트 조회
+    @Operation(summary = "사용자가 업로드한 실시간 핍 리스트 조회", description = "사용자가 업로드한 활성화 상태의 핍 리스트를 조회합니다.")
+    @GetMapping("/my/active")
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMyActivePeepList(@RequestParam(defaultValue = "0") int page,
+                                                                                            @RequestParam(defaultValue = "10") int size) {
+        return peepService.getActivePeepList(page, size);
+    }
+
     // 인기 핍 리스트 조회
+    @Operation(summary = "인기 핍 리스트 조회", description = "실시간 인기 핍으로 선정된 핍 리스트를 조회합니다.")
+    @GetMapping("/hot")
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getHotPeepList(@RequestParam(defaultValue = "0") int page,
+                                                                                       @RequestParam(defaultValue = "10") int size) {
+        return peepService.getHotPeepList(page, size);
+    }
+
     // 지도 내 핍 리스트 조회
 }

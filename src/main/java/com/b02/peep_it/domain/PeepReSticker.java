@@ -14,15 +14,15 @@ public class PeepReSticker {
     @Column(name = "peep_re_sticker_id")
     private Long id; // 핍 반응 고유 ID
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)  // 🔥 지연 로딩
     @JoinColumn(name = "member_id")
     private Member member; // 회원 고유 ID
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)  // 🔥 지연 로딩
     @JoinColumn(name = "re_sticker_id")
     private ReSticker reSticker; // 스티커 고유 ID
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)  // 🔥 지연 로딩
     @JoinColumn(name = "peep_id")
     private Peep peep; // 핍 고유 ID
 }
