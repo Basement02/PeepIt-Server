@@ -1,6 +1,5 @@
 package com.b02.peep_it.dto;
 
-import com.b02.peep_it.domain.CustomGender;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -25,10 +24,9 @@ public record RequestSignUpDto(
         LocalDateTime birth,
 
         @Nullable
-        CustomGender gender,
+        String gender,
 
-        @Nullable
-        @Pattern(regexp = "^\\d{11}$", message = "전화번호는 11자리 숫자만 입력 가능합니다.")
-        String phone
+        @NotNull
+        Boolean isAgree // 마케팅 약관 동의 여부
         ) {
 }

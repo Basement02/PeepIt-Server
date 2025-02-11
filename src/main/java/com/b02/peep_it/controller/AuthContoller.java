@@ -1,10 +1,13 @@
 package com.b02.peep_it.controller;
 
-import com.b02.peep_it.common.ApiResponse;
+import com.b02.peep_it.common.response.CommonResponse;
+import com.b02.peep_it.dto.RequestSignUpDto;
 import com.b02.peep_it.dto.RequestSocialLoginDto;
+import com.b02.peep_it.dto.ResponseLoginDto;
 import com.b02.peep_it.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -15,18 +18,20 @@ public class AuthContoller {
     private final AuthService authService;
 
     /*
-    register token 발급
+    소셜 로그인
+    - 최초: register token 발급
+    - 재: access/refresh token 발급
      */
     @PostMapping("/social")
-    public ApiResponse<Object> socialLogin(@RequestBody RequestSocialLoginDto requstDto) {
-        return authService.getRegisterToken(requstDto);
+    public ResponseEntity<CommonResponse<ResponseLoginDto>> socialLogin(@RequestBody RequestSocialLoginDto requestDto) {
+        return authService.getRegisterToken(requestDto);
     }
 
     /*
     아이디 중복 확인
      */
     @GetMapping("/check/id")
-    public ApiResponse<Object> checkId(@RequestParam("id") String id){
+    public ResponseEntity<CommonResponse<Object>> checkId(@RequestParam("id") String id){
         return authService.isIdDuplicated(id);
     }
 
@@ -34,15 +39,15 @@ public class AuthContoller {
     전화번호 중복 확인
      */
     @GetMapping("/check/phone")
-    public ApiResponse<Object> checkPhone(@RequestParam("phone") String phone){
+    public ResponseEntity<CommonResponse<Object>> checkPhone(@RequestParam("phone") String phone){
         return authService.isPhoneDuplicated(phone);
     }
 
     /*
-    계정 등록
+    계정 생성
      */
-//    @PostMapping("/signUp")
-//    public ApiResponse<Object> signUp(@RequestBody RequestSignUpDto requestDto) {
-//        return authService.createAccount(requestDto);
-//    }
+    @PostMapping("/sign-up")
+    public ResponseEntity<CommonResponse<ResponseLoginDto>> signUp(@RequestBody RequestSignUpDto requestDto){
+        return authService.createAccount(requestDto);
+    }
 }

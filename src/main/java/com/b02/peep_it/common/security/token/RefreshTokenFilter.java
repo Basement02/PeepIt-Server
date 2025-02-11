@@ -1,7 +1,8 @@
-package com.b02.peep_it.security.token;
+package com.b02.peep_it.common.security.token;
 
+import com.b02.peep_it.common.util.JwtUtils;
 import com.b02.peep_it.domain.Member;
-import com.b02.peep_it.dto.member.MemberDto;
+import com.b02.peep_it.dto.member.CommonMemberDto;
 import com.b02.peep_it.dto.token.CreateTokenResponseDto;
 import com.b02.peep_it.repository.MemberRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,12 +32,12 @@ public class RefreshTokenFilter extends OncePerRequestFilter {
             String token = bearerToken.substring(7);
             if (jwtUtils.validateRefreshToken(token)) {
                 Optional<Member> member = memberRepository.findById(jwtUtils.getClaims(token).get("uid", String.class));
-                MemberDto memberDto = MemberDto.builder()
+                CommonMemberDto commonMemberDto = CommonMemberDto.builder()
                         .id(member.get().getId())
                         .role(member.get().getRole())
                         .build();
-                String newAccessToken = jwtUtils.createAccessToken(memberDto);
-                String newRefreshToken = jwtUtils.createRefreshToken(memberDto);
+                String newAccessToken = jwtUtils.createAccessToken(commonMemberDto);
+                String newRefreshToken = jwtUtils.createRefreshToken(commonMemberDto);
                 log.info("Refresh Token validated and new Tokens issued.");
 
                 CreateTokenResponseDto responseDto = CreateTokenResponseDto.builder()

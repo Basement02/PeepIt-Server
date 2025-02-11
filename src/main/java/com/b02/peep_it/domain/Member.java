@@ -21,7 +21,7 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false)
     private String nickname; // 닉네임
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String phone; // 전화번호
 
     @Column(name = "profile_img", nullable = true)
@@ -61,9 +61,17 @@ public class Member extends BaseTimeEntity {
     private List<Peep> peepList; // 단순 조회용 필드 (등록 핍 리스트)
 
     @Builder
-    public Member(String uid, String nickname, MemberSocial memberSocial) {
-        this.id =uid;
+    public Member(String id, String nickname, String profileImg,
+                  LocalDateTime birth, CustomGender gender, MemberSocial memberSocial) {
+        this.id =id;
         this.nickname = nickname;
+        this.profileImg = profileImg;
+        if (birth != null) {
+            this.birth = birth;
+        }
+        if (gender != null) {
+            this.gender = gender;
+        }
         this.role = Role.UNCERT;
         this.isTerminated = Boolean.FALSE;
         this.memberSocial = memberSocial;
@@ -74,6 +82,11 @@ public class Member extends BaseTimeEntity {
         this.profileImg = profileImg;
         this.birth = birth;
         this.gender = gender;
+        return this;
+    }
+
+    public Member updateToken(String fcmToken) {
+        this.fcmToken = fcmToken;
         return this;
     }
 }

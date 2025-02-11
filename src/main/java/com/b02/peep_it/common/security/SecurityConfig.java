@@ -1,7 +1,7 @@
-package com.b02.peep_it.security;
+package com.b02.peep_it.common.security;
 
-import com.b02.peep_it.security.token.AccessTokenFilter;
-import com.b02.peep_it.security.token.RefreshTokenFilter;
+import com.b02.peep_it.common.security.token.AccessTokenFilter;
+import com.b02.peep_it.common.security.token.RefreshTokenFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,8 +19,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final AccessTokenFilter accessTokenFilter;
     private final RefreshTokenFilter refreshTokenFilter;
+    private final ApiVersionFilter apiVersionFilter;
+
     private String[] permitList = {
-            "/api/test", "/api/test/**",
+            "/test/**",
+            "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**"
     };
 
     @Bean
@@ -30,14 +33,15 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .sessionManagement(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests((auth) -> {
+                .authorizeHttpRequests(auth -> {
                     auth
                             .requestMatchers(permitList).permitAll()
                             .anyRequest().authenticated();
                 })
+                // ✅ Swagger 제외 후 API 버전 필터 적용
+//                .addFilterBefore(apiVersionFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(accessTokenFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(refreshTokenFilter, UsernamePasswordAuthenticationFilter.class)
-                ;
+                .addFilterAfter(refreshTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
