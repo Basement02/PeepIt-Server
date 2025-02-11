@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REPO_PATH="/home/ubuntu/app"
+REPO_PATH="/home/ubuntu/app/src/main/resources"
 SUBMODULE_PATH="PeepIt-ServerConfig"
 LOG_FILE="/home/ubuntu/app/deploy.log"
 
