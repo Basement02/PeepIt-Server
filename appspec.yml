@@ -15,9 +15,6 @@ permissions:
 
 hooks:
   AfterInstall:
-    - location: scripts/setup_submodules.sh
-      timeout: 60
-      runas: ubuntu
     - location: scripts/stop.sh
       timeout: 60
       runas: ubuntu
