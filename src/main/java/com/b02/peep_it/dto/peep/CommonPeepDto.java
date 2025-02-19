@@ -8,7 +8,6 @@ public record CommonPeepDto(
         @NotNull Long peepId,
         @NotNull String memberId,
         @NotNull String town,
-        @NotNull String legalDistrictCode,
         @NotNull String imageUrl,
         @NotNull String content,
         @NotNull Boolean isEdited,
