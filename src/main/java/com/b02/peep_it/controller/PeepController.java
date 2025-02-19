@@ -115,5 +115,22 @@ public class PeepController {
         return peepService.getHotPeepList(page, size);
     }
 
+    // 동네 실시간 핍 리스트 조회 (최신순)
+    @Operation(summary = "동네 핍 리스트 조회 (최신순)", description = "동네에 등록된 실시간 핍 리스트를 최신순으로 조회합니다.")
+    @GetMapping("/town")
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getTownPeepList(@RequestParam(defaultValue = "0") int page,
+                                                                                       @RequestParam(defaultValue = "10") int size) {
+        return peepService.getTownPeepList(page, size);
+    }
+
     // 지도 내 핍 리스트 조회
+    @Operation(summary = "지도 내 핍 리스트 조회", description = "지도 반경 내 노출될 핍 리스트를 조회합니다.")
+    @GetMapping("/map")
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMapPeepList(@RequestParam(defaultValue = "5") int dist,
+                                                                                       @RequestParam(defaultValue = "0") int page,
+                                                                                       @RequestParam(defaultValue = "10") int size,
+                                                                                       @RequestParam double latitude,
+                                                                                       @RequestParam double longitude) {
+        return peepService.getMapPeepList(dist, page, size, latitude, longitude);
+    }
 }

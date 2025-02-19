@@ -19,6 +19,6 @@ public class Town extends BaseTimeEntity {
     private Member member; // 회원 고유 ID
 
     @ManyToOne(optional = true)
-    @JoinColumn(name = "code")
-    private State code; // 법정동 코드
+    @JoinColumn(name = "state")
+    private State state; // 법정동 코드
 }
