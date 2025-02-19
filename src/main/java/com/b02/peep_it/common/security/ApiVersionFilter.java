@@ -21,7 +21,7 @@ public class ApiVersionFilter extends OncePerRequestFilter {
     private static final String[] SWAGGER_PATHS = {
             "/swagger-ui", "/swagger-ui.html", "/v3/api-docs", "/v3/api-docs/swagger-config",
             "/swagger-resources", "/swagger-resources/**", "/webjars/**",
-            "/test/**"
+            "/test"
     };
 
     @Override
