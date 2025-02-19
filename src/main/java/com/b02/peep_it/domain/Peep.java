@@ -25,11 +25,12 @@ public class Peep extends BaseTimeEntity {
     @Column(nullable = false, name = "active_time")
     private LocalDateTime activeTime; // 활성화 기준 시각
 
+    @OneToOne(optional = false)
+    @JoinColumn(nullable = false, name = "code")
+    private State code; // 법정동 코드
+
     @Column(nullable = false, name = "town")
     private String town; // 법정동명
-
-    @Column(nullable = false, name = "legal_district_code")
-    private String legalDistrictCode; // 법정동 코드
 
     @Column(nullable = false, name = "image_url")
     private String imageUrl; // 이미지 or 영상 url
@@ -57,11 +58,11 @@ public class Peep extends BaseTimeEntity {
     신규 핍 생성
      */
     @Builder
-    public Peep(String town, String legalDistrictCode, String imageUrl,
+    public Peep(State code, String town, String imageUrl,
                                   String content, Member member) {
         this.activeTime = LocalDateTime.now();
+        this.code = code;
         this.town = town;
-        this.legalDistrictCode = legalDistrictCode;
         this.imageUrl = imageUrl;
         this.content = content;
         this.isEdited = false;
