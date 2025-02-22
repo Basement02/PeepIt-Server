@@ -263,8 +263,8 @@ public class JwtUtils {
 
         // tester
         if (provider.equals(CustomProvider.TESTER)) {
-            // 테스터 계정 생성 시, 임의의 랜덤 UUID값으로 social 고유 ID를 대체
-            socialUid = UUID.randomUUID().toString();
+            // 테스터 계정 생성 시, 입력된 값으로 고유 ID를 대체
+            socialUid = providerId;
         }
 
         return socialUid;
