@@ -20,4 +20,11 @@ public record ExceptionDto(
                 message
         );
     }
+
+    public static ExceptionDto exception(Exception e) {
+        return new ExceptionDto(
+                "00000",
+                e.getMessage()
+        );
+    }
 }
