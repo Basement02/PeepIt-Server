@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.nurigo.java_sdk.exceptions.CoolsmsException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -141,6 +142,14 @@ public class AuthContoller {
     @GetMapping("/check/phone")
     public ResponseEntity<CommonResponse<Object>> checkPhone(@RequestParam("phone") String phone){
         return authService.isPhoneDuplicated(phone);
+    }
+
+    /*
+    전화번호 인증코드 발급
+     */
+    @PostMapping("/send/sms-code")
+    public ResponseEntity<CommonResponse<String>> sendSmsCode(@RequestParam("phone") String phone) throws CoolsmsException {
+        return authService.sendSmsCode(phone);
     }
 
     /*
