@@ -2,4 +2,4 @@ spring:
   application:
     name: peep-it
   profiles:
-    active: jwt, lettuce, swagger, devrds, s3, redis
+    active: jwt, lettuce, swagger, devrds, s3, redis, sms
