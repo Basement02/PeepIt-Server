@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -28,7 +28,7 @@ public class Member extends BaseTimeEntity {
     private String profileImg; // 프로필 이미지
 
     @Column(nullable = true)
-    private LocalDateTime birth; // 생년월일
+    private LocalDate birth; // 생년월일
 
     @Column(nullable = true)
     private CustomGender gender; // 성별
@@ -38,7 +38,7 @@ public class Member extends BaseTimeEntity {
     private Role role; // 회원 분류
 
     @Column(name = "auth_at", nullable = true)
-    private LocalDateTime authAt; // 인증 일자(전화번호)
+    private LocalDate authAt; // 인증 일자(전화번호)
 
     @Column(name = "is_terminated", nullable = false)
     private Boolean isTerminated; // 탈퇴 요청 여부
@@ -62,7 +62,7 @@ public class Member extends BaseTimeEntity {
 
     @Builder
     public Member(String id, String nickname, String profileImg,
-                  LocalDateTime birth, CustomGender gender, MemberSocial memberSocial) {
+                  LocalDate birth, CustomGender gender, MemberSocial memberSocial) {
         this.id =id;
         this.nickname = nickname;
         this.profileImg = profileImg;
@@ -77,7 +77,7 @@ public class Member extends BaseTimeEntity {
         this.memberSocial = memberSocial;
     }
 
-    public Member setAdditionalInfo(String phone, String profileImg, LocalDateTime birth, CustomGender gender) {
+    public Member setAdditionalInfo(String phone, String profileImg, LocalDate birth, CustomGender gender) {
         this.phone = phone;
         this.profileImg = profileImg;
         this.birth = birth;

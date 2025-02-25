@@ -125,7 +125,7 @@ public class AuthService {
         // idtoken 유효성 검증
         if (!jwtUtils.validateIdToken(provider, providerId)) {
             log.info("유효하지 않은 id token");
-            return CommonResponse.failed(CustomError.NEED_TO_CUSTOM);
+            return CommonResponse.failed(CustomError.ID_TOKEN_UNAUTHORIZED);
         }
 
         // 소셜 로그인 객체 생성 & 저장
