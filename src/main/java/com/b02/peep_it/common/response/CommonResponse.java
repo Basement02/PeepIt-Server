@@ -27,4 +27,12 @@ public record CommonResponse<T>(
     public static <T> ResponseEntity<CommonResponse<T>> onFailure(final CustomError customError, @Nullable final T data) {
         return ResponseEntity.status(customError.getStatus()).body(new CommonResponse<>(false, data, ExceptionDto.of(customError)));
     }
+
+    public static <T> ResponseEntity<CommonResponse<T>> exception(final Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new CommonResponse<>(false, null, ExceptionDto.exception(e)));
+    }
+
+    public static <T> ResponseEntity<CommonResponse<T>> onException(final Exception e, @Nullable final T data) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new CommonResponse<>(false, data, ExceptionDto.exception(e)));
+    }
 }

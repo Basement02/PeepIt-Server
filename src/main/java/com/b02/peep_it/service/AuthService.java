@@ -17,15 +17,29 @@ import com.b02.peep_it.repository.PushSettingRepository;
 import com.b02.peep_it.repository.TermsAgreementRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.nurigo.java_sdk.api.Message;
+import net.nurigo.java_sdk.exceptions.CoolsmsException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+
+import static org.apache.commons.lang.math.RandomUtils.nextInt;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class AuthService {
+    @Value("${coolsms.api.key}")
+    String apiKey;
+    @Value("${coolsms.api.secret}")
+    String apiSecret;
+    @Value("${coolsms.api.number}")
+    String sender;
     private final JwtUtils jwtUtils;
     private final AuthUtils authUtils;
     private final MemberRepository memberRepository;
@@ -125,7 +139,7 @@ public class AuthService {
         // idtoken 유효성 검증
         if (!jwtUtils.validateIdToken(provider, providerId)) {
             log.info("유효하지 않은 id token");
-            return CommonResponse.failed(CustomError.NEED_TO_CUSTOM);
+            return CommonResponse.failed(CustomError.ID_TOKEN_UNAUTHORIZED);
         }
 
         // 소셜 로그인 객체 생성 & 저장
@@ -190,6 +204,28 @@ public class AuthService {
     }
 
     /*
-    전화번호 인증
+    전화번호 인증코드 전송
      */
+    public ResponseEntity<CommonResponse<String>> sendSmsCode(String receiver) throws CoolsmsException {
+        try {
+            // 6자리 인증코드 생성
+            String code = String.format("%06d", new SecureRandom(), nextInt(1000000));
+
+            // 생성자로 API key & secret 전달
+            Message coolsms = new Message(apiKey, apiSecret);
+
+            HashMap<String, String> params = new HashMap<String, String>();
+            params.put("to", receiver);
+            params.put("from", sender);
+            params.put("type", "sms");
+            params.put("text", "[핍잇] 본인확인 인증번호 [" + code + "]를 화면에 입력해주세요!");
+
+            coolsms.send(params);
+
+            return CommonResponse.ok(code);
+        } catch (Exception e) {
+//            throw new CoolsmsException("SMS 전송에 실패했습니다", e);
+            return CommonResponse.exception(e);
+        }
+    }
 }

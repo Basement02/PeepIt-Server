@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import org.springframework.lang.Nullable;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Builder
 public record RequestSignUpDto(
@@ -21,7 +21,7 @@ public record RequestSignUpDto(
         String nickname,
 
         @Nullable
-        LocalDateTime birth,
+        LocalDate birth,
 
         @Nullable
         String gender,
