@@ -15,6 +15,12 @@ public enum CustomError {
     NEED_TO_CUSTOM(HttpStatus.INTERNAL_SERVER_ERROR,"00000", "NEED TO ERROR CUSTOM!"),
 
     /*
+    401
+    - 01: 유효하지 않은 social id token 입니다
+     */
+    ID_TOKEN_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "40101", "유효하지 않은 social id token입니다"),
+
+    /*
     404
     -01: 존재하지 않는 핍입니다
      */

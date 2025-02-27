@@ -32,6 +32,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	// 전화번호 인증
+	implementation 'net.nurigo:javaSDK:2.2'
 	// open-api (swagger)
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
 //	implementation 'com.google.cloud:spring-cloud-gcp-starter-storage'
