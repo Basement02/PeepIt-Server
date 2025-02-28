@@ -24,9 +24,8 @@ public class SecurityConfig {
     private final ApiVersionFilter apiVersionFilter;
 
     private String[] permitList = {
-            "/test/**", "/auth/**", "/api/v1/auth/**", "/api/v2/auth/**",
-            "/swagger-ui/**", "/swagger-ui.html", "/api/v1/swagger-ui.html",
-            "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**"
+            "/test/**", "/auth/**", "/api/**/auth/**",
+            "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**"
     };
 
     @Bean
