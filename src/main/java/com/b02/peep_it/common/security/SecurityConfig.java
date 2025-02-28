@@ -39,7 +39,7 @@ public class SecurityConfig {
                             .anyRequest().authenticated();
                 })
                 // ✅ Swagger 제외 후 API 버전 필터 적용
-//                .addFilterBefore(apiVersionFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(apiVersionFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(accessTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(refreshTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
