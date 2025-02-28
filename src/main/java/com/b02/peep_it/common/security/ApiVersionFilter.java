@@ -33,7 +33,7 @@ public class ApiVersionFilter extends OncePerRequestFilter {
         // ✅ Swagger 관련 요청이면 필터를 타지 않고 그대로 진행
         for (String path : SWAGGER_PATHS) {
             if (requestURI.startsWith(path)) {
-                log.info("✅ Swagger 요청 예외 처리: {}", requestURI);
+                log.info("✅ Swagger / test 요청 예외 처리: {}", requestURI);
                 filterChain.doFilter(request, response);
                 return;
             }
