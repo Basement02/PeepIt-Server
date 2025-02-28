@@ -24,7 +24,7 @@ public class SecurityConfig {
     private final ApiVersionFilter apiVersionFilter;
 
     private String[] permitList = {
-            "/test/**",
+            "/test/**", "/auth/**",
             "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**"
     };
 
