@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Tag(name = "Peep API", description = "핍 관련 API")
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/peep")
+@RequestMapping("/v1/peep")
 public class PeepController {
     private final PeepService peepService;
 

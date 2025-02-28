@@ -11,7 +11,7 @@ import java.io.IOException;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/test")
+@RequestMapping("/v1/test")
 public class TestController {
     private final S3Utils s3Utils;
 
