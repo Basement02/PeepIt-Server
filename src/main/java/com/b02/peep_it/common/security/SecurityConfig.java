@@ -2,6 +2,7 @@ package com.b02.peep_it.common.security;
 
 import com.b02.peep_it.common.security.token.AccessTokenFilter;
 import com.b02.peep_it.common.security.token.RefreshTokenFilter;
+import com.b02.peep_it.common.security.token.RegisterTokenFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig {
+    private final RegisterTokenFilter registerTokenFilter;
     private final AccessTokenFilter accessTokenFilter;
     private final RefreshTokenFilter refreshTokenFilter;
     private final ApiVersionFilter apiVersionFilter;
@@ -39,7 +41,8 @@ public class SecurityConfig {
                             .anyRequest().authenticated();
                 })
                 // ✅ Swagger 제외 후 API 버전 필터 적용
-                .addFilterBefore(apiVersionFilter, UsernamePasswordAuthenticationFilter.class)
+//                .addFilterBefore(apiVersionFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(registerTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(accessTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(refreshTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
