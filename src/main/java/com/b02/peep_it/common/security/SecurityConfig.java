@@ -1,5 +1,6 @@
 package com.b02.peep_it.common.security;
 
+import com.b02.peep_it.common.filter.LoggingFilter;
 import com.b02.peep_it.common.security.token.AccessTokenFilter;
 import com.b02.peep_it.common.security.token.RefreshTokenFilter;
 import com.b02.peep_it.common.security.token.RegisterTokenFilter;
@@ -21,6 +22,7 @@ public class SecurityConfig {
     private final RegisterTokenFilter registerTokenFilter;
     private final AccessTokenFilter accessTokenFilter;
     private final RefreshTokenFilter refreshTokenFilter;
+    private final LoggingFilter loggingFilter;
     private final ApiVersionFilter apiVersionFilter;
 
     private String[] permitList = {
@@ -40,11 +42,13 @@ public class SecurityConfig {
                             .requestMatchers(permitList).permitAll()
                             .anyRequest().authenticated();
                 })
-                // ✅ Swagger 제외 후 API 버전 필터 적용
-//                .addFilterBefore(apiVersionFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(registerTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(accessTokenFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(refreshTokenFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(refreshTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(apiVersionFilter, UsernamePasswordAuthenticationFilter.class);
+
+        ;
 
         return http.build();
     }

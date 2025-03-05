@@ -3,3 +3,12 @@ spring:
     name: peep-it
   profiles:
     active: jwt, lettuce, swagger, devrds, s3, redis, sms
+  mvc:
+    locale: ko_KR
+  messages:
+    encoding: UTF-8
+
+logging:
+  level:
+    root: INFO
+    com.example.logging: DEBUG

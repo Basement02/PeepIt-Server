@@ -15,7 +15,7 @@ import java.io.IOException;
 @Component
 public class ApiVersionFilter extends OncePerRequestFilter {
 
-    private static final String API_PREFIX = "/api/v1";
+    private static final String API_PREFIX = "/v1";
 
     // ✅ Swagger & test 관련 경로는 필터에서 제외
     private static final String[] SWAGGER_PATHS = {
@@ -39,14 +39,14 @@ public class ApiVersionFilter extends OncePerRequestFilter {
             }
         }
 
-        // ✅ API 요청이 '/api/v1'로 시작하지 않으면 차단
+        // ✅ API 요청이 '/v1'로 시작하지 않으면 차단
         if (!requestURI.startsWith(API_PREFIX)) {
-            log.warn("❌ API 요청이 '/api/v1'로 시작하지 않음: {}", requestURI);
+            log.warn("❌ API 요청이 '/v1'로 시작하지 않음: {}", requestURI);
             response.sendError(HttpStatus.FORBIDDEN.value(), "Invalid API Version");
             return;
         }
 
-        // '/api/v1' 제거한 경로 생성
+        // '/v1' 제거한 경로 생성
         String newPath = requestURI.substring(API_PREFIX.length());
         if (newPath.isEmpty()) {
             newPath = "/";
