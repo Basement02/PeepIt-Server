@@ -1,5 +1,6 @@
 package com.b02.peep_it.common.security;
 
+import com.b02.peep_it.common.filter.LoggingFilter;
 import com.b02.peep_it.common.security.token.AccessTokenFilter;
 import com.b02.peep_it.common.security.token.RefreshTokenFilter;
 import com.b02.peep_it.common.security.token.RegisterTokenFilter;
@@ -21,6 +22,7 @@ public class SecurityConfig {
     private final RegisterTokenFilter registerTokenFilter;
     private final AccessTokenFilter accessTokenFilter;
     private final RefreshTokenFilter refreshTokenFilter;
+    private final LoggingFilter loggingFilter;
     private final ApiVersionFilter apiVersionFilter;
 
     private String[] permitList = {
@@ -40,14 +42,18 @@ public class SecurityConfig {
                             .requestMatchers(permitList).permitAll()
                             .anyRequest().authenticated();
                 })
+
                 /*
                 ApiVersionFilter를 인증 필터보다 먼저 실행하면 토큰 검증이 제대로 동작하지 않을 수 있음
                 RefreshTokenFilter 다음에 실행되도록 addFilterAfter()를 사용해야 함
                  */
-                .addFilterBefore(refreshTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(registerTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(accessTokenFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(apiVersionFilter, RefreshTokenFilter.class);
+                .addFilterBefore(refreshTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(apiVersionFilter, UsernamePasswordAuthenticationFilter.class);
+
+        ;
 
         return http.build();
     }
