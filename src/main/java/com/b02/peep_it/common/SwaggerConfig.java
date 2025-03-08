@@ -5,31 +5,62 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 @Configuration
 public class SwaggerConfig {
     @Bean
     public OpenAPI openAPI() {
-        String jwt = "JWT";
-        SecurityRequirement securityRequirement = new SecurityRequirement().addList(jwt);
-        Components components = new Components().addSecuritySchemes(jwt, new SecurityScheme()
-                .name(jwt)
-                .type(SecurityScheme.Type.HTTP)
-                .scheme("bearer")
-                .bearerFormat("JWT")
-        );
+        String bearerToken = "BearerAuth";
+        String registerToken = "RegisterAuth";
+
+        // SecurityRequirement 추가
+        SecurityRequirement securityRequirement = new SecurityRequirement()
+                .addList(bearerToken)
+                .addList(registerToken);
+
+        // SecurityScheme 추가 (각 토큰을 개별적으로 정의)
+        Components components = new Components()
+                .addSecuritySchemes(bearerToken, new SecurityScheme()
+                        .name(bearerToken)
+                        .type(SecurityScheme.Type.HTTP)
+                        .scheme("bearer")
+                        .bearerFormat("JWT")
+                        .description("사용 예시: `Authorization: Bearer JWT_TOKEN`"))
+                .addSecuritySchemes(registerToken, new SecurityScheme()
+                        .name(registerToken)
+                        .type(SecurityScheme.Type.HTTP)
+                        .scheme("bearer")
+                        .bearerFormat("Register")
+                        .description("사용 예시: `Authorization: Register REGISTER_TOKEN`"));
+
         return new OpenAPI()
-                .components(new Components())
+                .components(components)
                 .info(apiInfo())
                 .addSecurityItem(securityRequirement)
-                .components(components);
+                // ✅ 기본 API 버전을 `/api/v1`로 설정 (Swagger UI에서 자동 반영)
+                .servers(List.of(
+                        new Server().url("https://basement02.site/api/v1").description("Default API (v1)"),
+                        new Server().url("https://basement02.site/api/v2").description("Next API Version (v2)")
+                ));
     }
+
     private Info apiInfo() {
         return new Info()
-                .title("API Test") // API의 제목
-                .description("Let's practice Swagger UI") // API에 대한 설명
-                .version("1.0.0"); // API의 버전
+                .title("API Test")
+                .description("""
+                        인증 방식:
+                        - `Bearer JWT_TOKEN` (access/refresh 토큰)
+                        - `Register REGISTER_TOKEN` (회원가입 전용 토큰)
+                        
+                        API 기본 경로:
+                        - `/api/v1/...` (기본 버전)
+                        - `/api/v2/...` (향후 지원 예정)
+                        """)
+                .version("1.0.0");
     }
 }

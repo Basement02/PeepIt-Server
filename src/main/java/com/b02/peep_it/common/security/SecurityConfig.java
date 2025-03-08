@@ -26,7 +26,7 @@ public class SecurityConfig {
     private final ApiVersionFilter apiVersionFilter;
 
     private String[] permitList = {
-            "/test/**",
+            "/test/**", "/auth/**", "/api/v1/auth/**", "/api/v2/auth/**",  // ✅ 버전별 허용 추가
             "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**"
     };
 
@@ -42,6 +42,11 @@ public class SecurityConfig {
                             .requestMatchers(permitList).permitAll()
                             .anyRequest().authenticated();
                 })
+
+                /*
+                ApiVersionFilter를 인증 필터보다 먼저 실행하면 토큰 검증이 제대로 동작하지 않을 수 있음
+                RefreshTokenFilter 다음에 실행되도록 addFilterAfter()를 사용해야 함
+                 */
                 .addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(registerTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(accessTokenFilter, UsernamePasswordAuthenticationFilter.class)

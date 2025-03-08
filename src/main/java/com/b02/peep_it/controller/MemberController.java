@@ -2,7 +2,6 @@ package com.b02.peep_it.controller;
 
 import com.b02.peep_it.common.response.CommonResponse;
 import com.b02.peep_it.dto.RequestSignUpDto;
-import com.b02.peep_it.dto.RequestSocialLoginDto;
 import com.b02.peep_it.dto.ResponseLoginDto;
 import com.b02.peep_it.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,57 +12,51 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.nurigo.java_sdk.exceptions.CoolsmsException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/v1/auth")
-public class AuthContoller {
+@RequestMapping("/v1/member")
+public class MemberController {
     private final AuthService authService;
-
     /*
-    소셜 로그인
-    - 최초: register token 발급
-    - 재: access/refresh token 발급
-    KAKAO("KAKAO", "카카오 인증 회원"),
-    NAVER("NAVER", "네이버 인증 회원"),
-    APPLE("APPLE", "애플 인증 회원"),
-    TESTER("TESTER", "테스터: 가상 회원")
+    계정 생성
      */
     @Operation(
-            summary = "소셜 로그인",
+            summary = "계정 생성",
             description = """
-            - 최초 로그인 시 register token 발급
-            - 기존 회원 로그인 시 access/refresh token 발급
-            - 지원하는 provider:
-              - KAKAO: 카카오 인증 회원
-              - NAVER: 네이버 인증 회원
-              - APPLE: 애플 인증 회원
-              - TESTER: 테스트 계정
+            - 추가 정보 포함 계정 생성
+            - 입력 가능한 추가 정보:
+              - id
+              - nickname
+              - birth
+              - gender: 성별
+                - female: 여성
+                - male: 남성
+                - other: 기타
+              - isAgree: 마케팅 약관 동의 여부
+                - True: 동의
+                - False: 거부
         """,
             requestBody = @RequestBody(
-                    description = "소셜 로그인 요청 DTO",
+                    description = "계정 생성 요청 DTO",
                     required = true,
                     content = @Content(
                             mediaType = "application/json",
                             examples = {
                                     @ExampleObject(
-                                            name = "카카오 로그인 요청 예시",
+                                            name = "계정 생성 요청 예시",
                                             value = """
                         {
-                            "provider": "KAKAO",
-                            "idToken": "kakao-id-token-sample"
-                        }
-                        """),
-                                    @ExampleObject(
-                                            name = "테스터 로그인 요청 예시",
-                                            value = """
-                        {
-                            "provider": "TESTER",
-                            "idToken": "임의의 테스터 아이디"
+                            "id": "KAKAO",
+                            "nickname": "kakao-id-token-sample",
+                            "birth": "",
+                            "gender": "",
+                            "isAgree": "true"
                         }
                         """)
                             }
@@ -72,7 +65,7 @@ public class AuthContoller {
             responses = {
                     @ApiResponse(
                             responseCode = "201",
-                            description = "성공적으로 로그인 또는 회원가입 진행됨",
+                            description = "성공적으로 계정이 생성됨",
                             content = @Content(
                                     mediaType = "application/json",
                                     schema = @Schema(implementation = ResponseLoginDto.class),
@@ -123,32 +116,8 @@ public class AuthContoller {
                     )
             }
     )
-    @PostMapping("/social")
-    public ResponseEntity<CommonResponse<ResponseLoginDto>> socialLogin(@RequestBody RequestSocialLoginDto requestDto) {
-        return authService.getRegisterToken(requestDto);
-    }
-
-    /*
-    아이디 중복 확인
-     */
-    @GetMapping("/check/id")
-    public ResponseEntity<CommonResponse<Object>> checkId(@RequestParam("id") String id){
-        return authService.isIdDuplicated(id);
-    }
-
-    /*
-    전화번호 중복 확인
-     */
-    @GetMapping("/check/phone")
-    public ResponseEntity<CommonResponse<Object>> checkPhone(@RequestParam("phone") String phone){
-        return authService.isPhoneDuplicated(phone);
-    }
-
-    /*
-    전화번호 인증코드 발급
-     */
-    @PostMapping("/send/sms-code")
-    public ResponseEntity<CommonResponse<String>> sendSmsCode(@RequestParam("phone") String phone) throws CoolsmsException {
-        return authService.sendSmsCode(phone);
+    @PostMapping("/sign-up")
+    public ResponseEntity<CommonResponse<ResponseLoginDto>> signUp(@RequestBody RequestSignUpDto requestDto){
+        return authService.createAccount(requestDto);
     }
 }
