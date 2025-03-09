@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Tag(name = "Peep API", description = "핍 관련 API")
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/v1/peep")
+@RequestMapping("/api/v1/peep")
 public class PeepController {
     private final PeepService peepService;
 
@@ -50,7 +50,7 @@ public class PeepController {
             @ApiResponse(responseCode = "500", description = "서버 내부 오류",
                     content = @Content(schema = @Schema(implementation = CommonResponse.class)))
     })
-    @GetMapping("/{peepId}")
+    @GetMapping("/get/{peepId}")
     public ResponseEntity<CommonResponse<CommonPeepDto>> getPeep(@PathVariable("peepId") Long peepId) {
         return peepService.getPeepById(peepId);
     }
@@ -90,15 +90,6 @@ public class PeepController {
         return peepService.getChatPeepList(page, size);
     }
 
-    // 특정 사용자가 업로드한 핍 리스트 조회
-    @Operation(summary = "특정 사용자가 업로드한 핍 리스트 조회", description = "특정 사용자가 업로드한 핍 리스트를 조회합니다.")
-    @GetMapping
-    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMemberPeepList(@RequestParam("memberId") String memberId,
-                                                                                          @RequestParam(defaultValue = "0") int page,
-                                                                                          @RequestParam(defaultValue = "10") int size) {
-        return peepService.getMemberPeepList(memberId, page, size);
-    }
-
     // 사용자 실시간 활성 핍 리스트 조회
     @Operation(summary = "사용자가 업로드한 실시간 핍 리스트 조회", description = "사용자가 업로드한 활성화 상태의 핍 리스트를 조회합니다.")
     @GetMapping("/my/active")
@@ -107,9 +98,18 @@ public class PeepController {
         return peepService.getActivePeepList(page, size);
     }
 
+    // 특정 사용자가 업로드한 핍 리스트 조회
+    @Operation(summary = "특정 사용자가 업로드한 핍 리스트 조회", description = "특정 사용자가 업로드한 핍 리스트를 조회합니다.")
+    @GetMapping("/get")
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMemberPeepList(@RequestParam("memberId") String memberId,
+                                                                                          @RequestParam(defaultValue = "0") int page,
+                                                                                          @RequestParam(defaultValue = "10") int size) {
+        return peepService.getMemberPeepList(memberId, page, size);
+    }
+
     // 인기 핍 리스트 조회
     @Operation(summary = "인기 핍 리스트 조회", description = "실시간 인기 핍으로 선정된 핍 리스트를 조회합니다.")
-    @GetMapping("/hot")
+    @GetMapping("/get/hot")
     public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getHotPeepList(@RequestParam(defaultValue = "0") int page,
                                                                                        @RequestParam(defaultValue = "10") int size) {
         return peepService.getHotPeepList(page, size);
@@ -117,7 +117,7 @@ public class PeepController {
 
     // 동네 실시간 핍 리스트 조회 (최신순)
     @Operation(summary = "동네 핍 리스트 조회 (최신순)", description = "동네에 등록된 실시간 핍 리스트를 최신순으로 조회합니다.")
-    @GetMapping("/town")
+    @GetMapping("/get/town")
     public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getTownPeepList(@RequestParam(defaultValue = "0") int page,
                                                                                        @RequestParam(defaultValue = "10") int size) {
         return peepService.getTownPeepList(page, size);
@@ -125,7 +125,7 @@ public class PeepController {
 
     // 지도 내 핍 리스트 조회
     @Operation(summary = "지도 내 핍 리스트 조회", description = "지도 반경 내 노출될 핍 리스트를 조회합니다.")
-    @GetMapping("/map")
+    @GetMapping("/get/map")
     public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMapPeepList(@RequestParam(defaultValue = "5") int dist,
                                                                                        @RequestParam(defaultValue = "0") int page,
                                                                                        @RequestParam(defaultValue = "10") int size,

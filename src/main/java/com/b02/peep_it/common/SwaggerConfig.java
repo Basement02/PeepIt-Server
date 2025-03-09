@@ -44,8 +44,7 @@ public class SwaggerConfig {
                 .addSecurityItem(securityRequirement)
                 // ✅ 기본 API 버전을 `/api/v1`로 설정 (Swagger UI에서 자동 반영)
                 .servers(List.of(
-                        new Server().url("https://basement02.site/api/v1").description("Default API (v1)"),
-                        new Server().url("https://basement02.site/api/v2").description("Next API Version (v2)")
+                        new Server().url("https://basement02.site").description("base domain")
                 ));
     }
 
