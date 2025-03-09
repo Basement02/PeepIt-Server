@@ -4,11 +4,14 @@ spring:
   profiles:
     active: jwt, lettuce, swagger, devrds, s3, redis, sms
   mvc:
-    locale: ko_KR
+    local: ko_KR
   messages:
     encoding: UTF-8
+  main:
+    log-startup-info: false  # 애플리케이션 시작 시 추가 정보 출력 방지
 
 logging:
   level:
-    root: INFO
-    com.example.logging: DEBUG
+    root: info
+    org.springframework: info  # DEBUG → INFO 변경하여 불필요한 자동 설정 로그 제거
+    org.springframework.boot.autoconfigure: off  # CONDITIONS EVALUATION REPORT 로그 숨김
