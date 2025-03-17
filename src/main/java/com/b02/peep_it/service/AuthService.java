@@ -70,10 +70,10 @@ public class AuthService {
         String refreshToken = "";
         String name = "";
         String id = "";
-        CustomProvider provider = CustomProvider.valueOf(requestDto.getProvider());
+        CustomProvider provider = CustomProvider.valueOf(requestDto.provider());
 
         // idtoken에서 고유 id 추출
-        String socialUid = jwtUtils.getSocialUid(provider, requestDto.getIdToken());
+        String socialUid = jwtUtils.getSocialUid(provider, requestDto.idToken());
 
         // 기존 회원과 provider 고유 id 중복 확인
         Optional<MemberSocial> memberSocial = memberSocialRepository.findByProviderAndProviderId(provider.getCode(), socialUid);
@@ -96,7 +96,7 @@ public class AuthService {
         // 신규 회원은 register token 발급 (가입 대기)
         else {
             // register token 생성
-            registerToken = jwtUtils.createRegisterToken(provider.getCode(), requestDto.getIdToken());
+            registerToken = jwtUtils.createRegisterToken(provider.getCode(), requestDto.idToken());
         }
         return CommonResponse.created(ResponseLoginDto.builder()
                 .isMember(isMember)
