@@ -9,4 +9,3 @@ public class RequestSocialLoginDto {
     private String provider;
     private String idToken;
 }
-
