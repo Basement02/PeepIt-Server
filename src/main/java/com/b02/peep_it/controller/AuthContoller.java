@@ -1,7 +1,6 @@
 package com.b02.peep_it.controller;
 
 import com.b02.peep_it.common.response.CommonResponse;
-import com.b02.peep_it.dto.RequestSignUpDto;
 import com.b02.peep_it.dto.RequestSocialLoginDto;
 import com.b02.peep_it.dto.ResponseLoginDto;
 import com.b02.peep_it.service.AuthService;
@@ -9,7 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +43,7 @@ public class AuthContoller {
               - APPLE: 애플 인증 회원
               - TESTER: 테스트 계정
         """,
-            requestBody = @RequestBody(
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "소셜 로그인 요청 DTO",
                     required = true,
                     content = @Content(
@@ -125,9 +124,9 @@ public class AuthContoller {
     )
     @PostMapping("/social")
     public ResponseEntity<CommonResponse<ResponseLoginDto>> socialLogin(@RequestBody RequestSocialLoginDto requestDto) {
-        log.info("==== provider = [{}] ===", requestDto.getProvider());
-        log.info("provider: {}", requestDto.getProvider());
-        log.info("idToken: {}", requestDto.getIdToken());
+        log.info("==== provider = [{}] ===", requestDto.provider());
+        log.info("provider: {}", requestDto.provider());
+        log.info("idToken: {}", requestDto.idToken());
 
         return authService.getRegisterToken(requestDto);
     }
