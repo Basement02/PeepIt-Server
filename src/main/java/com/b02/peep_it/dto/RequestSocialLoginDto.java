@@ -1,11 +1,12 @@
 package com.b02.peep_it.dto;
 
-import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Builder
-public record RequestSocialLoginDto(
-        @NotNull String provider,
-        @NotNull String idToken
-) {
+@Getter
+@NoArgsConstructor
+public class RequestSocialLoginDto {
+    private String provider;
+    private String idToken;
 }
+
