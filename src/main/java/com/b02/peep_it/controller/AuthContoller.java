@@ -125,6 +125,10 @@ public class AuthContoller {
     )
     @PostMapping("/social")
     public ResponseEntity<CommonResponse<ResponseLoginDto>> socialLogin(@RequestBody RequestSocialLoginDto requestDto) {
+        log.info("==== provider = [{}] ===", requestDto.getProvider());
+        log.info("provider: {}", requestDto.getProvider());
+        log.info("idToken: {}", requestDto.getIdToken());
+
         return authService.getRegisterToken(requestDto);
     }
 
