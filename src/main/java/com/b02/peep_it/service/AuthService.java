@@ -76,7 +76,7 @@ public class AuthService {
         String socialUid = jwtUtils.getSocialUid(provider, requestDto.idToken());
 
         // 기존 회원과 provider 고유 id 중복 확인
-        Optional<MemberSocial> memberSocial = memberSocialRepository.findByProviderAndProviderId(provider.getCode(), socialUid);
+        Optional<MemberSocial> memberSocial = memberSocialRepository.findByProviderAndProviderId(provider, socialUid);
 
         // 기존 회원은 access/refresh token 발급 (로그인)
         if (memberSocial.isPresent()) {
