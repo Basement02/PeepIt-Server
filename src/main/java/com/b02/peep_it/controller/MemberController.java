@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +43,9 @@ public class MemberController {
                 - True: 동의
                 - False: 거부
         """,
+            security = {
+                    @SecurityRequirement(name = "RegisterToken")
+            },
             requestBody = @RequestBody(
                     description = "계정 생성 요청 DTO",
                     required = true,
@@ -52,8 +56,8 @@ public class MemberController {
                                             name = "계정 생성 요청 예시",
                                             value = """
                         {
-                            "id": "KAKAO",
-                            "nickname": "kakao-id-token-sample",
+                            "id": "핍잇에서-사용할-id",
+                            "nickname": "핍잇에서-사용할-nickname",
                             "birth": "",
                             "gender": "",
                             "isAgree": "true"
