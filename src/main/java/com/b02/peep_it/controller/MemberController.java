@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -42,13 +43,8 @@ public class MemberController {
                 - True: 동의
                 - False: 거부
         """,
-            parameters = {
-                    @io.swagger.v3.oas.annotations.Parameter(
-                            name = "Authorization",
-                            description = "Register 형식의 JWT 액세스 토큰",
-                            required = true,
-                            example = "Register eyJhbGciOiJIUzI1NiIs토큰토큰In..."
-                    )
+            security = {
+                    @SecurityRequirement(name = "RegisterToken")
             },
             requestBody = @RequestBody(
                     description = "계정 생성 요청 DTO",
