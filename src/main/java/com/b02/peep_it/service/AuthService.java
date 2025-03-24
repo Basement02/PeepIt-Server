@@ -167,11 +167,11 @@ public class AuthService {
         memberSocialRepository.save(memberSocial);
         log.info("✅ 소셜 로그인 정보 저장 완료 - provider: {}, providerId: {}", provider, providerId);
 
-        if(requestDto.id().isEmpty()) {
+        if (requestDto.id() == null || requestDto.id().isEmpty()) {
             log.info("id가 비어있음");
             return CommonResponse.failed(CustomError.NEED_TO_CUSTOM);
         }
-        if(requestDto.nickname().isEmpty()) {
+        if (requestDto.nickname() == null || requestDto.nickname().isEmpty()) {
             log.info("nickname이 비어있음");
             return CommonResponse.failed(CustomError.NEED_TO_CUSTOM);
         }
