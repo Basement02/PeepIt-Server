@@ -24,7 +24,7 @@ public class MemberSocial {
     private String providerId; // 제공받은 식별자
 
     @Builder
-    public MemberSocial(CustomProvider provider, String providerId, String email) {
+    public MemberSocial(CustomProvider provider, String providerId) {
         this.provider = provider;
         this.providerId = providerId;
     }

@@ -131,12 +131,13 @@ public class JwtUtils {
     - validateAccess: access token 유효성 검사 (null, exp, login, iss)
     - validateRefresh: refresh token 유효성 검사 (null, exp, login, iss)
      */
-
     public boolean validateRegisterToken(String token) {
         if (!StringUtils.hasText(token)) {
+            log.warn("❌ Token is empty or null");
             return false;
         }
         if (!isIss(token)) {
+            log.warn("❌ Issuer mismatch in token");
             return false;
         }
         try {
@@ -146,23 +147,66 @@ public class JwtUtils {
                     .getBody();
 
             // 토큰에서 필드 추출
-            CustomProvider provider = (CustomProvider) claims.get("provider");
+            log.info("✅ JWT Claims: {}", claims);
+            CustomProvider provider = CustomProvider.valueOf((String) claims.get("provider"));
             String providerId = (String) claims.get("providerId");
+
+            log.info("🔍 Extracted Provider: {}", provider);
+            log.info("🔍 Extracted ProviderId: {}", providerId);
 
             // provider에 따른 social uid 추출 (추출 시, 유효성 검증 거침)
             String socialUid = getSocialUid(provider, providerId);
 
+            if (socialUid == null) {
+                log.warn("❌ Failed to extract social UID. Invalid providerId?");
+            }
+
             return socialUid != null;
 
-
         } catch (MalformedJwtException e) {
+            log.warn("❌ Malformed JWT: {}", e.getMessage());
             throw new UnauthorizedException(CustomError.NEED_TO_CUSTOM);
         } catch (ExpiredJwtException e) {
+            log.warn("❌ Expired JWT: {}", e.getMessage());
             throw new UnauthorizedException(CustomError.NEED_TO_CUSTOM);
         } catch (UnauthorizedException e) {
+            log.warn("❌ Unauthorized JWT: {}", e.getMessage());
             return false;
         }
     }
+
+
+//    public boolean validateRegisterToken(String token) {
+//        if (!StringUtils.hasText(token)) {
+//            return false;
+//        }
+//        if (!isIss(token)) {
+//            return false;
+//        }
+//        try {
+//            Claims claims = Jwts.parser()
+//                    .setSigningKey(jwtSecretKey)
+//                    .parseClaimsJws(token)
+//                    .getBody();
+//
+//            // 토큰에서 필드 추출
+//            CustomProvider provider = (CustomProvider) claims.get("provider");
+//            String providerId = (String) claims.get("providerId");
+//
+//            // provider에 따른 social uid 추출 (추출 시, 유효성 검증 거침)
+//            String socialUid = getSocialUid(provider, providerId);
+//
+//            return socialUid != null;
+//
+//
+//        } catch (MalformedJwtException e) {
+//            throw new UnauthorizedException(CustomError.NEED_TO_CUSTOM);
+//        } catch (ExpiredJwtException e) {
+//            throw new UnauthorizedException(CustomError.NEED_TO_CUSTOM);
+//        } catch (UnauthorizedException e) {
+//            return false;
+//        }
+//    }
 
     public boolean validateAccessToken(String token) {
         if (!StringUtils.hasText(token)) {
@@ -372,7 +416,20 @@ public class JwtUtils {
     }
 
     public boolean isIss(String token) {
-        return issuer.equals(token);
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(jwtSecretKey)
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            String actualIssuer = claims.getIssuer(); // ✅ JWT에서 iss 값 추출
+            log.info("🔍 JWT Issuer 검증: 실제값={}, 기대값={}", actualIssuer, issuer);
+
+            return issuer.equals(actualIssuer); // ✅ 기대하는 issuer 값과 비교
+        } catch (Exception e) {
+            log.warn("❌ Issuer 검증 실패: {}", e.getMessage());
+            return false;
+        }
     }
 
     public Long getExpiration(String token) {
