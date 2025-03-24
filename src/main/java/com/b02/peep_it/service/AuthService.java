@@ -22,6 +22,7 @@ import net.nurigo.java_sdk.exceptions.CoolsmsException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.util.HashMap;
@@ -63,7 +64,8 @@ public class AuthService {
     - 40101: 유효하지 않은 소셜 계정입니다
     - 50000: 서버 내부 오류가 발생했습니다
      */
-    public ResponseEntity<CommonResponse<ResponseLoginDto>> getRegisterToken(RequestSocialLoginDto requestDto) {
+    @Transactional
+    public ResponseEntity<CommonResponse<ResponseLoginDto>> getRegisterToken(RequestSocialLoginDto requestDto) throws Exception {
         Boolean isMember = Boolean.FALSE;
         String registerToken = "";
         String accessToken = "";
@@ -82,17 +84,24 @@ public class AuthService {
         if (memberSocial.isPresent()) {
             isMember = Boolean.TRUE;
             Optional<Member> memberOptional = memberRepository.findByMemberSocial(memberSocial.get());
-            Member member = memberOptional.get();
+
+            // member가 존재하지 않으면 예외 발생 (메시지 포함)
+            Member member = memberOptional.orElseThrow(() ->
+                    new Exception("Member 정보가 존재하지 않습니다. socialId: " + memberSocial.get().getProviderId())
+            );
+
             CommonMemberDto commonMemberDto = CommonMemberDto.builder()
                     .id(member.getId())
                     .role(member.getRole())
                     .name(member.getNickname())
                     .build();
+
             accessToken = jwtUtils.createAccessToken(commonMemberDto);
             refreshToken = jwtUtils.createRefreshToken(commonMemberDto);
             name = member.getNickname();
             id = member.getId();
         }
+
         // 신규 회원은 register token 발급 (가입 대기)
         else {
             // register token 생성
@@ -130,17 +139,24 @@ public class AuthService {
     /*
     신규 계정 생성
      */
+    @Transactional
     public ResponseEntity<CommonResponse<ResponseLoginDto>> createAccount(RequestSignUpDto requestDto) {
+        log.info("🟢 createAccount 시작 - requestDto: {}", requestDto);
+
         // 레지스터 토큰에서 사용자 정보 추출
         CustomUserDetails userDetails = authUtils.getPrincipal();
+        log.info("🔹 사용자 정보 추출 완료 - provider: {}, providerId: {}", userDetails.getProvider(), userDetails.getProviderId());
+
         CustomProvider provider = CustomProvider.valueOf(userDetails.getProvider());
         String providerId = userDetails.getProviderId();
 
         // idtoken 유효성 검증
         if (!jwtUtils.validateIdToken(provider, providerId)) {
-            log.info("유효하지 않은 id token");
+            log.warn("⚠ 유효하지 않은 id token - provider: {}, providerId: {}", provider, providerId);
             return CommonResponse.failed(CustomError.ID_TOKEN_UNAUTHORIZED);
         }
+
+        log.info("✅ id token 검증 완료");
 
         // 소셜 로그인 객체 생성 & 저장
         MemberSocial memberSocial = MemberSocial.builder()
@@ -149,20 +165,34 @@ public class AuthService {
                 .build();
 
         memberSocialRepository.save(memberSocial);
-
+        log.info("✅ 소셜 로그인 정보 저장 완료 - provider: {}, providerId: {}", provider, providerId);
 
         // 회원 객체 생성 & 저장
-        log.info("‼\uFE0F프로필 사진 기본 이미지 경로 변경 필요");
+//        log.info("‼\uFE0F 프로필 사진 기본 이미지 경로 변경 필요");
+//        Member member = Member.builder()
+//                .id(requestDto.id())
+//                .nickname(requestDto.nickname())
+//                .profileImg(DEFAULT_PROFILE_IMG)
+//                .birth(requestDto.birth())
+//                .gender(new CustomGender(requestDto.gender()))
+//                .memberSocial(memberSocial)
+//                .build();
+        log.info("‼️ 프로필 사진 기본 이미지 경로 변경 필요");
+
+        // gender 값이 null이거나 빈 문자열이면 기본값 설정
+        String genderValue = (requestDto.gender() == null || requestDto.gender().isEmpty()) ? "other" : requestDto.gender();
+
         Member member = Member.builder()
                 .id(requestDto.id())
                 .nickname(requestDto.nickname())
                 .profileImg(DEFAULT_PROFILE_IMG)
                 .birth(requestDto.birth())
-                .gender(new CustomGender(requestDto.gender()))
+                .gender(new CustomGender(genderValue)) // Null 체크 후 적용
                 .memberSocial(memberSocial)
                 .build();
 
         memberRepository.save(member);
+        log.info("✅ 회원 정보 저장 완료 - id: {}, nickname: {}", member.getId(), member.getNickname());
 
         // 약관 동의 객체 생성 & 저장
         TermsAgreement termsAgreement = TermsAgreement.builder()
@@ -171,14 +201,15 @@ public class AuthService {
                 .build();
 
         termsAgreementRepository.save(termsAgreement);
+        log.info("✅ 약관 동의 정보 저장 완료 - isAgree: {}", requestDto.isAgree());
 
-        // 알림 설정 동의 객체 생성 & 저장
-        // 기본값: 모든 알림 on
+        // 알림 설정 동의 객체 생성 & 저장 (기본값: 모든 알림 ON)
         PushSetting pushSetting = PushSetting.builder()
                 .member(member)
                 .build();
 
         pushSettingRepository.save(pushSetting);
+        log.info("✅ 알림 설정 저장 완료 - memberId: {}", member.getId());
 
         // 로그인
         Boolean isMember = Boolean.TRUE;
@@ -188,11 +219,15 @@ public class AuthService {
                 .role(member.getRole())
                 .name(member.getNickname())
                 .build();
+
         String accessToken = jwtUtils.createAccessToken(commonMemberDto);
         String refreshToken = jwtUtils.createRefreshToken(commonMemberDto);
+        log.info("✅ 토큰 생성 완료 - accessToken: {}, refreshToken: {}", accessToken, refreshToken);
+
         String name = member.getNickname();
         String id = member.getId();
 
+        log.info("🟢 createAccount 완료 - memberId: {}, name: {}", id, name);
         return CommonResponse.created(ResponseLoginDto.builder()
                 .isMember(isMember)
                 .registerToken(registerToken)

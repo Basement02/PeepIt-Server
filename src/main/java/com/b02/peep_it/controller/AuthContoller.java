@@ -123,7 +123,7 @@ public class AuthContoller {
             }
     )
     @PostMapping("/social")
-    public ResponseEntity<CommonResponse<ResponseLoginDto>> socialLogin(@RequestBody RequestSocialLoginDto requestDto) {
+    public ResponseEntity<CommonResponse<ResponseLoginDto>> socialLogin(@RequestBody RequestSocialLoginDto requestDto) throws Exception {
         log.info("==== provider = [{}] ===", requestDto.provider());
         log.info("provider: {}", requestDto.provider());
         log.info("idToken: {}", requestDto.idToken());

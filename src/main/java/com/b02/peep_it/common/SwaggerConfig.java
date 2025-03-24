@@ -3,6 +3,7 @@ package com.b02.peep_it.common;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
@@ -17,18 +18,13 @@ public class SwaggerConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .components(new Components()
-                        .addSecuritySchemes("BearerAuth", new SecurityScheme()
-                                .type(SecurityScheme.Type.HTTP)
-                                .scheme("bearer")
-                                .bearerFormat("JWT")
-                                .description("사용 예시: Authorization: Bearer {JWT_ACCESS_TOKEN}"))
-
-                        .addSecuritySchemes("RegisterAuth", new SecurityScheme()
-                                .type(SecurityScheme.Type.HTTP)
-                                .scheme("bearer")
-                                .bearerFormat("Register")
-                                .description("사용 예시: Authorization: Register {REGISTER_TOKEN}"))
+                        .addSecuritySchemes("AuthToken", new SecurityScheme()
+                                .type(SecurityScheme.Type.APIKEY)
+                                .in(SecurityScheme.In.HEADER)
+                                .name("Authorization")
+                                .description("API 호출 시 필요한 인증 토큰. 사용 예시: `Authorization: Bearer {JWT_ACCESS_TOKEN}` 또는 `Authorization: Register {REGISTER_TOKEN}`"))
                 )
+                .addSecurityItem(new SecurityRequirement().addList("AuthToken"))
                 .info(new Info()
                         .title("Peep-It API")
                         .version("1.0")

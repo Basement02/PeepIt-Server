@@ -44,7 +44,7 @@ public class MemberController {
                 - False: 거부
         """,
             security = {
-                    @SecurityRequirement(name = "RegisterToken")
+                    @SecurityRequirement(name = "AuthToken")
             },
             requestBody = @RequestBody(
                     description = "계정 생성 요청 DTO",
