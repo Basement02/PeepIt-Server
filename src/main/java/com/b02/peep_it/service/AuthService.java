@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.util.HashMap;
-import java.util.UUID;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.apache.commons.lang.math.RandomUtils.nextInt;
@@ -167,6 +167,15 @@ public class AuthService {
         memberSocialRepository.save(memberSocial);
         log.info("✅ 소셜 로그인 정보 저장 완료 - provider: {}, providerId: {}", provider, providerId);
 
+        if(requestDto.id().isEmpty()) {
+            log.info("id가 비어있음");
+            return CommonResponse.failed(CustomError.NEED_TO_CUSTOM);
+        }
+        if(requestDto.nickname().isEmpty()) {
+            log.info("nickname이 비어있음");
+            return CommonResponse.failed(CustomError.NEED_TO_CUSTOM);
+        }
+
         // 회원 객체 생성 & 저장
 //        log.info("‼\uFE0F 프로필 사진 기본 이미지 경로 변경 필요");
 //        Member member = Member.builder()
@@ -183,11 +192,11 @@ public class AuthService {
         String genderValue = (requestDto.gender() == null || requestDto.gender().isEmpty()) ? "other" : requestDto.gender();
 
         Member member = Member.builder()
-                .id(requestDto.id() != null ? requestDto.id() : UUID.randomUUID().toString())
+                .id(requestDto.id())
                 .nickname(requestDto.nickname())
                 .profileImg(DEFAULT_PROFILE_IMG)
                 .birth(requestDto.birth())
-                .gender(new CustomGender(genderValue))
+                .gender(new CustomGender(genderValue)) // Null 체크 후 적용
                 .memberSocial(memberSocial)
                 .build();
 
