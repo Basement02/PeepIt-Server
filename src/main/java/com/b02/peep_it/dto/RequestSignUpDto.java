@@ -3,12 +3,10 @@ package com.b02.peep_it.dto;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.Builder;
 import org.springframework.lang.Nullable;
 
 import java.time.LocalDate;
 
-@Builder
 public record RequestSignUpDto(
         @NotNull
         @Size(min = 10, max = 20, message = "ID는 10~20자 이내로 입력해주세요.")
