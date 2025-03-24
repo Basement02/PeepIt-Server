@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.UUID;
 import java.util.Optional;
 
 import static org.apache.commons.lang.math.RandomUtils.nextInt;
@@ -183,11 +183,11 @@ public class AuthService {
         String genderValue = (requestDto.gender() == null || requestDto.gender().isEmpty()) ? "other" : requestDto.gender();
 
         Member member = Member.builder()
-                .id(requestDto.id())
+                .id(requestDto.id() != null ? requestDto.id() : UUID.randomUUID().toString())
                 .nickname(requestDto.nickname())
                 .profileImg(DEFAULT_PROFILE_IMG)
                 .birth(requestDto.birth())
-                .gender(new CustomGender(genderValue)) // Null 체크 후 적용
+                .gender(new CustomGender(genderValue))
                 .memberSocial(memberSocial)
                 .build();
 
