@@ -16,9 +16,11 @@ public enum CustomError {
 
     /*
     401
-    - 01: 유효하지 않은 social id token 입니다
+    - 01: 유효하지 않은 social id token입니다
+    - 02: 유효하지 않은 계정입니다
      */
     ID_TOKEN_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "40101", "유효하지 않은 social id token입니다"),
+    MEMBER_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "40102", "유효하지 않은 계정입니다"),
 
     /*
     404

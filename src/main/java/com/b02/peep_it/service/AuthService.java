@@ -10,11 +10,8 @@ import com.b02.peep_it.dto.RequestSignUpDto;
 import com.b02.peep_it.dto.RequestSocialLoginDto;
 import com.b02.peep_it.dto.ResponseLoginDto;
 import com.b02.peep_it.dto.member.CommonMemberDto;
-import com.b02.peep_it.repository.MemberRepository;
-import com.b02.peep_it.repository.MemberSocialRepository;
+import com.b02.peep_it.repository.*;
 import com.b02.peep_it.common.util.JwtUtils;
-import com.b02.peep_it.repository.PushSettingRepository;
-import com.b02.peep_it.repository.TermsAgreementRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.nurigo.java_sdk.api.Message;
@@ -35,6 +32,7 @@ import static org.apache.commons.lang.math.RandomUtils.nextInt;
 @RequiredArgsConstructor
 @Service
 public class AuthService {
+    private final TownRepository townRepository;
     @Value("${coolsms.api.key}")
     String apiKey;
     @Value("${coolsms.api.secret}")
@@ -220,6 +218,12 @@ public class AuthService {
 
         pushSettingRepository.save(pushSetting);
         log.info("✅ 알림 설정 저장 완료 - memberId: {}", mergedMember.getId());
+
+        // 동네 객체 생성 & 저장 (기본값: null)
+        Town town = Town.builder()
+                .member(mergedMember)
+                .build();
+        townRepository.save(town);
 
         // 로그인
         Boolean isMember = Boolean.TRUE;
