@@ -63,7 +63,7 @@ public class Member extends BaseTimeEntity {
 
     @Builder
     public Member(String id, String nickname, String profileImg,
-                  LocalDate birth, CustomGender gender, MemberSocial memberSocial) {
+                  LocalDate birth, CustomGender gender) {
         this.id =id;
         this.nickname = nickname;
         this.profileImg = profileImg;
@@ -75,7 +75,11 @@ public class Member extends BaseTimeEntity {
         }
         this.role = Role.UNCERT;
         this.isTerminated = Boolean.FALSE;
+    }
+
+    public Member setMemberSocial(MemberSocial memberSocial) {
         this.memberSocial = memberSocial;
+        return this;
     }
 
     public Member setAdditionalInfo(String phone, String profileImg, LocalDate birth, CustomGender gender) {

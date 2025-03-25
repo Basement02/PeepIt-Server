@@ -1,9 +1,11 @@
 package com.b02.peep_it.common.security;
 
+import com.b02.peep_it.common.HttpLoggingFilter;
 import com.b02.peep_it.common.security.token.AccessTokenFilter;
 import com.b02.peep_it.common.security.token.RefreshTokenFilter;
 import com.b02.peep_it.common.security.token.RegisterTokenFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -72,6 +74,15 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
 
         return source;
+    }
+
+    @Bean
+    public FilterRegistrationBean<HttpLoggingFilter> loggingFilter() {
+        FilterRegistrationBean<HttpLoggingFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(new HttpLoggingFilter());
+        registrationBean.addUrlPatterns("/*"); // 모든 URL에 대해 적용
+        registrationBean.setOrder(1); // 필터 순서 지정 (낮은 값이 우선)
+        return registrationBean;
     }
 
     @Bean

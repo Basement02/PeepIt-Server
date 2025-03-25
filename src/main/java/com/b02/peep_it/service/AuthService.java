@@ -164,7 +164,7 @@ public class AuthService {
                 .providerId(providerId)
                 .build();
 
-        memberSocialRepository.save(memberSocial);
+        MemberSocial mergedMemberSocial = memberSocialRepository.save(memberSocial);
         log.info("✅ 소셜 로그인 정보 저장 완료 - provider: {}, providerId: {}", provider, providerId);
 
         if (requestDto.id() == null || requestDto.id().isEmpty()) {
@@ -196,16 +196,17 @@ public class AuthService {
                 .nickname(requestDto.nickname())
                 .profileImg(DEFAULT_PROFILE_IMG)
                 .birth(requestDto.birth())
-                .gender(new CustomGender(genderValue)) // Null 체크 후 적용
-                .memberSocial(memberSocial)
+                .gender(new CustomGender(genderValue))
                 .build();
 
-        memberRepository.save(member);
-        log.info("✅ 회원 정보 저장 완료 - id: {}, nickname: {}", member.getId(), member.getNickname());
+        member.setMemberSocial(mergedMemberSocial);
+
+        Member mergedMember = memberRepository.save(member);
+        log.info("✅ 회원 정보 저장 완료 - id: {}, nickname: {}", mergedMember.getId(), mergedMember.getNickname());
 
         // 약관 동의 객체 생성 & 저장
         TermsAgreement termsAgreement = TermsAgreement.builder()
-                .member(member)
+                .member(mergedMember)
                 .isAgree(requestDto.isAgree())
                 .build();
 
@@ -214,27 +215,27 @@ public class AuthService {
 
         // 알림 설정 동의 객체 생성 & 저장 (기본값: 모든 알림 ON)
         PushSetting pushSetting = PushSetting.builder()
-                .member(member)
+                .member(mergedMember)
                 .build();
 
         pushSettingRepository.save(pushSetting);
-        log.info("✅ 알림 설정 저장 완료 - memberId: {}", member.getId());
+        log.info("✅ 알림 설정 저장 완료 - memberId: {}", mergedMember.getId());
 
         // 로그인
         Boolean isMember = Boolean.TRUE;
         String registerToken = "";
         CommonMemberDto commonMemberDto = CommonMemberDto.builder()
-                .id(member.getId())
-                .role(member.getRole())
-                .name(member.getNickname())
+                .id(mergedMember.getId())
+                .role(mergedMember.getRole())
+                .name(mergedMember.getNickname())
                 .build();
 
         String accessToken = jwtUtils.createAccessToken(commonMemberDto);
         String refreshToken = jwtUtils.createRefreshToken(commonMemberDto);
         log.info("✅ 토큰 생성 완료 - accessToken: {}, refreshToken: {}", accessToken, refreshToken);
 
-        String name = member.getNickname();
-        String id = member.getId();
+        String name = mergedMember.getNickname();
+        String id = mergedMember.getId();
 
         log.info("🟢 createAccount 완료 - memberId: {}, name: {}", id, name);
         return CommonResponse.created(ResponseLoginDto.builder()

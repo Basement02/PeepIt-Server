@@ -8,13 +8,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,7 +46,7 @@ public class MemberController {
             security = {
                     @SecurityRequirement(name = "AuthToken")
             },
-            requestBody = @RequestBody(
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "계정 생성 요청 DTO",
                     required = true,
                     content = @Content(
@@ -56,11 +56,11 @@ public class MemberController {
                                             name = "계정 생성 요청 예시",
                                             value = """
                         {
-                            "id": "핍잇에서-사용할-id",
-                            "nickname": "핍잇에서-사용할-nickname",
-                            "birth": "",
-                            "gender": "",
-                            "isAgree": "true"
+                          "id": "peepit_user1",
+                          "nickname": "PeepItUser",
+                          "birth": "2025-01-01",
+                          "gender": "other",
+                          "isAgree": true
                         }
                         """)
                             }
@@ -122,6 +122,7 @@ public class MemberController {
     )
     @PostMapping("/sign-up")
     public ResponseEntity<CommonResponse<ResponseLoginDto>> signUp(@RequestBody RequestSignUpDto requestDto){
+        log.info("요청받은 DTO: {}", requestDto);
         return authService.createAccount(requestDto);
     }
 }
