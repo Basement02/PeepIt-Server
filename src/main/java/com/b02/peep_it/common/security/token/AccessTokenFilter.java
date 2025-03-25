@@ -30,7 +30,9 @@ public class AccessTokenFilter extends OncePerRequestFilter {
                 Authentication authentication = jwtUtils.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 log.info("Request to {}: JWT(access)={}", request.getRequestURI(), token);
-                CustomUserDetails userDetails = (CustomUserDetails) authentication.getDetails();
+//                CustomUserDetails userDetails = (CustomUserDetails) authentication.getDetails();
+                CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
                 log.info("✅CustomUserDetails 객체 적용됨!");
                 log.info("User ID (uid): " + userDetails.getUid());
                 log.info("Username (닉네임): " + userDetails.getUsername());

@@ -37,6 +37,8 @@ dependencies {
 	// open-api (swagger)
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
 //	implementation 'com.google.cloud:spring-cloud-gcp-starter-storage'
+	// httpclient
+	implementation 'org.apache.httpcomponents:httpclient:4.5.13'
 	// aws s3
 	implementation 'software.amazon.awssdk:s3:2.20.10'
 	// jpa
