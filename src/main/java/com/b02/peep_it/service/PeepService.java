@@ -46,12 +46,16 @@ public class PeepService {
             // 1. S3에 파일 업로드 후 URL 받기
             String mediaUrl = s3Utils.uploadFile(media);
 
-            // 2. 작성자 가져오기
+            // 2. 작성자 & 동네 가져오기
             Member member = userInfo.getCurrentMember();
+            Optional<State> townName = stateRepository.findByCode(requestDto.legalDistrictCode());
+            if (townName.isEmpty()) {
+                return CommonResponse.failed(CustomError.TOWN_NOT_FOUND);
+            }
 
             // 3. 핍 객체 생성
             Peep peep = Peep.builder()
-                    .town(stateRepository.findByCode(requestDto.legalDistrictCode()))
+                    .town(townName.get().getName())
                     .imageUrl(mediaUrl)
                     .content(requestDto.content())
                     .member(member)
@@ -352,7 +356,15 @@ public class PeepService {
     public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getHotPeepList(int page, int size) {
         // 1. 현재 로그인 사용자의 등록 동네 조회
         Member member = userInfo.getCurrentMember();
-        State memberState = member.getTown().getState();
+
+        Town town = member.getTown();
+        if (town == null || town.getState() == null) {
+            log.info("error custom 필요");
+//            throw new RuntimeException("사용자의 동네 정보가 없습니다");
+            return CommonResponse.failed(CustomError.TOWN_NOT_FOUND);
+        }
+
+        State memberState = town.getState();
 
         // 2. 페이징 처리를 위한 PageRequest 생성 (최신순 정렬 추가)
         PageRequest pageRequest = PageRequest.of(page, size);
@@ -402,7 +414,16 @@ public class PeepService {
     public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getTownPeepList(int page, int size) {
         // 1. 현재 로그인 사용자의 등록 동네 조회
         Member member = userInfo.getCurrentMember();
-        State memberState = member.getTown().getState();
+
+        Town town = member.getTown();
+        if (town == null || town.getState() == null) {
+            log.info("error custom 필요");
+//            throw new RuntimeException("사용자의 동네 정보가 없습니다");
+            return CommonResponse.failed(CustomError.TOWN_NOT_FOUND);
+        }
+
+        State memberState = town.getState();
+
 
         // 2. 페이징 처리를 위한 PageRequest 생성 (최신순 정렬 추가)
         PageRequest pageRequest = PageRequest.of(page, size);
@@ -450,7 +471,15 @@ public class PeepService {
     public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMapPeepList(int dist, int page, int size, double latitude, double longitude) {
         // 1. 현재 로그인 사용자의 등록 동네(State) 조회
         Member member = userInfo.getCurrentMember();
-        State memberState = member.getTown().getState();
+
+        Town town = member.getTown();
+        if (town == null || town.getState() == null) {
+            log.info("error custom 필요");
+//            throw new RuntimeException("사용자의 동네 정보가 없습니다");
+            return CommonResponse.failed(CustomError.TOWN_NOT_FOUND);
+        }
+
+        State memberState = town.getState();
         String memberCode = memberState.getCode();
         String stateTitle = memberState.getName();
 

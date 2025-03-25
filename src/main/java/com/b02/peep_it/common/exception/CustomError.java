@@ -23,8 +23,10 @@ public enum CustomError {
     /*
     404
     -01: 존재하지 않는 핍입니다
+    -02: 사용자의 동네 정보가 존재하지 않습니다
      */
     PEEP_NOT_FOUND(HttpStatus.NOT_FOUND, "40401", "존재하지 않는 핍입니다"),
+    TOWN_NOT_FOUND(HttpStatus.NOT_FOUND, "40402", "사용자의 동네 정보가 존재하지 않습니다"),
 
     /*
     409

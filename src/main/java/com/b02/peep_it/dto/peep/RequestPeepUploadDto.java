@@ -13,10 +13,10 @@ public record RequestPeepUploadDto(
         @Schema(description = "핍 내용", example = "새로운 핍을 등록합니다.")
         String content,
 
-        @Schema(description = "위도", example = "37.5665")
+        @Schema(description = "위도", example = "37.566500")
         Double latitude,
 
-        @Schema(description = "경도", example = "126.9780")
+        @Schema(description = "경도", example = "126.978000")
         Double longitude,
 
         @Schema(description = "우편번호", example = "04524")
