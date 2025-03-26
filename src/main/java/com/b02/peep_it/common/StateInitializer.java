@@ -61,7 +61,7 @@ public class StateInitializer {
         JDBC INSERT
          */
         // INSERT IGNORE
-//        String sql = "INSERT IGNORE INTO state (code, name) VALUES (?, ?)"
+        String sql = "INSERT IGNORE INTO state (code, name) VALUES (?, ?)";
 
         // ON DUPLICATE KEY UPDATE
 //        String sql = "INSERT IGNORE INTO state (code, name) VALUES (?, ?)"
@@ -70,46 +70,46 @@ public class StateInitializer {
         // REPLACE INTO
 //        String sql = "REPLACE INTO state (code, name) VALUES (?, ?)";
 
-//        int[][] batchResults = jdbcTemplate.batchUpdate(sql, states, 1000,
-//                (PreparedStatement ps, State state) -> {
-//                    ps.setString(1, state.getCode());
-//                    ps.setString(2, state.getName());
-//                });
-//
-//        inserted = 0;
-//        for (int[] batch : batchResults) {
-//            for (int count : batch) {
-//                if (count == Statement.SUCCESS_NO_INFO) {
-//                    inserted++;
-//                }
-//            }
-//        }
+        int[][] batchResults = jdbcTemplate.batchUpdate(sql, states, 1000,
+                (PreparedStatement ps, State state) -> {
+                    ps.setString(1, state.getCode());
+                    ps.setString(2, state.getName());
+                });
+
+        inserted = 0;
+        for (int[] batch : batchResults) {
+            for (int count : batch) {
+                if (count == Statement.SUCCESS_NO_INFO) {
+                    inserted++;
+                }
+            }
+        }
 
         /*
         JPA
          */
-        inserted = 0;
-
-        for (int i = 0; i < states.size(); i++) {
-            State state = states.get(i);
-
-            try {
-                if (em.find(State.class, state.getCode()) == null) {
-                    em.persist(state);
-                    inserted++;
-                }
-            } catch (Exception e) {
-                log.error("🚨 삽입 중 오류 발생: code={}, name={}", state.getCode(), state.getName(), e);
-            }
-
-            if (i % 1000 == 0) {
-                em.flush();
-                em.clear();
-            }
-        }
-
-        em.flush();
-        em.clear();
+//        inserted = 0;
+//
+//        for (int i = 0; i < states.size(); i++) {
+//            State state = states.get(i);
+//
+//            try {
+//                if (em.find(State.class, state.getCode()) == null) {
+//                    em.persist(state);
+//                    inserted++;
+//                }
+//            } catch (Exception e) {
+//                log.error("🚨 삽입 중 오류 발생: code={}, name={}", state.getCode(), state.getName(), e);
+//            }
+//
+//            if (i % 1000 == 0) {
+//                em.flush();
+//                em.clear();
+//            }
+//        }
+//
+//        em.flush();
+//        em.clear();
 
         long end = System.nanoTime();
 
