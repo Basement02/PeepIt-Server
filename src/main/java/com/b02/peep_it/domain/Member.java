@@ -47,7 +47,7 @@ public class Member extends BaseTimeEntity {
     @Column(name = "fcm_token", nullable = true)
     private String fcmToken; // fcm 토큰
 
-    @OneToOne(optional = false)
+    @OneToOne(optional = false, cascade = CascadeType.ALL)
     @JoinColumn(name = "member_social_id")
     private MemberSocial memberSocial; // 소셜로그인 정보 고유 ID
 

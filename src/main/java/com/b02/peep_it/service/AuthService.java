@@ -10,11 +10,8 @@ import com.b02.peep_it.dto.RequestSignUpDto;
 import com.b02.peep_it.dto.RequestSocialLoginDto;
 import com.b02.peep_it.dto.ResponseLoginDto;
 import com.b02.peep_it.dto.member.CommonMemberDto;
-import com.b02.peep_it.repository.MemberRepository;
-import com.b02.peep_it.repository.MemberSocialRepository;
+import com.b02.peep_it.repository.*;
 import com.b02.peep_it.common.util.JwtUtils;
-import com.b02.peep_it.repository.PushSettingRepository;
-import com.b02.peep_it.repository.TermsAgreementRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.nurigo.java_sdk.api.Message;
@@ -25,9 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.apache.commons.lang.math.RandomUtils.nextInt;
 
@@ -35,6 +30,7 @@ import static org.apache.commons.lang.math.RandomUtils.nextInt;
 @RequiredArgsConstructor
 @Service
 public class AuthService {
+    private final TownRepository townRepository;
     @Value("${coolsms.api.key}")
     String apiKey;
     @Value("${coolsms.api.secret}")
@@ -47,6 +43,7 @@ public class AuthService {
     private final MemberSocialRepository memberSocialRepository;
     private final TermsAgreementRepository termsAgreementRepository;
     private final PushSettingRepository pushSettingRepository;
+    private final StateRepository stateRepository;
 
     private static final String DEFAULT_PROFILE_IMG = "추후수정필요 프로필 이미지 고정값";
 
@@ -221,6 +218,13 @@ public class AuthService {
         pushSettingRepository.save(pushSetting);
         log.info("✅ 알림 설정 저장 완료 - memberId: {}", mergedMember.getId());
 
+        // 동네 객체 생성 & 저장 (기본값: null)
+        Town town = Town.builder()
+                .member(mergedMember)
+                .state(getRandomState())
+                .build();
+        townRepository.save(town);
+
         // 로그인
         Boolean isMember = Boolean.TRUE;
         String registerToken = "";
@@ -272,5 +276,14 @@ public class AuthService {
 //            throw new CoolsmsException("SMS 전송에 실패했습니다", e);
             return CommonResponse.exception(e);
         }
+    }
+
+    /*
+    랜덤 State
+     */
+    public State getRandomState() {
+        List<State> allStates = stateRepository.findAll();
+        if (allStates.isEmpty()) throw new IllegalStateException("State 테이블이 비어 있습니다.");
+        return allStates.get(new Random().nextInt(allStates.size()));
     }
 }

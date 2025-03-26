@@ -2,6 +2,7 @@ package com.b02.peep_it.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -21,4 +22,15 @@ public class Town extends BaseTimeEntity {
     @ManyToOne(optional = true)
     @JoinColumn(name = "state")
     private State state; // 법정동 코드
+
+    @Builder
+    public Town(Member member, State state) {
+        this.member = member;
+        this.state = state;
+    }
+
+    public Town updateTown(State state) {
+        this.state = state;
+        return this;
+    }
 }
