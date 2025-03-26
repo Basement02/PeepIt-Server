@@ -1,4 +1,7 @@
 spring:
+  jpa:
+    properties:
+      hibernate.jdbc.batch_size: 1000
   application:
     name: peep-it
   profiles:

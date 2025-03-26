@@ -24,9 +24,9 @@ public class Town extends BaseTimeEntity {
     private State state; // 법정동 코드
 
     @Builder
-    public Town(Member member) {
+    public Town(Member member, State state) {
         this.member = member;
-        this.state =  null;
+        this.state = state;
     }
 
     public Town updateTown(State state) {

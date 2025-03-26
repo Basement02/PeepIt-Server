@@ -22,9 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.apache.commons.lang.math.RandomUtils.nextInt;
 
@@ -45,6 +43,7 @@ public class AuthService {
     private final MemberSocialRepository memberSocialRepository;
     private final TermsAgreementRepository termsAgreementRepository;
     private final PushSettingRepository pushSettingRepository;
+    private final StateRepository stateRepository;
 
     private static final String DEFAULT_PROFILE_IMG = "추후수정필요 프로필 이미지 고정값";
 
@@ -222,6 +221,7 @@ public class AuthService {
         // 동네 객체 생성 & 저장 (기본값: null)
         Town town = Town.builder()
                 .member(mergedMember)
+                .state(getRandomState())
                 .build();
         townRepository.save(town);
 
@@ -276,5 +276,14 @@ public class AuthService {
 //            throw new CoolsmsException("SMS 전송에 실패했습니다", e);
             return CommonResponse.exception(e);
         }
+    }
+
+    /*
+    랜덤 State
+     */
+    public State getRandomState() {
+        List<State> allStates = stateRepository.findAll();
+        if (allStates.isEmpty()) throw new IllegalStateException("State 테이블이 비어 있습니다.");
+        return allStates.get(new Random().nextInt(allStates.size()));
     }
 }
