@@ -31,7 +31,7 @@ public class Member extends BaseTimeEntity {
     private LocalDate birth; // 생년월일
 
     @Column(nullable = true)
-    @Enumerated(EnumType.STRING)
+//    @Enumerated(EnumType.STRING)
     private CustomGender gender; // 성별
 
     @Column(nullable = false)
