@@ -12,7 +12,7 @@ import java.util.Collection;
 @AllArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
-    private final String username; // 닉네임
+//    private final String username; // 닉네임
     private final String uid;  // DB의 사용자 ID
     private final String provider; // 소셜 로그인 공급자
     private final String providerId; // 소셜 로그인 고유 ID
@@ -30,7 +30,8 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return uid;
+//        return username;
     }
 
     @Override
