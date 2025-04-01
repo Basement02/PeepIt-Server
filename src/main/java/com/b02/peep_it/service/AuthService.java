@@ -53,6 +53,8 @@ public class AuthService {
     private final StateRepository stateRepository;
 
     @Autowired
+    private ObjectMapper redisObjectMapper;
+    @Autowired
     private final RedisTemplate<String, Object> redisTemplate;
 
     private static final String DEFAULT_PROFILE_IMG = "추후수정필요 프로필 이미지 고정값";
@@ -319,7 +321,7 @@ public class AuthService {
 //            SmsAuthDto saved = (SmsAuthDto) redisTemplate.opsForValue().get(key);
             // 명시적으로 역직렬화
             Object raw = redisTemplate.opsForValue().get(key);
-            SmsAuthDto saved = new ObjectMapper().convertValue(raw, SmsAuthDto.class);
+            SmsAuthDto saved = redisObjectMapper.convertValue(raw, SmsAuthDto.class);
 
             if (saved == null) {
                 return CommonResponse.failed(CustomError.SMS_EXPIRED);
