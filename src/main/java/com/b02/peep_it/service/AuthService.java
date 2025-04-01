@@ -270,7 +270,8 @@ public class AuthService {
     public ResponseEntity<CommonResponse<String>> sendSmsCode(String receiver) throws CoolsmsException {
         try {
             // 6자리 인증코드 생성
-            String code = String.format("%06d", new SecureRandom().nextInt(1000000));
+            int codeNum = new SecureRandom().nextInt(1000000);
+            String code = String.format("%06d", codeNum);
 
             log.info("생성된 인증 코드: {}", code);
             log.info("수신자 번호: {}", receiver);
