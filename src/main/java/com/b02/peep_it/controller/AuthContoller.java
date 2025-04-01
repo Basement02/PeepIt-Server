@@ -152,6 +152,7 @@ public class AuthContoller {
      */
     @PostMapping("/send/sms-code")
     public ResponseEntity<CommonResponse<String>> sendSmsCode(@RequestParam("phone") String phone) throws CoolsmsException {
+        log.info("==== phone = [{}] ===", phone);
         return authService.sendSmsCode(phone);
     }
 

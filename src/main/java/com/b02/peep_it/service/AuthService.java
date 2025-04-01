@@ -281,7 +281,13 @@ public class AuthService {
             params.put("type", "sms");
             params.put("text", "[핍잇] 본인확인 인증번호 [" + code + "]를 화면에 입력해주세요!");
 
-            coolsms.send(params);
+            try {
+                coolsms.send(params);
+            }
+            catch (CoolsmsException e) {
+                log.error("CoolSMS 전송 실패: {} (code: {})", e.getMessage(), e.getCode());
+                return CommonResponse.exception(e);
+            }
 
             // Redis에 저장
             SmsAuthDto redisSMS = new SmsAuthDto(code, 0, LocalDateTime.now());
