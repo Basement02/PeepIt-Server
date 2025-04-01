@@ -1,4 +1,4 @@
-package com.b02.peep_it.common;
+package com.b02.peep_it.common.filter;
 
 import com.b02.peep_it.common.model.HttpLogMessage;
 import jakarta.servlet.FilterChain;

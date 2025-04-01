@@ -1,6 +1,5 @@
 package com.b02.peep_it.common.util;
 
-import com.b02.peep_it.common.security.token.CustomUserDetails;
 import com.b02.peep_it.domain.constant.CustomProvider;
 import com.b02.peep_it.dto.member.CommonMemberDto;
 import com.b02.peep_it.common.exception.CustomError;
@@ -19,7 +18,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
