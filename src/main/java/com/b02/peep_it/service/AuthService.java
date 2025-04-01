@@ -272,6 +272,9 @@ public class AuthService {
             // 6자리 인증코드 생성
             String code = String.format("%06d", new SecureRandom(), nextInt(1000000));
 
+            log.info("생성된 인증 코드: {}", code);
+            log.info("수신자 번호: {}", receiver);
+
             // 생성자로 API key & secret 전달
             Message coolsms = new Message(apiKey, apiSecret);
 
@@ -280,6 +283,10 @@ public class AuthService {
             params.put("from", sender);
             params.put("type", "sms");
             params.put("text", "[핍잇] 본인확인 인증번호 [" + code + "]를 화면에 입력해주세요!");
+
+            log.info("CoolSMS params: {}", params);
+            log.info("API Key: {}, Secret: {}", apiKey, apiSecret);
+            log.info("Sender 번호: {}", sender);
 
             coolsms.send(params);
 
@@ -295,7 +302,7 @@ public class AuthService {
             throw new CoolsmsException("SMS 전송에 실패했습니다: 쿨시스의 문제", 50000);
         }
         catch (Exception e) {
-            log.error("CoolSMS 전송 실패: {}", e.getMessage());
+            log.error("!!!!!!!!!!!!SMS 전송 예외 발생 - message: {}", e.getMessage(), e);
             throw new CoolsmsException("SMS 전송에 실패했습니다", 50000);
 //            return CommonResponse.exception(e);
         }
