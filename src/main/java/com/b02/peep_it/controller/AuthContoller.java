@@ -154,4 +154,16 @@ public class AuthContoller {
     public ResponseEntity<CommonResponse<String>> sendSmsCode(@RequestParam("phone") String phone) throws CoolsmsException {
         return authService.sendSmsCode(phone);
     }
+
+    /*
+    전화번호 인증코드 검증
+     */
+    @PostMapping("/verify/sms-code")
+    public ResponseEntity<CommonResponse<String>> verifySmsCode(
+            @RequestParam("phone") String phone,
+            @RequestParam("code") String inputCode) throws CoolsmsException {
+        log.info("==== phone = [{}] ===", phone);
+        log.info("code = [{}]", inputCode);
+        return authService.verifySmsCode(phone, inputCode);
+    }
 }
