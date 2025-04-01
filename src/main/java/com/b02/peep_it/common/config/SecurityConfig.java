@@ -1,9 +1,9 @@
-package com.b02.peep_it.common.security;
+package com.b02.peep_it.common.config;
 
-import com.b02.peep_it.common.HttpLoggingFilter;
-import com.b02.peep_it.common.security.token.AccessTokenFilter;
-import com.b02.peep_it.common.security.token.RefreshTokenFilter;
-import com.b02.peep_it.common.security.token.RegisterTokenFilter;
+import com.b02.peep_it.common.filter.HttpLoggingFilter;
+import com.b02.peep_it.common.filter.AccessTokenFilter;
+import com.b02.peep_it.common.filter.RefreshTokenFilter;
+import com.b02.peep_it.common.filter.RegisterTokenFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;

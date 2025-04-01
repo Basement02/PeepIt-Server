@@ -1,6 +1,7 @@
-package com.b02.peep_it.common.security.token;
+package com.b02.peep_it.common.filter;
 
 import com.b02.peep_it.common.util.AuthUtils;
+import com.b02.peep_it.common.util.CustomUserDetails;
 import com.b02.peep_it.common.util.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
