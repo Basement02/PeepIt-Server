@@ -13,6 +13,7 @@ import com.b02.peep_it.dto.SmsAuthDto;
 import com.b02.peep_it.dto.member.CommonMemberDto;
 import com.b02.peep_it.repository.*;
 import com.b02.peep_it.common.util.JwtUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.nurigo.java_sdk.api.Message;
@@ -315,7 +316,10 @@ public class AuthService {
     public ResponseEntity<CommonResponse<String>> verifySmsCode(String receiver, String inputCode) throws CoolsmsException {
         try {
             String key = PREFIX + receiver;
-            SmsAuthDto saved = (SmsAuthDto) redisTemplate.opsForValue().get(key);
+//            SmsAuthDto saved = (SmsAuthDto) redisTemplate.opsForValue().get(key);
+            // 명시적으로 역직렬화
+            Object raw = redisTemplate.opsForValue().get(key);
+            SmsAuthDto saved = new ObjectMapper().convertValue(raw, SmsAuthDto.class);
 
             if (saved == null) {
                 return CommonResponse.failed(CustomError.SMS_EXPIRED);
