@@ -66,7 +66,7 @@ public class SecurityConfig {
 
         configuration.setAllowCredentials(true);
         configuration.setAllowedOrigins(List.of("http://localhost:8080", "http://basement02.site", "https://basement02.site", "http://43.200.44.121:8080", "https://43.200.44.121:8080"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setMaxAge(3600L); // preflight 결과를 캐시하는 시간(초)
 
