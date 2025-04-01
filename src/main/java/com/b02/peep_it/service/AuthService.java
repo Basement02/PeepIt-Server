@@ -17,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.nurigo.java_sdk.api.Message;
 import net.nurigo.java_sdk.exceptions.CoolsmsException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -50,6 +52,8 @@ public class AuthService {
     private final PushSettingRepository pushSettingRepository;
     private final StateRepository stateRepository;
 
+    @Autowired
+    @Qualifier("redisTemplate")
     private final RedisTemplate<String, Object> redisTemplate;
     private final StringRedisTemplate stringRedisTemplate;
 
@@ -294,7 +298,6 @@ public class AuthService {
             // Redis에 저장
             SmsAuthDto redisSMS = new SmsAuthDto(code, 0, LocalDateTime.now());
             redisTemplate.opsForValue().set(PREFIX + receiver, redisSMS, EXPIRE_TIME);
-
 
             return CommonResponse.ok(null);
         }
