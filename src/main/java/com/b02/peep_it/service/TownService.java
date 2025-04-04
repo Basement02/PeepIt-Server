@@ -2,16 +2,21 @@ package com.b02.peep_it.service;
 
 import com.b02.peep_it.common.exception.CustomError;
 import com.b02.peep_it.common.response.CommonResponse;
+import com.b02.peep_it.common.response.PagedResponse;
 import com.b02.peep_it.common.util.AuthUtils;
 import com.b02.peep_it.domain.Member;
 import com.b02.peep_it.domain.State;
 import com.b02.peep_it.domain.Town;
+import com.b02.peep_it.dto.CommonTownDto;
 import com.b02.peep_it.dto.RequestPatchTownDto;
 import com.b02.peep_it.dto.member.CommonMemberDto;
 import com.b02.peep_it.repository.StateRepository;
 import com.b02.peep_it.repository.TownRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -46,5 +51,52 @@ public class TownService {
         townRepository.save(town.get().updateTown(townName.get()));
 
         return CommonResponse.created(null);
+    }
+
+    /*
+    법정동 정보 조회
+     */
+    public ResponseEntity<CommonResponse<PagedResponse<CommonTownDto>>> getStateListInfo(int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "code"));
+        Page<State> statePage = stateRepository.findAll(pageRequest);
+
+        Page<CommonTownDto> responseDtoPage = statePage.map(p -> {
+            return CommonTownDto.builder()
+                    .legalCode(p.getCode())
+                    .name(p.getName())
+                    .build();
+        });
+
+        PagedResponse<CommonTownDto> pagedResponse = PagedResponse.create(
+                responseDtoPage.getContent(),
+                responseDtoPage.getNumber(),
+                responseDtoPage.getSize(),
+                responseDtoPage.getTotalPages(),
+                responseDtoPage.getTotalElements()
+        );
+
+        return CommonResponse.ok(pagedResponse);
+    }
+
+    /*
+    법정동 코드로 법정동 정보 조회
+     */
+    public ResponseEntity<CommonResponse<CommonTownDto>> getStateInfo(String legalCode) {
+        // 법정동 객체 조회
+        Optional<State> optionalState = stateRepository.findByCode(legalCode);
+        if (optionalState.isEmpty()) {
+            return CommonResponse.failed(CustomError.TOWN_NOT_FOUND); // 존재하지 않는 법정동코드입니다
+        }
+
+        State state = optionalState.get();
+
+        // response dto 생성
+        CommonTownDto responseDto = CommonTownDto.builder()
+                .legalCode(legalCode)
+                .name(state.getName())
+                .build();
+
+        // response 반환
+        return CommonResponse.ok(responseDto);
     }
 }

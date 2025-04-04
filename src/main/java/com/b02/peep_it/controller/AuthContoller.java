@@ -62,7 +62,7 @@ public class AuthContoller {
                                             value = """
                         {
                             "provider": "TESTER",
-                            "idToken": "임의의 테스터 아이디"
+                            "idToken": "gangjjang5"
                         }
                         """)
                             }
