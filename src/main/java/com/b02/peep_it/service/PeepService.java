@@ -19,9 +19,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -173,6 +172,67 @@ public class PeepService {
         return CommonResponse.ok(pagedResponse);
     }
 
+    /*
+    사용자의 모든 유관 핍 리스트 조회
+     */
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getTotalPeepList(int page, int size) {
+        // 현재 로그인 사용자 ID 조회
+        String memberId = userInfo.getCurrentMemberUid();
+
+        // 업로드한 핍
+        List<Peep> uploadedPeeps = peepRepository.findAllByMember_Id(memberId);
+
+        // 반응한 핍
+        List<Peep> reactedPeeps = peepReStickerRepository.findAllByMember_Id(memberId)
+                .stream().map(PeepReSticker::getPeep).toList();
+
+        // 댓글단 핍
+        List<Peep> cattedPeeps = chatRepository.findDistinctPeepsByMemberId(memberId)
+                .stream().map(Chat::getPeep).toList();
+
+        // 모든 핍을 하나로 합치고 중복 제거
+        Set<Peep> totalPeepSet = new HashSet<>();
+        totalPeepSet.addAll(uploadedPeeps);
+        totalPeepSet.addAll(reactedPeeps);
+        totalPeepSet.addAll(cattedPeeps);
+
+        // 최신순 정렬
+        List<Peep> sortedPeepList = totalPeepSet.stream()
+                .sorted(Comparator.comparing(Peep::getCreatedAt).reversed())
+                .toList();
+
+        // 페이징 처리
+        int start = page * size;
+        int end = Math.min(start + size, sortedPeepList.size());
+        List<Peep> pagedPeeps = start >= sortedPeepList.size() ? Collections.emptyList() : sortedPeepList.subList(start, end);
+
+        // dto 변환
+        List<CommonPeepDto> dtoList = pagedPeeps.stream().map(p -> CommonPeepDto.builder()
+                .peepId(p.getId())
+                .memberId(p.getMember().getId())
+                .town(p.getTown())
+                .imageUrl(p.getImageUrl())
+                .content(p.getContent())
+                .isEdited(p.getIsEdited())
+                .profileUrl(p.getMember().getProfileImg())
+                .isActive(timeAgoUtils.isActiveWithin24Hours(p.getCreatedAt()))
+                .uploadAt(timeAgoUtils.getTimeAgo(p.getCreatedAt()))
+                .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
+                .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
+                .build()).toList();
+
+        // PagedResponse 생성
+        PagedResponse<CommonPeepDto> pagedResponse = PagedResponse.create(
+                dtoList,
+                page,
+                size,
+                (int) Math.ceil((double) totalPeepSet.size() / size),
+                totalPeepSet.size()
+        );
+
+        // response 반환
+        return CommonResponse.ok(pagedResponse);
+    }
     /*
     사용자가 반응한 핍 리스트 조회
      */
