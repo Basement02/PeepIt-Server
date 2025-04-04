@@ -1,6 +1,6 @@
 package com.b02.peep_it.controller;
 
-import com.b02.peep_it.common.s3.S3Utils;
+import com.b02.peep_it.common.util.S3Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;

@@ -1,6 +1,5 @@
 package com.b02.peep_it.common.util;
 
-import com.b02.peep_it.common.security.token.CustomUserDetails;
 import com.b02.peep_it.domain.constant.CustomProvider;
 import com.b02.peep_it.dto.member.CommonMemberDto;
 import com.b02.peep_it.common.exception.CustomError;
@@ -19,7 +18,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -361,7 +359,7 @@ public class JwtUtils {
         }
 
         String uid = claims.get("uid").toString(); // 사용자 ID
-        String username = claims.getSubject(); // 닉네임
+//        String username = claims.getSubject(); // 닉네임
         String role = claims.get("role").toString();
         String provider = "";
         String providerId = "";
@@ -370,7 +368,7 @@ public class JwtUtils {
 
         // CustomUserDetails 사용
         CustomUserDetails principal = CustomUserDetails.builder()
-                .username(username)
+//                .username(username)
                 .uid(uid)
                 .provider(provider)
                 .providerId(providerId)
@@ -400,7 +398,7 @@ public class JwtUtils {
 
         // CustomUserDetails 사용
         CustomUserDetails principal = CustomUserDetails.builder()
-                .username(username)
+//                .username(username)
                 .uid(uid)
                 .provider(provider)
                 .providerId(providerId)

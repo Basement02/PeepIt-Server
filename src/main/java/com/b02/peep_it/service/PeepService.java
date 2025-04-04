@@ -3,7 +3,7 @@ package com.b02.peep_it.service;
 import com.b02.peep_it.common.response.CommonResponse;
 import com.b02.peep_it.common.exception.CustomError;
 import com.b02.peep_it.common.response.PagedResponse;
-import com.b02.peep_it.common.s3.S3Utils;
+import com.b02.peep_it.common.util.S3Utils;
 import com.b02.peep_it.common.util.AuthUtils;
 import com.b02.peep_it.common.util.TimeAgoUtils;
 import com.b02.peep_it.domain.*;
@@ -22,7 +22,6 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor

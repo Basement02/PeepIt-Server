@@ -1,4 +1,4 @@
-package com.b02.peep_it.common;
+package com.b02.peep_it.common.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;

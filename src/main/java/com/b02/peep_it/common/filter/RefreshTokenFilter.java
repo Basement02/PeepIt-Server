@@ -1,4 +1,4 @@
-package com.b02.peep_it.common.security.token;
+package com.b02.peep_it.common.filter;
 
 import com.b02.peep_it.common.util.JwtUtils;
 import com.b02.peep_it.domain.Member;

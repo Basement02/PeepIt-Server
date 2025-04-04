@@ -1,4 +1,4 @@
-package com.b02.peep_it.common.security.token;
+package com.b02.peep_it.common.util;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,7 +30,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return this.username;
     }
 
     @Override

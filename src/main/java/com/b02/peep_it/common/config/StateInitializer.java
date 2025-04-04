@@ -1,4 +1,4 @@
-package com.b02.peep_it.common;
+package com.b02.peep_it.common.config;
 
 import com.b02.peep_it.domain.State;
 import lombok.RequiredArgsConstructor;

@@ -2,26 +2,33 @@ package com.b02.peep_it.service;
 
 import com.b02.peep_it.common.response.CommonResponse;
 import com.b02.peep_it.common.exception.CustomError;
-import com.b02.peep_it.common.security.token.CustomUserDetails;
+import com.b02.peep_it.common.util.CustomUserDetails;
 import com.b02.peep_it.common.util.AuthUtils;
 import com.b02.peep_it.domain.*;
 import com.b02.peep_it.domain.constant.CustomProvider;
 import com.b02.peep_it.dto.RequestSignUpDto;
 import com.b02.peep_it.dto.RequestSocialLoginDto;
 import com.b02.peep_it.dto.ResponseLoginDto;
+import com.b02.peep_it.dto.SmsAuthDto;
 import com.b02.peep_it.dto.member.CommonMemberDto;
 import com.b02.peep_it.repository.*;
 import com.b02.peep_it.common.util.JwtUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.nurigo.java_sdk.api.Message;
 import net.nurigo.java_sdk.exceptions.CoolsmsException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.apache.commons.lang.math.RandomUtils.nextInt;
@@ -45,7 +52,16 @@ public class AuthService {
     private final PushSettingRepository pushSettingRepository;
     private final StateRepository stateRepository;
 
+    @Autowired
+    private ObjectMapper redisObjectMapper;
+    @Autowired
+    private final RedisTemplate<String, Object> redisTemplate;
+
     private static final String DEFAULT_PROFILE_IMG = "추후수정필요 프로필 이미지 고정값";
+    private static final String PREFIX = "SMS_AUTH:";
+    private static final int MAX_TRY = 3;
+    private static final Duration EXPIRE_TIME = Duration.ofMinutes(5);
+
 
     /*
     - 최초: register token 발급
@@ -258,7 +274,11 @@ public class AuthService {
     public ResponseEntity<CommonResponse<String>> sendSmsCode(String receiver) throws CoolsmsException {
         try {
             // 6자리 인증코드 생성
-            String code = String.format("%06d", new SecureRandom(), nextInt(1000000));
+            int codeNum = new SecureRandom().nextInt(1000000);
+            String code = String.format("%06d", codeNum);
+
+            log.info("생성된 인증 코드: {}", code);
+            log.info("수신자 번호: {}", receiver);
 
             // 생성자로 API key & secret 전달
             Message coolsms = new Message(apiKey, apiSecret);
@@ -269,11 +289,63 @@ public class AuthService {
             params.put("type", "sms");
             params.put("text", "[핍잇] 본인확인 인증번호 [" + code + "]를 화면에 입력해주세요!");
 
+            log.info("CoolSMS params: {}", params);
+            log.info("API Key: {}, Secret: {}", apiKey, apiSecret);
+            log.info("Sender 번호: {}", sender);
+
             coolsms.send(params);
 
-            return CommonResponse.ok(code);
+            // Redis에 저장
+            SmsAuthDto redisSMS = new SmsAuthDto(code, 0, LocalDateTime.now());
+            redisTemplate.opsForValue().set(PREFIX + receiver, redisSMS, EXPIRE_TIME);
+
+            return CommonResponse.ok(null);
+        }
+        catch (CoolsmsException e) {
+            log.error("CoolSMS 전송 실패: {} (code: {})", e.getMessage(), e.getCode());
+            throw new CoolsmsException("SMS 전송에 실패했습니다: 쿨시스의 문제", 50000);
+        }
+        catch (Exception e) {
+            log.error("!!!!!!!!!!!!SMS 전송 예외 발생 - message: {}", e.getMessage(), e);
+            throw new CoolsmsException("SMS 전송에 실패했습니다", 50000);
+//            return CommonResponse.exception(e);
+        }
+    }
+
+    /*
+    인증번호 검증
+     */
+    public ResponseEntity<CommonResponse<String>> verifySmsCode(String receiver, String inputCode) throws CoolsmsException {
+        try {
+            String key = PREFIX + receiver;
+//            SmsAuthDto saved = (SmsAuthDto) redisTemplate.opsForValue().get(key);
+            // 명시적으로 역직렬화
+            Object raw = redisTemplate.opsForValue().get(key);
+            SmsAuthDto saved = redisObjectMapper.convertValue(raw, SmsAuthDto.class);
+
+            if (saved == null) {
+                return CommonResponse.failed(CustomError.SMS_EXPIRED);
+            }
+
+            if (saved.tryCount() >= MAX_TRY) {
+                return CommonResponse.failed(CustomError.OVER_MAX_TRY);
+            }
+
+            if (!saved.code().equals(inputCode)) {
+                // tryCount 증가 후 재저장
+                SmsAuthDto updated = SmsAuthDto.builder()
+                        .code(saved.code())
+                        .tryCount(saved.tryCount() + 1)
+                        .requestedAt(saved.requestedAt())
+                        .build();
+                redisTemplate.opsForValue().set(key, updated, EXPIRE_TIME); // TTL 유지
+                return CommonResponse.failed(CustomError.WRONG_SMS);
+            }
+
+            // 성공 (redis key 삭제)
+            redisTemplate.delete(key);
+            return CommonResponse.ok(null);
         } catch (Exception e) {
-//            throw new CoolsmsException("SMS 전송에 실패했습니다", e);
             return CommonResponse.exception(e);
         }
     }

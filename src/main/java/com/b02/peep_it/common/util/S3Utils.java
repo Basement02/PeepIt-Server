@@ -1,4 +1,4 @@
-package com.b02.peep_it.common.s3;
+package com.b02.peep_it.common.util;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
