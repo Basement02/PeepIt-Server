@@ -9,11 +9,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface PeepRepository extends JpaRepository<Peep, Long> {
     Optional<Peep> findById(Long peepId);
     Page<Peep> findAllByMember_Id(String memberId, Pageable pageable);
+    List<Peep> findAllByMember_Id(String memberId);
     Page<Peep> findAllByActiveTimeAfter(LocalDateTime cutoffTime, Pageable pageable);
     Page<Peep> findAllByActiveTimeAfterAndMember_Id(LocalDateTime cutoffTime, String memberId, Pageable pageable);
     Page<Peep> findAllByCodeAndActiveTimeAfter(

@@ -57,6 +57,7 @@ public class PeepController {
 
     /*
     핍 리스트 조회
+    - 나의 모든 핍 리스트 조회
     - 내가 업로드한 핍 리스트 조회
     - 내가 반응한 핍 리스트 조회
     - 내가 댓글 단 핍 리스트 조회
@@ -65,6 +66,14 @@ public class PeepController {
     - 인기 핍 리스트 조회
     - 지도 내 핍 리스트 조회
      */
+
+    // 나의 모든 핍 리스트 조회
+    @Operation(summary = "사용자 업로드/반응/댓글 핍 리스트 조회", description = "사용자가 업로드한/반응한/댓글 단 핍을 모두 리스트로 조회합니다.")
+    @GetMapping("/my/all")
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMyTotalPeepList(@RequestParam(defaultValue = "0") int page,
+                                                                                           @RequestParam(defaultValue = "10") int size) {
+        return peepService.getTotalPeepList(page, size);
+    }
 
     // 사용자가 업로드한 핍 리스트 조회
     @Operation(summary = "사용자가 업로드한 핍 리스트 조회", description = "사용자가 업로드한 핍을 리스트로 조회합니다.")
