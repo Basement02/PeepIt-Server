@@ -8,6 +8,8 @@ import lombok.Builder;
 public record CommonMemberDto(
         @NotNull String id,
         Role role,
-        String name
+        String name, // 닉네임
+        String town, // 동네이름
+        String profile // 프로필 url
 ) {
 }
