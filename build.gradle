@@ -41,6 +41,8 @@ dependencies {
 	implementation 'org.apache.httpcomponents:httpclient:4.5.13'
 	// aws s3
 	implementation 'software.amazon.awssdk:s3:2.20.10'
+	implementation 'software.amazon.awssdk:auth'
+
 	// jpa
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	// mysql db

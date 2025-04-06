@@ -32,7 +32,7 @@ public class Peep extends BaseTimeEntity {
     @Column(nullable = false, name = "town")
     private String town; // 법정동명
 
-    @Column(nullable = false, name = "image_url")
+    @Column(nullable = false, length = 1024, name = "image_url")
     private String imageUrl; // 이미지 or 영상 url
 
     @Column(nullable = false)

@@ -43,7 +43,7 @@ public class PeepService {
             RequestPeepUploadDto requestDto, MultipartFile media) {
         try {
             // 1. S3에 파일 업로드 후 URL 받기
-            String mediaUrl = s3Utils.uploadFile(media);
+            String mediaUrl = s3Utils.generatePresignedUploadUrl(media);
 
             // 2. 작성자 & 동네 가져오기
             Member member = userInfo.getCurrentMember();
