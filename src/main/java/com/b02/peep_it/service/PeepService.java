@@ -30,6 +30,7 @@ public class PeepService {
     private final S3Utils s3Utils;
     private final TimeAgoUtils timeAgoUtils;
     private final PeepRepository peepRepository;
+    private final PeepLocationRepository peepLocationRepository;
     private final PeepReStickerRepository peepReStickerRepository;
     private final ChatRepository chatRepository;
     private final TownRepository townRepository;
@@ -73,6 +74,7 @@ public class PeepService {
                     .build();
 
             peep.updatePeepLocation(peepLocation);
+            peepLocationRepository.save(peepLocation);
 
             // 5. 핍 객체 저장
             peepRepository.save(peep);

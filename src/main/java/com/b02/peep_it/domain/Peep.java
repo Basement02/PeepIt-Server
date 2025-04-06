@@ -25,7 +25,7 @@ public class Peep extends BaseTimeEntity {
     @Column(nullable = false, name = "active_time")
     private LocalDateTime activeTime; // 활성화 기준 시각
 
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(nullable = false, name = "code")
     private State code; // 법정동 코드
 
