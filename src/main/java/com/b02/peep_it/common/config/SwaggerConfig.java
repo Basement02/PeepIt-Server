@@ -3,7 +3,6 @@ package com.b02.peep_it.common.config;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
@@ -28,9 +27,6 @@ public class SwaggerConfig {
                                 .in(SecurityScheme.In.HEADER)
                                 .name("Authorization")
                                 .description("회원가입용 Register Token. 예: 'Register {REGISTER_TOKEN}'")))
-                .addSecurityItem(new SecurityRequirement()
-                        .addList("AccessToken")
-                        .addList("RegisterToken"))
                 .info(new Info()
                         .title("Peep-It API")
                         .version("1.0")

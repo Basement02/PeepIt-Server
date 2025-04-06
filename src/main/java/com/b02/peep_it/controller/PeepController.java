@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -27,6 +28,7 @@ public class PeepController {
     /*
     신규 핍 등록 (텍스트 + 이미지/영상)
      */
+    @SecurityRequirement(name = "AccessToken")
     @Operation(summary = "신규 핍 등록 (텍스트 + 이미지/영상)", description = "이미지와 함께 새로운 핍을 업로드합니다.")
     @PostMapping(value = "/post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CommonResponse<CommonPeepDto>> uploadPeep(
@@ -42,6 +44,7 @@ public class PeepController {
     /*
     개별 핍 조회
      */
+    @SecurityRequirement(name = "AccessToken")
     @Operation(summary = "개별 핍 조회", description = "개별 핍을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "요청 성공 - 핍 조회 완료"),
@@ -68,6 +71,7 @@ public class PeepController {
      */
 
     // 나의 모든 핍 리스트 조회
+    @SecurityRequirement(name = "AccessToken")
     @Operation(summary = "사용자 업로드/반응/댓글 핍 리스트 조회", description = "사용자가 업로드한/반응한/댓글 단 핍을 모두 리스트로 조회합니다.")
     @GetMapping("/my/all")
     public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMyTotalPeepList(@RequestParam(defaultValue = "0") int page,
@@ -76,6 +80,7 @@ public class PeepController {
     }
 
     // 사용자가 업로드한 핍 리스트 조회
+    @SecurityRequirement(name = "AccessToken")
     @Operation(summary = "사용자가 업로드한 핍 리스트 조회", description = "사용자가 업로드한 핍을 리스트로 조회합니다.")
     @GetMapping("/my/upload")
     public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMyDefaultPeepList(@RequestParam(defaultValue = "0") int page,
@@ -84,6 +89,7 @@ public class PeepController {
     }
 
     // 사용자가 반응한 핍 리스트 조회
+    @SecurityRequirement(name = "AccessToken")
     @Operation(summary = "사용자가 반응한 핍 리스트 조회", description = "사용자가 반응한 핍 리스트를 조회합니다.")
     @GetMapping("/my/react")
     public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMyReactedPeepList(@RequestParam(defaultValue = "0") int page,
@@ -92,6 +98,7 @@ public class PeepController {
     }
 
     // 사용자가 댓글 단 핍 리스트 조회
+    @SecurityRequirement(name = "AccessToken")
     @Operation(summary = "사용자가 댓글 단 핍 리스트 조회", description = "사용자가 댓글 단 핍 리스트를 조회합니다.")
     @GetMapping("/my/chat")
     public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMyChatPeepList(@RequestParam(defaultValue = "0") int page,
@@ -100,6 +107,7 @@ public class PeepController {
     }
 
     // 사용자 실시간 활성 핍 리스트 조회
+    @SecurityRequirement(name = "AccessToken")
     @Operation(summary = "사용자가 업로드한 실시간 핍 리스트 조회", description = "사용자가 업로드한 활성화 상태의 핍 리스트를 조회합니다.")
     @GetMapping("/my/active")
     public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMyActivePeepList(@RequestParam(defaultValue = "0") int page,
@@ -108,6 +116,7 @@ public class PeepController {
     }
 
     // 특정 사용자가 업로드한 핍 리스트 조회
+    @SecurityRequirement(name = "AccessToken")
     @Operation(summary = "특정 사용자가 업로드한 핍 리스트 조회", description = "특정 사용자가 업로드한 핍 리스트를 조회합니다.")
     @GetMapping("/get")
     public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMemberPeepList(@RequestParam("memberId") String memberId,
@@ -117,6 +126,7 @@ public class PeepController {
     }
 
     // 인기 핍 리스트 조회
+    @SecurityRequirement(name = "AccessToken")
     @Operation(summary = "인기 핍 리스트 조회", description = "실시간 인기 핍으로 선정된 핍 리스트를 조회합니다.")
     @GetMapping("/get/hot")
     public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getHotPeepList(@RequestParam(defaultValue = "0") int page,
@@ -125,6 +135,7 @@ public class PeepController {
     }
 
     // 동네 실시간 핍 리스트 조회 (최신순)
+    @SecurityRequirement(name = "AccessToken")
     @Operation(summary = "동네 핍 리스트 조회 (최신순)", description = "동네에 등록된 실시간 핍 리스트를 최신순으로 조회합니다.")
     @GetMapping("/get/town")
     public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getTownPeepList(@RequestParam(defaultValue = "0") int page,
@@ -133,6 +144,7 @@ public class PeepController {
     }
 
     // 지도 내 핍 리스트 조회
+    @SecurityRequirement(name = "AccessToken")
     @Operation(summary = "지도 내 핍 리스트 조회", description = "지도 반경 내 노출될 핍 리스트를 조회합니다.")
     @GetMapping("/get/map")
     public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMapPeepList(@RequestParam(defaultValue = "5") int dist,

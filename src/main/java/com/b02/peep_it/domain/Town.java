@@ -33,4 +33,8 @@ public class Town extends BaseTimeEntity {
         this.state = state;
         return this;
     }
+
+    public String getStateName() {
+        return this.state.getName();
+    }
 }

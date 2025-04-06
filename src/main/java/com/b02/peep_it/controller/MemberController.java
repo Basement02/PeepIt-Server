@@ -6,6 +6,7 @@ import com.b02.peep_it.dto.RequestSignUpDto;
 import com.b02.peep_it.dto.ResponseLoginDto;
 import com.b02.peep_it.dto.member.CommonMemberDto;
 import com.b02.peep_it.service.AuthService;
+import com.b02.peep_it.service.MemberService;
 import com.b02.peep_it.service.TownService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,10 +26,12 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
     private final AuthService authService;
     private final TownService townService;
+    private final MemberService memberService;
 
     /*
     계정 생성
      */
+    @SecurityRequirement(name = "RegisterToken")
     @Operation(
             summary = "계정 생성",
             description = """
@@ -131,6 +134,7 @@ public class MemberController {
     /*
     동네 갱신
      */
+    @SecurityRequirement(name = "AccessToken")
     @Operation(
             summary = "동네 등록/수정하기 (등록/수정 동일 api)",
             description = """
@@ -214,5 +218,178 @@ public class MemberController {
     public ResponseEntity<CommonResponse<CommonMemberDto>> patchTown(@RequestBody RequestPatchTownDto requestDto) {
         log.info("요청받은 DTO: {}", requestDto);
         return townService.updateTownInfo(requestDto);
+    }
+
+    /*
+    아이디로 멤버 정보 조회
+     */
+    @SecurityRequirement(name = "AccessToken")
+    @Operation(
+            summary = "멤버 프로필 조회하기 (아이디/닉네임/동네/프로필이미지)",
+            description = """
+            - 입력 가능한 정보:
+                - memberId: 사용자 고유 ID
+            """,
+            security = {
+                    @SecurityRequirement(name = "AuthToken")
+            },
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "멤버 ID",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = {
+                                    @ExampleObject(
+                                            name = "멤버 프로필 조회 예시",
+                                            value = """
+                                            {
+                                                "memberId": "1234512345"
+                                            }
+                                    """)
+                            }
+                    )
+            ),
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "성공적으로 사용자 정보 조회",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(
+                                            value = """
+                                                    {
+                                                        "success": true,
+                                                        "data": null,
+                                                        "error": null
+                                                    }
+                                    """)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "40102",
+                            description = "유효하지 않은 계정",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(value = """
+                    {
+                        "success": false,
+                        "data": {},
+                        "error": {
+                            "code": "40102",
+                            "message": "유효하지 않은 계정입니다"
+                        }
+                    }
+                    """)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "40304",
+                            description = "존재하지 않는 사용자",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(value = """
+                    {
+                        "success": false,
+                        "data": {},
+                        "error": {
+                            "code": "40404",
+                            "message": "존재하지 않는 사용자입니다"
+                        }
+                    }
+                    """)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "50000",
+                            description = "서버 내부 오류",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(value = """
+                    {
+                        "success": false,
+                        "data": {},
+                        "error": {
+                            "code": "50000",
+                            "message": "서버 내부 오류가 발생했습니다"
+                        }
+                    }
+                    """)
+                            )
+                    )
+            }
+    )
+    @GetMapping("/detail/{memberId}")
+    public ResponseEntity<CommonResponse<CommonMemberDto>> getMemberDetail(@PathVariable("memberId") String memberId) {
+        return memberService.getMemberDetail(memberId);
+    }
+
+    /*
+    로그인한 사용자 상세 정보 조회
+     */
+    @SecurityRequirement(name = "AccessToken")
+    @Operation(
+            summary = "로그인한 사용자 프로필 조회하기 (아이디/닉네임/동네/프로필이미지)",
+            description = """
+            - 입력 가능한 정보:
+                - 없음
+            """,
+            security = {
+                    @SecurityRequirement(name = "AuthToken")
+            },
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "성공적으로 사용자 정보 조회",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(
+                                            value = """
+                                                    {
+                                                        "success": true,
+                                                        "data": null,
+                                                        "error": null
+                                                    }
+                                    """)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "40102",
+                            description = "유효하지 않은 계정",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(value = """
+                    {
+                        "success": false,
+                        "data": {},
+                        "error": {
+                            "code": "40102",
+                            "message": "유효하지 않은 계정입니다"
+                        }
+                    }
+                    """)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "50000",
+                            description = "서버 내부 오류",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(value = """
+                    {
+                        "success": false,
+                        "data": {},
+                        "error": {
+                            "code": "50000",
+                            "message": "서버 내부 오류가 발생했습니다"
+                        }
+                    }
+                    """)
+                            )
+                    )
+            }
+    )
+    @GetMapping("/detail")
+    public ResponseEntity<CommonResponse<CommonMemberDto>> getOwnDetail() {
+        return memberService.getMyDetail();
     }
 }
