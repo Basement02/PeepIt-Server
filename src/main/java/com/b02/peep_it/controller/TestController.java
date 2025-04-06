@@ -37,7 +37,7 @@ public class TestController {
     @PostMapping("/upload")
     public String uploadImage(@RequestParam("file") MultipartFile file) {
         try {
-            String imageUrl = s3Utils.generatePresignedUploadUrl(file);
+            String imageUrl = s3Utils.uploadFile(file);
             return imageUrl;
         } catch (IOException e) {
             return "ERROR! 이미지 업로드 실패";
