@@ -50,10 +50,12 @@ public class PeepService {
             if (townName.isEmpty()) {
                 return CommonResponse.failed(CustomError.TOWN_NOT_FOUND);
             }
+            State town = townName.get();
 
             // 3. 핍 객체 생성
             Peep peep = Peep.builder()
-                    .town(townName.get().getName())
+                    .code(town)
+                    .town(town.getName())
                     .imageUrl(mediaUrl)
                     .content(requestDto.content())
                     .member(member)
