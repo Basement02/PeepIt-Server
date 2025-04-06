@@ -105,7 +105,7 @@ public class AuthService {
 
             CommonMemberDto commonMemberDto = CommonMemberDto.builder()
                     .id(member.getId())
-                    .role(member.getRole())
+                    .role(member.getRole().toString())
                     .name(member.getNickname())
                     .build();
 
@@ -246,7 +246,7 @@ public class AuthService {
         String registerToken = "";
         CommonMemberDto commonMemberDto = CommonMemberDto.builder()
                 .id(mergedMember.getId())
-                .role(mergedMember.getRole())
+                .role(mergedMember.getRole().toString())
                 .name(mergedMember.getNickname())
                 .build();
 

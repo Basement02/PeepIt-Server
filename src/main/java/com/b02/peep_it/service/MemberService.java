@@ -37,6 +37,7 @@ public class MemberService {
 
         // responseDto 구성 (id, role, name, town, profile)
         CommonMemberDto responseDto = CommonMemberDto.builder()
+                .role(member.getRole().getCode())
                 .id(memberId)
                 .name(member.getNickname())
                 .town(member.getTown().getStateName())
@@ -61,6 +62,7 @@ public class MemberService {
 
         // responseDto 구성 (id, role, name, town, profile)
         CommonMemberDto responseDto = CommonMemberDto.builder()
+                .role(member.getRole().getCode())
                 .id(member.getId())
                 .name(member.getNickname())
                 .town(member.getTown().getStateName())

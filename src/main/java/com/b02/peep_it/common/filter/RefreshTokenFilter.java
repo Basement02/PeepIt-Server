@@ -35,7 +35,7 @@ public class RefreshTokenFilter extends OncePerRequestFilter {
                 Optional<Member> member = memberRepository.findById(jwtUtils.getClaims(token).get("uid", String.class));
                 CommonMemberDto commonMemberDto = CommonMemberDto.builder()
                         .id(member.get().getId())
-                        .role(member.get().getRole())
+                        .role(member.get().getRole().toString())
                         .build();
                 String newAccessToken = jwtUtils.createAccessToken(commonMemberDto);
                 String newRefreshToken = jwtUtils.createRefreshToken(commonMemberDto);

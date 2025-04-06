@@ -229,6 +229,11 @@ public class MemberController {
             description = """
             - 입력 가능한 정보:
                 - memberId: 사용자 고유 ID
+            - 역할 상세
+                 - CERT("CERTIFIED", "인증 회원"),
+                 - UNCERT("UNCERTIFIED", "미인증 회원"),
+                 - MAN("MANAGER", "관리자"),
+                 - DEV("DEVELOPER", "개발자")
             """,
             security = {
                     @SecurityRequirement(name = "AuthToken")
@@ -258,10 +263,16 @@ public class MemberController {
                                     examples = @ExampleObject(
                                             value = """
                                                     {
-                                                        "success": true,
-                                                        "data": null,
-                                                        "error": null
-                                                    }
+                                                                      "success": true,
+                                                                      "data": {
+                                                                        "id": "gangjjang5",
+                                                                        "role": "UNCERTIFIED",
+                                                                        "name": "gangjjang5",
+                                                                        "town": "서울특별시",
+                                                                        "profile": "추후수정필요 프로필 이미지 고정값"
+                                                                      },
+                                                                      "error": null
+                                                                    }
                                     """)
                             )
                     ),
@@ -332,6 +343,11 @@ public class MemberController {
             description = """
             - 입력 가능한 정보:
                 - 없음
+            - 역할 상세
+                 - CERT("CERTIFIED", "인증 회원"),
+                 - UNCERT("UNCERTIFIED", "미인증 회원"),
+                 - MAN("MANAGER", "관리자"),
+                 - DEV("DEVELOPER", "개발자")
             """,
             security = {
                     @SecurityRequirement(name = "AuthToken")
@@ -345,10 +361,16 @@ public class MemberController {
                                     examples = @ExampleObject(
                                             value = """
                                                     {
-                                                        "success": true,
-                                                        "data": null,
-                                                        "error": null
-                                                    }
+                                                                      "success": true,
+                                                                      "data": {
+                                                                        "id": "gangjjang5",
+                                                                        "role": "UNCERTIFIED",
+                                                                        "name": "gangjjang5",
+                                                                        "town": "서울특별시",
+                                                                        "profile": "추후수정필요 프로필 이미지 고정값"
+                                                                      },
+                                                                      "error": null
+                                                                    }
                                     """)
                             )
                     ),

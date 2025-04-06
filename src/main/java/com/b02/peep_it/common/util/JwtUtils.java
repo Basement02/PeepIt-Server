@@ -61,7 +61,7 @@ public class JwtUtils {
     public String createAccessToken(CommonMemberDto commonMemberDto) {
         Claims claims = Jwts.claims();
         claims.put("uid", commonMemberDto.id());
-        claims.put("role", commonMemberDto.role().name());
+        claims.put("role", commonMemberDto.role());
         Date now = new Date();
         return Jwts.builder()
                 .setClaims(claims)
