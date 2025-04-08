@@ -1,7 +1,7 @@
 package com.b02.peep_it.common.util;
 
 import com.b02.peep_it.domain.constant.CustomProvider;
-import com.b02.peep_it.dto.member.CommonMemberDto;
+import com.b02.peep_it.dto.member.ResponseCommonMemberDto;
 import com.b02.peep_it.common.exception.CustomError;
 import com.b02.peep_it.common.exception.UnauthorizedException;
 import io.jsonwebtoken.*;
@@ -58,10 +58,10 @@ public class JwtUtils {
                 .compact();
     }
 
-    public String createAccessToken(CommonMemberDto commonMemberDto) {
+    public String createAccessToken(ResponseCommonMemberDto responseCommonMemberDto) {
         Claims claims = Jwts.claims();
-        claims.put("uid", commonMemberDto.id());
-        claims.put("role", commonMemberDto.role());
+        claims.put("uid", responseCommonMemberDto.id());
+        claims.put("role", responseCommonMemberDto.role());
         Date now = new Date();
         return Jwts.builder()
                 .setClaims(claims)
@@ -72,9 +72,9 @@ public class JwtUtils {
                 .compact();
     }
 
-    public String createRefreshToken(CommonMemberDto commonMemberDto) {
+    public String createRefreshToken(ResponseCommonMemberDto responseCommonMemberDto) {
         Claims claims = Jwts.claims();
-        claims.put("uid", commonMemberDto.id());
+        claims.put("uid", responseCommonMemberDto.id());
         Date now = new Date();
         String refreshToken =  Jwts.builder()
                 .setClaims(claims)
@@ -84,7 +84,7 @@ public class JwtUtils {
                 .signWith(SignatureAlgorithm.HS256, jwtSecretKey)
                 .compact();
 
-        updateUserRefreshToken(commonMemberDto, refreshToken);
+        updateUserRefreshToken(responseCommonMemberDto, refreshToken);
         return refreshToken;
     }
 
@@ -103,10 +103,10 @@ public class JwtUtils {
     - get: uid로 토큰 값 조회
     - delete: 토큰 만료 처리 (삭제)
      */
-    public void updateUserRefreshToken(CommonMemberDto commonMemberDto, String refreshToken) {
+    public void updateUserRefreshToken(ResponseCommonMemberDto responseCommonMemberDto, String refreshToken) {
         // Redis의 set 명령은 지정된 키에 대해 새로운 값을 설정하면서, 기존 값이 있을 경우 자동으로 대체
         // 기존 토큰 삭제 불필요
-        stringRedisTemplate.opsForValue().set(String.valueOf(commonMemberDto.id()), refreshToken, refreshTokenTime, TimeUnit.MILLISECONDS);
+        stringRedisTemplate.opsForValue().set(String.valueOf(responseCommonMemberDto.id()), refreshToken, refreshTokenTime, TimeUnit.MILLISECONDS);
     }
 
     public String getUserRefreshToken(String uid) {

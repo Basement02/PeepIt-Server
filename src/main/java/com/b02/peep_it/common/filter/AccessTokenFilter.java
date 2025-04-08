@@ -34,7 +34,7 @@ public class AccessTokenFilter extends OncePerRequestFilter {
 //                CustomUserDetails userDetails = (CustomUserDetails) authentication.getDetails();
                 CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-                log.info("✅CustomUserDetails 객체 적용됨!");
+                log.info("CustomUserDetails 객체 적용됨!");
                 log.info("User ID (uid): " + userDetails.getUid());
                 log.info("Username (닉네임): " + userDetails.getUsername());
                 log.info("Provider (공급자): " + userDetails.getProvider());
@@ -44,6 +44,9 @@ public class AccessTokenFilter extends OncePerRequestFilter {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
+        }
+        else {
+            log.info("!!!!!!!!!!Authorization header is missing!!!!!!!!!!!");
         }
         filterChain.doFilter(request, response);
     }

@@ -6,11 +6,11 @@ import com.b02.peep_it.common.util.CustomUserDetails;
 import com.b02.peep_it.common.util.AuthUtils;
 import com.b02.peep_it.domain.*;
 import com.b02.peep_it.domain.constant.CustomProvider;
-import com.b02.peep_it.dto.RequestSignUpDto;
+import com.b02.peep_it.dto.member.RequestCommonMemberDto;
 import com.b02.peep_it.dto.RequestSocialLoginDto;
 import com.b02.peep_it.dto.ResponseLoginDto;
 import com.b02.peep_it.dto.SmsAuthDto;
-import com.b02.peep_it.dto.member.CommonMemberDto;
+import com.b02.peep_it.dto.member.ResponseCommonMemberDto;
 import com.b02.peep_it.repository.*;
 import com.b02.peep_it.common.util.JwtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,7 +21,6 @@ import net.nurigo.java_sdk.exceptions.CoolsmsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -103,14 +102,14 @@ public class AuthService {
                     new Exception("Member 정보가 존재하지 않습니다. socialId: " + memberSocial.get().getProviderId())
             );
 
-            CommonMemberDto commonMemberDto = CommonMemberDto.builder()
+            ResponseCommonMemberDto responseCommonMemberDto = ResponseCommonMemberDto.builder()
                     .id(member.getId())
                     .role(member.getRole().toString())
                     .name(member.getNickname())
                     .build();
 
-            accessToken = jwtUtils.createAccessToken(commonMemberDto);
-            refreshToken = jwtUtils.createRefreshToken(commonMemberDto);
+            accessToken = jwtUtils.createAccessToken(responseCommonMemberDto);
+            refreshToken = jwtUtils.createRefreshToken(responseCommonMemberDto);
             name = member.getNickname();
             id = member.getId();
         }
@@ -153,7 +152,7 @@ public class AuthService {
     신규 계정 생성
      */
     @Transactional
-    public ResponseEntity<CommonResponse<ResponseLoginDto>> createAccount(RequestSignUpDto requestDto) {
+    public ResponseEntity<CommonResponse<ResponseLoginDto>> createAccount(RequestCommonMemberDto requestDto) {
         log.info("🟢 createAccount 시작 - requestDto: {}", requestDto);
 
         // 레지스터 토큰에서 사용자 정보 추출
@@ -245,14 +244,14 @@ public class AuthService {
         // 로그인
         Boolean isMember = Boolean.TRUE;
         String registerToken = "";
-        CommonMemberDto commonMemberDto = CommonMemberDto.builder()
+        ResponseCommonMemberDto responseCommonMemberDto = ResponseCommonMemberDto.builder()
                 .id(mergedMember.getId())
                 .role(mergedMember.getRole().toString())
                 .name(mergedMember.getNickname())
                 .build();
 
-        String accessToken = jwtUtils.createAccessToken(commonMemberDto);
-        String refreshToken = jwtUtils.createRefreshToken(commonMemberDto);
+        String accessToken = jwtUtils.createAccessToken(responseCommonMemberDto);
+        String refreshToken = jwtUtils.createRefreshToken(responseCommonMemberDto);
         log.info("✅ 토큰 생성 완료 - accessToken: {}, refreshToken: {}", accessToken, refreshToken);
 
         String name = mergedMember.getNickname();
@@ -272,6 +271,7 @@ public class AuthService {
     /*
     전화번호 인증코드 전송
      */
+    @Transactional
     public ResponseEntity<CommonResponse<String>> sendSmsCode(String receiver) throws CoolsmsException {
         try {
             // 6자리 인증코드 생성
@@ -316,6 +316,7 @@ public class AuthService {
     /*
     인증번호 검증
      */
+    @Transactional
     public ResponseEntity<CommonResponse<String>> verifySmsCode(String receiver, String inputCode) throws CoolsmsException {
         try {
             String key = PREFIX + receiver;

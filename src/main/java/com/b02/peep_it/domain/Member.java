@@ -1,6 +1,8 @@
 package com.b02.peep_it.domain;
 
 import com.b02.peep_it.domain.constant.Role;
+import com.b02.peep_it.dto.RequestPatchMemberDto;
+import com.b02.peep_it.dto.member.RequestCommonMemberDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -82,11 +84,10 @@ public class Member extends BaseTimeEntity {
         return this;
     }
 
-    public Member setAdditionalInfo(String phone, String profileImg, LocalDate birth, CustomGender gender) {
-        this.phone = phone;
-        this.profileImg = profileImg;
-        this.birth = birth;
-        this.gender = gender;
+    public Member withPatched(RequestPatchMemberDto requestDto) {
+        this.nickname = requestDto.nickname() != null ? requestDto.nickname() : this.nickname;
+        this.birth = requestDto.birth() != null ? requestDto.birth() : this.birth;
+        this.gender = requestDto.gender() != null ? new CustomGender(requestDto.gender()) : this.gender;
         return this;
     }
 

@@ -31,8 +31,7 @@ public class SecurityConfig {
 
     private String[] permitList = {
             "/api/v1/test/**", // /deploy, /health-check, /upload
-            "/api/v1/auth/social/**", // /social, /check/id, /check/phone, /send/sms-code
-            "/api/v1/town/**", // /list, /info
+            "/api/v1/auth/social**", // /social, /check/id, /check/phone, /send/sms-code
 //            "/api/v1/member/**", // /sign-up
 //            "/api/v1/peep/**", // /post, /get/{peepId}, /my/upload, /my/react, /my/chat, /my/active, /get, /get/hot, /get/town, /get/map
             "/swagger",
