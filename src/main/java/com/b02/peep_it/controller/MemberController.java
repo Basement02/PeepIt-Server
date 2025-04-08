@@ -2,6 +2,7 @@ package com.b02.peep_it.controller;
 
 import com.b02.peep_it.common.response.CommonResponse;
 import com.b02.peep_it.dto.RequestPatchMemberDto;
+import com.b02.peep_it.dto.RequestPatchProfileImgDto;
 import com.b02.peep_it.dto.RequestPatchTownDto;
 import com.b02.peep_it.dto.member.RequestCommonMemberDto;
 import com.b02.peep_it.dto.ResponseLoginDto;
@@ -17,6 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -272,7 +274,7 @@ public class MemberController {
                                                                         "name": "gangjjang5",
                                                                         "town": "서울특별시",
                                                                         "profile": "추후수정필요 프로필 이미지 고정값",
-                                                                        "isAgree": true, // 마케팅 약관 동의 여부
+                                                                        "isAgree": true
                                                                       },
                                                                       "error": null
                                                                     }
@@ -372,7 +374,7 @@ public class MemberController {
                                                                         "name": "gangjjang5",
                                                                         "town": "서울특별시",
                                                                         "profile": "추후수정필요 프로필 이미지 고정값",
-                                                                        "isAgree": true, // 마케팅 약관 동의 여부
+                                                                        "isAgree": true
                                                                       },
                                                                       "error": null
                                                                     }
@@ -461,7 +463,7 @@ public class MemberController {
                                                                         "name": "gangjjang5",
                                                                         "town": "서울특별시",
                                                                         "profile": "추후수정필요 프로필 이미지 고정값",
-                                                                        "isAgree": true, // 마케팅 약관 동의 여부
+                                                                        "isAgree": true
                                                                       },
                                                                       "error": null
                                                                     }
@@ -512,4 +514,75 @@ public class MemberController {
     /*
     프로필 사진 수정하기
      */
+    @SecurityRequirement(name = "AccessToken")
+    @Operation(
+            summary = "프로필 사진 수정",
+            description = """
+            - 입력 가능한 정보:
+                - 프로필 사진 이미지
+            """,
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "성공적으로 사용자 정보 수정",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(
+                                            value = """
+                                                    {
+                                                                      "success": true,
+                                                                      "data": {
+                                                                        "id": "gangjjang5",
+                                                                        "role": "UNCERTIFIED",
+                                                                        "gender": "other",
+                                                                        "name": "gangjjang5",
+                                                                        "town": "서울특별시",
+                                                                        "profile": "추후수정필요 프로필 이미지 고정값",
+                                                                        "isAgree": true
+                                                                      },
+                                                                      "error": null
+                                                                    }
+                                    """)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "40102",
+                            description = "유효하지 않은 계정",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(value = """
+                    {
+                        "success": false,
+                        "data": {},
+                        "error": {
+                            "code": "40102",
+                            "message": "유효하지 않은 계정입니다"
+                        }
+                    }
+                    """)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "50000",
+                            description = "서버 내부 오류",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(value = """
+                    {
+                        "success": false,
+                        "data": {},
+                        "error": {
+                            "code": "50000",
+                            "message": "서버 내부 오류가 발생했습니다"
+                        }
+                    }
+                    """)
+                            )
+                    )
+            }
+    )
+    @PatchMapping(value = "/profile-img", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<CommonResponse<ResponseCommonMemberDto>> patchOwnProfileImg(@ModelAttribute RequestPatchProfileImgDto requestDto) throws Exception {
+        return memberService.patchMyProfileImg(requestDto);
+    }
 }

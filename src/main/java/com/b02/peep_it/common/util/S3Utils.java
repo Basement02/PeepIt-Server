@@ -10,6 +10,7 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
@@ -29,7 +30,7 @@ public class S3Utils {
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
 
-    public String uploadFile(MultipartFile file) throws IOException {
+    public String uploadFile(MultipartFile file, String folder) throws IOException {
         // 1. AWS S3 Client 생성
         S3Client s3Client = S3Client.builder()
                 .region(Region.of(region))
@@ -38,7 +39,8 @@ public class S3Utils {
                 .build();
 
         // 2. 파일명 랜덤화
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+//        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        String fileName = folder + UUID.randomUUID() + "_" + file.getOriginalFilename();
 
         // 3. S3 업로드 요청
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
@@ -54,5 +56,30 @@ public class S3Utils {
 
         // 4. 업로드된 파일의 S3 URL 반환
         return "https://" + bucketName + ".s3." + region + ".amazonaws.com/" + fileName;
+    }
+
+    public void deleteFile(String fileKey) {
+        // 1. AWS S3 Client 생성
+        S3Client s3Client = S3Client.builder()
+                .region(Region.of(region))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(accessKey, secretKey)))
+                .build();
+
+        // 2. 삭제 요청 생성
+        DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(fileKey)
+                .build();
+
+        // 3. 삭제 실행
+        s3Client.deleteObject(deleteRequest);
+
+        log.info("S3 파일 삭제 완료: {}", fileKey);
+    }
+
+    public String extractKeyFromUrl(String s3Url) {
+        String baseUrl = "https://" + bucketName + ".s3." + region + ".amazonaws.com/";
+        return s3Url.replace(baseUrl, "");
     }
 }
