@@ -235,9 +235,9 @@ public class MemberController {
                  - MAN("MANAGER", "관리자"),
                  - DEV("DEVELOPER", "개발자")
             """,
-            security = {
-                    @SecurityRequirement(name = "AuthToken")
-            },
+//            security = {
+//                    @SecurityRequirement(name = "AuthToken")
+//            },
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "멤버 ID",
                     required = true,
@@ -267,6 +267,7 @@ public class MemberController {
                                                                       "data": {
                                                                         "id": "gangjjang5",
                                                                         "role": "UNCERTIFIED",
+                                                                        "gender": "other",
                                                                         "name": "gangjjang5",
                                                                         "town": "서울특별시",
                                                                         "profile": "추후수정필요 프로필 이미지 고정값"
@@ -349,9 +350,9 @@ public class MemberController {
                  - MAN("MANAGER", "관리자"),
                  - DEV("DEVELOPER", "개발자")
             """,
-            security = {
-                    @SecurityRequirement(name = "AuthToken")
-            },
+//            security = {
+//                    @SecurityRequirement(name = "AuthToken")
+//            },
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -365,6 +366,7 @@ public class MemberController {
                                                                       "data": {
                                                                         "id": "gangjjang5",
                                                                         "role": "UNCERTIFIED",
+                                                                        "gender": "other",
                                                                         "name": "gangjjang5",
                                                                         "town": "서울특별시",
                                                                         "profile": "추후수정필요 프로필 이미지 고정값"

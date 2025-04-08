@@ -31,9 +31,9 @@ public class SecurityConfig {
 
     private String[] permitList = {
             "/api/v1/test/**", // /deploy, /health-check, /upload
-            "/api/v1/auth/**", // /social, /check/id, /check/phone, /send/sms-code
-            "/api/v1/member/**", // /sign-up
-            "/api/v1/peep/**", // /post, /get/{peepId}, /my/upload, /my/react, /my/chat, /my/active, /get, /get/hot, /get/town, /get/map
+            "/api/v1/auth/social**", // /social, /check/id, /check/phone, /send/sms-code
+//            "/api/v1/member/**", // /sign-up
+//            "/api/v1/peep/**", // /post, /get/{peepId}, /my/upload, /my/react, /my/chat, /my/active, /get, /get/hot, /get/town, /get/map
             "/swagger",
             "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**"
     };
@@ -80,7 +80,7 @@ public class SecurityConfig {
     public FilterRegistrationBean<HttpLoggingFilter> loggingFilter() {
         FilterRegistrationBean<HttpLoggingFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new HttpLoggingFilter());
-        registrationBean.addUrlPatterns("/*"); // 모든 URL에 대해 적용
+        registrationBean.addUrlPatterns("/**"); // 모든 URL에 대해 적용
         registrationBean.setOrder(1); // 필터 순서 지정 (낮은 값이 우선)
         return registrationBean;
     }

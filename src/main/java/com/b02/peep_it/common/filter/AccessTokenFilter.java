@@ -51,6 +51,9 @@ public class AccessTokenFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return path.startsWith("/auth") || path.startsWith("/test"); // auth 경로로 접근하는 모든 요청은 필터 제외
+        return path.startsWith("/api/v1/auth/check")
+                || path.startsWith("/api/v1/test")
+                || path.startsWith("/api/v1/auth/social")
+                ; // auth 경로로 접근하는 모든 요청은 필터 제외
     }
 }

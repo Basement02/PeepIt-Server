@@ -3,6 +3,7 @@ package com.b02.peep_it.service;
 import com.b02.peep_it.common.exception.CustomError;
 import com.b02.peep_it.common.response.CommonResponse;
 import com.b02.peep_it.common.util.AuthUtils;
+import com.b02.peep_it.domain.CustomGender;
 import com.b02.peep_it.domain.Member;
 import com.b02.peep_it.dto.member.CommonMemberDto;
 import com.b02.peep_it.repository.MemberRepository;
@@ -35,11 +36,12 @@ public class MemberService {
 
         Member member = optionalMember.get();
 
-        // responseDto 구성 (id, role, name, town, profile)
+        // responseDto 구성 (id, role, name, gender, town, profile)
         CommonMemberDto responseDto = CommonMemberDto.builder()
                 .role(member.getRole().getCode())
                 .id(memberId)
                 .name(member.getNickname())
+                .gender(member.getGender().getValue())
                 .town(member.getTown().getStateName())
                 .profile(member.getProfileImg())
                 .build();
@@ -60,11 +62,12 @@ public class MemberService {
             return CommonResponse.failed(CustomError.MEMBER_UNAUTHORIZED); // 유효하지 않은 계정입니다
         }
 
-        // responseDto 구성 (id, role, name, town, profile)
+        // responseDto 구성 (id, role, name, gender, town, profile)
         CommonMemberDto responseDto = CommonMemberDto.builder()
                 .role(member.getRole().getCode())
                 .id(member.getId())
                 .name(member.getNickname())
+                .gender(member.getGender().getValue())
                 .town(member.getTown().getStateName())
                 .profile(member.getProfileImg())
                 .build();
