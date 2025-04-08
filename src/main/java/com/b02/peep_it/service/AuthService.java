@@ -234,10 +234,11 @@ public class AuthService {
         pushSettingRepository.save(pushSetting);
         log.info("✅ 알림 설정 저장 완료 - memberId: {}", mergedMember.getId());
 
-        // 동네 객체 생성 & 저장 (기본값: null)
+        // 동네 객체 생성 & 저장 (기본값: random)
         Town town = Town.builder()
                 .member(mergedMember)
-                .state(getRandomState())
+//                .state(getRandomState())
+                .state(null)
                 .build();
         townRepository.save(town);
 
