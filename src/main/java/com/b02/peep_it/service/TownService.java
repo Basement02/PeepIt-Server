@@ -9,7 +9,7 @@ import com.b02.peep_it.domain.State;
 import com.b02.peep_it.domain.Town;
 import com.b02.peep_it.dto.CommonTownDto;
 import com.b02.peep_it.dto.RequestPatchTownDto;
-import com.b02.peep_it.dto.member.CommonMemberDto;
+import com.b02.peep_it.dto.member.ResponseCommonMemberDto;
 import com.b02.peep_it.repository.StateRepository;
 import com.b02.peep_it.repository.TownRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ public class TownService {
     /*
     법정동 코드로 사용자 동네 등록
      */
-    public ResponseEntity<CommonResponse<CommonMemberDto>> updateTownInfo(RequestPatchTownDto requestDto) {
+    public ResponseEntity<CommonResponse<ResponseCommonMemberDto>> updateTownInfo(RequestPatchTownDto requestDto) {
         // 현재 사용자 정보를 불러온다
         Member member = userInfo.getCurrentMember();
         Optional<State> townName = stateRepository.findByCode(requestDto.legalDistrictCode());

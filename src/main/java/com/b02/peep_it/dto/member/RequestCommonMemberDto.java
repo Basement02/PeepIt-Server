@@ -1,4 +1,4 @@
-package com.b02.peep_it.dto;
+package com.b02.peep_it.dto.member;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -7,7 +7,7 @@ import org.springframework.lang.Nullable;
 
 import java.time.LocalDate;
 
-public record RequestSignUpDto(
+public record RequestCommonMemberDto(
         @NotNull
         @Size(min = 10, max = 20, message = "ID는 10~20자 이내로 입력해주세요.")
         @Pattern(regexp = "^[a-zA-Z0-9_.]+$", message = "ID는 영어, 숫자, 밑줄(_) 및 마침표(.)만 사용할 수 있습니다.")

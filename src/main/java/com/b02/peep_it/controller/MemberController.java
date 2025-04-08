@@ -1,10 +1,11 @@
 package com.b02.peep_it.controller;
 
 import com.b02.peep_it.common.response.CommonResponse;
+import com.b02.peep_it.dto.RequestPatchMemberDto;
 import com.b02.peep_it.dto.RequestPatchTownDto;
-import com.b02.peep_it.dto.RequestSignUpDto;
+import com.b02.peep_it.dto.member.RequestCommonMemberDto;
 import com.b02.peep_it.dto.ResponseLoginDto;
-import com.b02.peep_it.dto.member.CommonMemberDto;
+import com.b02.peep_it.dto.member.ResponseCommonMemberDto;
 import com.b02.peep_it.service.AuthService;
 import com.b02.peep_it.service.MemberService;
 import com.b02.peep_it.service.TownService;
@@ -126,7 +127,7 @@ public class MemberController {
             }
     )
     @PostMapping("/sign-up")
-    public ResponseEntity<CommonResponse<ResponseLoginDto>> signUp(@RequestBody RequestSignUpDto requestDto){
+    public ResponseEntity<CommonResponse<ResponseLoginDto>> signUp(@RequestBody RequestCommonMemberDto requestDto){
         log.info("요청받은 DTO: {}", requestDto);
         return authService.createAccount(requestDto);
     }
@@ -215,7 +216,7 @@ public class MemberController {
             }
     )
     @PatchMapping("/town")
-    public ResponseEntity<CommonResponse<CommonMemberDto>> patchTown(@RequestBody RequestPatchTownDto requestDto) {
+    public ResponseEntity<CommonResponse<ResponseCommonMemberDto>> patchTown(@RequestBody RequestPatchTownDto requestDto) {
         log.info("요청받은 DTO: {}", requestDto);
         return townService.updateTownInfo(requestDto);
     }
@@ -270,7 +271,8 @@ public class MemberController {
                                                                         "gender": "other",
                                                                         "name": "gangjjang5",
                                                                         "town": "서울특별시",
-                                                                        "profile": "추후수정필요 프로필 이미지 고정값"
+                                                                        "profile": "추후수정필요 프로필 이미지 고정값",
+                                                                        "isAgree": true, // 마케팅 약관 동의 여부
                                                                       },
                                                                       "error": null
                                                                     }
@@ -331,7 +333,7 @@ public class MemberController {
             }
     )
     @GetMapping("/detail/{memberId}")
-    public ResponseEntity<CommonResponse<CommonMemberDto>> getMemberDetail(@PathVariable("memberId") String memberId) {
+    public ResponseEntity<CommonResponse<ResponseCommonMemberDto>> getMemberDetail(@PathVariable("memberId") String memberId) {
         return memberService.getMemberDetail(memberId);
     }
 
@@ -369,7 +371,8 @@ public class MemberController {
                                                                         "gender": "other",
                                                                         "name": "gangjjang5",
                                                                         "town": "서울특별시",
-                                                                        "profile": "추후수정필요 프로필 이미지 고정값"
+                                                                        "profile": "추후수정필요 프로필 이미지 고정값",
+                                                                        "isAgree": true, // 마케팅 약관 동의 여부
                                                                       },
                                                                       "error": null
                                                                     }
@@ -413,7 +416,100 @@ public class MemberController {
             }
     )
     @GetMapping("/detail")
-    public ResponseEntity<CommonResponse<CommonMemberDto>> getOwnDetail() {
+    public ResponseEntity<CommonResponse<ResponseCommonMemberDto>> getOwnDetail() {
         return memberService.getMyDetail();
     }
+
+    /*
+    사용자 정보 수정
+    - 닉네임
+    - 성별
+    - 생일
+    - 마케팅 약관 동의
+     */
+    @SecurityRequirement(name = "AccessToken")
+    @Operation(
+            summary = "로그인한 사용자 정보 수정",
+            description = """
+            - 입력 가능한 정보:
+                - 닉네임 nickname
+                - 성별 gender
+                - 생일 birth
+                - 마케팅 약관 동의 isAgree
+            - 성별 상세
+                 - female
+                 - male
+                 - other
+            """,
+//            security = {
+//                    @SecurityRequirement(name = "AuthToken")
+//            },
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "성공적으로 사용자 정보 수정",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(
+                                            value = """
+                                                    {
+                                                                      "success": true,
+                                                                      "data": {
+                                                                        "id": "gangjjang5",
+                                                                        "role": "UNCERTIFIED",
+                                                                        "gender": "other",
+                                                                        "name": "gangjjang5",
+                                                                        "town": "서울특별시",
+                                                                        "profile": "추후수정필요 프로필 이미지 고정값",
+                                                                        "isAgree": true, // 마케팅 약관 동의 여부
+                                                                      },
+                                                                      "error": null
+                                                                    }
+                                    """)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "40102",
+                            description = "유효하지 않은 계정",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(value = """
+                    {
+                        "success": false,
+                        "data": {},
+                        "error": {
+                            "code": "40102",
+                            "message": "유효하지 않은 계정입니다"
+                        }
+                    }
+                    """)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "50000",
+                            description = "서버 내부 오류",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(value = """
+                    {
+                        "success": false,
+                        "data": {},
+                        "error": {
+                            "code": "50000",
+                            "message": "서버 내부 오류가 발생했습니다"
+                        }
+                    }
+                    """)
+                            )
+                    )
+            }
+    )
+    @PatchMapping("/detail")
+    public ResponseEntity<CommonResponse<ResponseCommonMemberDto>> patchOwnDetail(@RequestBody RequestPatchMemberDto requestDto) throws Exception {
+        return memberService.patchMyDetail(requestDto);
+    }
+
+    /*
+    프로필 사진 수정하기
+     */
 }
