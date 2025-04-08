@@ -100,4 +100,10 @@ public class Member extends BaseTimeEntity {
         this.profileImg = profileImg;
         return this;
     }
+
+    public Member certificate(Role role) {
+        this.role = role;
+        this.authAt = LocalDate.now();
+        return this;
+    }
 }

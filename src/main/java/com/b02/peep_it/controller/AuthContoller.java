@@ -3,6 +3,7 @@ package com.b02.peep_it.controller;
 import com.b02.peep_it.common.response.CommonResponse;
 import com.b02.peep_it.dto.RequestSocialLoginDto;
 import com.b02.peep_it.dto.ResponseLoginDto;
+import com.b02.peep_it.dto.member.ResponseCommonMemberDto;
 import com.b02.peep_it.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -162,8 +163,41 @@ public class AuthContoller {
     전화번호 인증코드 검증
      */
     @SecurityRequirement(name = "AccessToken")
+    @Operation(
+            summary = "전화번호 인증코드 검증",
+            description = """
+            - 입력 가능한 정보:
+                - 전화번호 인증코드
+                - 전화번호
+            """,
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "성공적으로 사용자 정보 수정",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(
+                                            value = """
+                                                    {
+                                                                      "success": true,
+                                                                      "data": {
+                                                                        "id": "gangjjang5",
+                                                                        "role": "UNCERTIFIED",
+                                                                        "gender": "other",
+                                                                        "name": "gangjjang5",
+                                                                        "town": "서울특별시",
+                                                                        "profile": "추후수정필요 프로필 이미지 고정값",
+                                                                        "isAgree": true
+                                                                      },
+                                                                      "error": null
+                                                                    }
+                                    """)
+                            )
+                    )
+            }
+    )
     @PostMapping("/verify/sms-code")
-    public ResponseEntity<CommonResponse<String>> verifySmsCode(
+    public ResponseEntity<CommonResponse<ResponseCommonMemberDto>> verifySmsCode(
             @RequestParam("phone") String phone,
             @RequestParam("code") String inputCode) throws CoolsmsException {
         log.info("==== phone = [{}] ===", phone);

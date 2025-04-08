@@ -6,6 +6,7 @@ import com.b02.peep_it.common.util.CustomUserDetails;
 import com.b02.peep_it.common.util.AuthUtils;
 import com.b02.peep_it.domain.*;
 import com.b02.peep_it.domain.constant.CustomProvider;
+import com.b02.peep_it.domain.constant.Role;
 import com.b02.peep_it.dto.member.RequestCommonMemberDto;
 import com.b02.peep_it.dto.RequestSocialLoginDto;
 import com.b02.peep_it.dto.ResponseLoginDto;
@@ -44,7 +45,7 @@ public class AuthService {
     @Value("${coolsms.api.number}")
     String sender;
     private final JwtUtils jwtUtils;
-    private final AuthUtils authUtils;
+    private final AuthUtils userInfo;
     private final MemberRepository memberRepository;
     private final MemberSocialRepository memberSocialRepository;
     private final TermsAgreementRepository termsAgreementRepository;
@@ -156,7 +157,7 @@ public class AuthService {
         log.info("🟢 createAccount 시작 - requestDto: {}", requestDto);
 
         // 레지스터 토큰에서 사용자 정보 추출
-        CustomUserDetails userDetails = authUtils.getPrincipal();
+        CustomUserDetails userDetails = userInfo.getPrincipal();
         log.info("🔹 사용자 정보 추출 완료 - provider: {}, providerId: {}", userDetails.getProvider(), userDetails.getProviderId());
 
         CustomProvider provider = CustomProvider.valueOf(userDetails.getProvider());
@@ -317,8 +318,15 @@ public class AuthService {
     인증번호 검증
      */
     @Transactional
-    public ResponseEntity<CommonResponse<String>> verifySmsCode(String receiver, String inputCode) throws CoolsmsException {
+    public ResponseEntity<CommonResponse<ResponseCommonMemberDto>> verifySmsCode(String receiver, String inputCode) throws CoolsmsException {
         try {
+            // 사용자 조회
+            Member member = userInfo.getCurrentMember();
+            // 부재 시 Exception
+            if (member == null) {
+                return CommonResponse.failed(CustomError.MEMBER_UNAUTHORIZED); // 유효하지 않은 계정입니다
+            }
+
             String key = PREFIX + receiver;
 //            SmsAuthDto saved = (SmsAuthDto) redisTemplate.opsForValue().get(key);
             // 명시적으로 역직렬화
@@ -344,9 +352,26 @@ public class AuthService {
                 return CommonResponse.failed(CustomError.WRONG_SMS);
             }
 
-            // 성공 (redis key 삭제)
+            // 성공 (redis key 삭제 & 사용자 role 변경(UNCERT -> CERT))
             redisTemplate.delete(key);
-            return CommonResponse.ok(null);
+            member.certificate(Role.CERT);
+
+            TermsAgreement termsAgreement = termsAgreementRepository.findById(member.getId()).orElseThrow(() ->
+                    new Exception("termsAgreement 정보가 존재하지 않습니다.")
+            );
+
+//            return CommonResponse.ok(null);
+            ResponseCommonMemberDto responseDto = ResponseCommonMemberDto.builder()
+                    .role(member.getRole().getCode())
+                    .id(member.getId())
+                    .name(member.getNickname())
+                    .gender(member.getGender().getValue())
+                    .town(member.getTown().getStateName())
+                    .profile(member.getProfileImg())
+                    .isAgree(termsAgreement.getIsAgree())
+                    .build();
+
+            return CommonResponse.ok(responseDto);
         } catch (Exception e) {
             return CommonResponse.exception(e);
         }
