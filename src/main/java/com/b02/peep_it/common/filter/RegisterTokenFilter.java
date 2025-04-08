@@ -85,6 +85,7 @@ public class RegisterTokenFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
+        log.info("should not register filter: {}", path);
         return !path.startsWith("/api/v1/member/sign-up"); // 지정 경로 이외의 요청은 통과 시킴
     }
 }

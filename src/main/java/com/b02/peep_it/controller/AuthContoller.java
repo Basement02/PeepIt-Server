@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.web.bind.annotation.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -150,6 +151,7 @@ public class AuthContoller {
     /*
     전화번호 인증코드 발급
      */
+    @SecurityRequirement(name = "AccessToken")
     @PostMapping("/send/sms-code")
     public ResponseEntity<CommonResponse<String>> sendSmsCode(@RequestParam("phone") String phone) throws CoolsmsException {
         log.info("==== phone = [{}] ===", phone);
@@ -159,6 +161,7 @@ public class AuthContoller {
     /*
     전화번호 인증코드 검증
      */
+    @SecurityRequirement(name = "AccessToken")
     @PostMapping("/verify/sms-code")
     public ResponseEntity<CommonResponse<String>> verifySmsCode(
             @RequestParam("phone") String phone,
