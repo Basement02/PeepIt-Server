@@ -6,6 +6,7 @@ import com.b02.peep_it.dto.ResponseLoginDto;
 import com.b02.peep_it.dto.member.ResponseCommonMemberDto;
 import com.b02.peep_it.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -203,5 +204,38 @@ public class AuthContoller {
         log.info("==== phone = [{}] ===", phone);
         log.info("code = [{}]", inputCode);
         return authService.verifySmsCode(phone, inputCode);
+    }
+
+    /*
+    로그아웃
+     */
+    @SecurityRequirement(name = "AccessToken")
+    @Operation(
+            summary = "로그아웃",
+            description = """
+            - 입력 가능한 정보:
+                - 없음
+            """,
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "로그아웃 성공",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(
+                                            value = """
+                                                    {
+                                                                      "success": true,
+                                                                      "data": null,
+                                                                      "error": null
+                                                                    }
+                                    """)
+                            )
+                    )
+            }
+    )
+    @DeleteMapping("/logout")
+    public ResponseEntity<CommonResponse<Object>> logout(@Parameter(hidden = true) @RequestHeader("Authorization") String bearerToken) {
+        return authService.logout(bearerToken);
     }
 }

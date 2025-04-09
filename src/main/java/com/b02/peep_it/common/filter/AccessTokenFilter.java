@@ -28,6 +28,7 @@ public class AccessTokenFilter extends OncePerRequestFilter {
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             String token = bearerToken.substring(7);
             if (jwtUtils.validateAccessToken(token)) {
+                log.info("검증 완료된 정상 토큰");
                 Authentication authentication = jwtUtils.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 log.info("Request to {}: JWT(access)={}", request.getRequestURI(), token);

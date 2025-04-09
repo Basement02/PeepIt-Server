@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -212,6 +213,7 @@ public class JwtUtils {
             return false;
         }
         if (isLogout(token)) {
+            log.info("로그아웃된 토큰");
 //            throw new UnauthorizedException(ErrorCode.LOG_OUT_JWT_TOKEN);
             return false;
         }
@@ -410,7 +412,10 @@ public class JwtUtils {
     }
 
     public boolean isLogout(String accessToken) {
-        return !ObjectUtils.isEmpty(stringRedisTemplate.opsForValue().get(accessToken));
+        String key = "blacklist:" + accessToken;
+        log.info("로그아웃된 토큰인가요? {}", key);
+        log.info(String.valueOf(stringRedisTemplate.hasKey(key)));
+        return Boolean.TRUE.equals(stringRedisTemplate.hasKey(key));
     }
 
     public boolean isIss(String token) {
