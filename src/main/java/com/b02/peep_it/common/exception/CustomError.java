@@ -26,12 +26,12 @@ public enum CustomError {
 
     /*
     404
-    -01: 존재하지 않는 핍입니다
+    -01: 핍이 존재하지 않습니다
     -02: 사용자의 동네 정보가 존재하지 않습니다
     -03: 존재하지 않는 법정동코드입니다
     -04: 존재하지 않는 사용자입니다
      */
-    PEEP_NOT_FOUND(HttpStatus.NOT_FOUND, "40401", "존재하지 않는 핍입니다"),
+    PEEP_NOT_FOUND(HttpStatus.NOT_FOUND, "40401", "핍이 존재하지 않습니다"),
     TOWN_NOT_FOUND(HttpStatus.NOT_FOUND, "40402", "사용자의 동네 정보가 존재하지 않습니다"),
     STATE_NOT_FOUND(HttpStatus.NOT_FOUND, "40403", "존재하지 않는 법정동코드입니다"),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "40404", "존재하지 않는 사용자입니다"),

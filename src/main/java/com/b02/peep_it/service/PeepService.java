@@ -9,6 +9,7 @@ import com.b02.peep_it.common.util.TimeAgoUtils;
 import com.b02.peep_it.domain.*;
 import com.b02.peep_it.dto.peep.CommonPeepDto;
 import com.b02.peep_it.dto.peep.RequestPeepUploadDto;
+import com.b02.peep_it.dto.peep.ResponsePeepsByTownDto;
 import com.b02.peep_it.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -163,6 +164,10 @@ public class PeepService {
                 .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
                 .build());
 
+        if (responseDtoPage.isEmpty()) {
+            return CommonResponse.failed(CustomError.PEEP_NOT_FOUND);
+        }
+
         // 4. PagedResponse 객체 생성
         PagedResponse<CommonPeepDto> pagedResponse = PagedResponse.create(
                 responseDtoPage.getContent(),
@@ -177,15 +182,11 @@ public class PeepService {
     }
 
     /*
-    사용자의 모든 유관 핍 리스트 조회
+    나의 반응한/댓글 단 핍 리스트 조회
      */
-    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getTotalPeepList(int page, int size) {
+    public ResponseEntity<CommonResponse<ResponsePeepsByTownDto>> getActionPeepList() {
         // 현재 로그인 사용자 ID 조회
         String memberId = userInfo.getCurrentMemberUid();
-
-        // 업로드한 핍
-        List<Peep> uploadedPeeps = peepRepository.findAllByMember_Id(memberId);
-
         // 반응한 핍
         List<Peep> reactedPeeps = peepReStickerRepository.findAllByMember_Id(memberId)
                 .stream().map(PeepReSticker::getPeep).toList();
@@ -196,47 +197,61 @@ public class PeepService {
 
         // 모든 핍을 하나로 합치고 중복 제거
         Set<Peep> totalPeepSet = new HashSet<>();
-        totalPeepSet.addAll(uploadedPeeps);
         totalPeepSet.addAll(reactedPeeps);
         totalPeepSet.addAll(cattedPeeps);
 
-        // 최신순 정렬
-        List<Peep> sortedPeepList = totalPeepSet.stream()
-                .sorted(Comparator.comparing(Peep::getCreatedAt).reversed())
+        // 동네별 그룹화
+        Map<String, List<Peep>> townGroupedMap = totalPeepSet.stream()
+                .filter(p -> p.getCode() != null)
+                .collect(Collectors.groupingBy(p -> String.valueOf(p.getCode())));
+
+        // 상위 3개 동네 추출
+        List<String> topTownLegalCodes = townGroupedMap.entrySet().stream()
+                .sorted((e1, e2) -> Integer.compare(e2.getValue().size(), e1.getValue().size()))
+                .limit(3)
+                .map(Map.Entry::getKey)
                 .toList();
 
-        // 페이징 처리
-        int start = page * size;
-        int end = Math.min(start + size, sortedPeepList.size());
-        List<Peep> pagedPeeps = start >= sortedPeepList.size() ? Collections.emptyList() : sortedPeepList.subList(start, end);
+        // 각 동네별 Peep 10개 최신순
+        Map<String, List<CommonPeepDto>> peepsByTown = new HashMap<>();
+        Map<String, String> topTowns = new HashMap<>();
 
-        // dto 변환
-        List<CommonPeepDto> dtoList = pagedPeeps.stream().map(p -> CommonPeepDto.builder()
-                .peepId(p.getId())
-                .memberId(p.getMember().getId())
-                .town(p.getTown())
-                .imageUrl(p.getImageUrl())
-                .content(p.getContent())
-                .isEdited(p.getIsEdited())
-                .profileUrl(p.getMember().getProfileImg())
-                .isActive(timeAgoUtils.isActiveWithin24Hours(p.getCreatedAt()))
-                .uploadAt(timeAgoUtils.getTimeAgo(p.getCreatedAt()))
-                .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
-                .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
-                .build()).toList();
+        for(String townCode : topTownLegalCodes) {
+            List<Peep> peepList = townGroupedMap.getOrDefault(townCode, List.of());
+            List<CommonPeepDto> dtoList = peepList.stream()
+                    .sorted(Comparator.comparing(Peep::getCreatedAt).reversed())
+                    .limit(10)
+                    .map(p -> CommonPeepDto.builder()
+                            .peepId(p.getId())
+                            .memberId(p.getMember().getId())
+                            .town(p.getTown())
+                            .imageUrl(p.getImageUrl())
+                            .content(p.getContent())
+                            .isEdited(p.getIsEdited())
+                            .profileUrl(p.getMember().getProfileImg())
+                            .isActive(timeAgoUtils.isActiveWithin24Hours(p.getCreatedAt()))
+                            .uploadAt(timeAgoUtils.getTimeAgo(p.getCreatedAt()))
+                            .stickerNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
+                            .build())
+                    .toList();
+            peepsByTown.put(townCode, dtoList);
+            topTowns.put(townCode, stateRepository.findByCode(townCode).get().getName());
+        }
 
-        // PagedResponse 생성
-        PagedResponse<CommonPeepDto> pagedResponse = PagedResponse.create(
-                dtoList,
-                page,
-                size,
-                (int) Math.ceil((double) totalPeepSet.size() / size),
-                totalPeepSet.size()
-        );
+        if (peepsByTown.isEmpty()) {
+            return CommonResponse.failed(CustomError.PEEP_NOT_FOUND);
+        }
+
+        // response
+        ResponsePeepsByTownDto responseDto = ResponsePeepsByTownDto.builder()
+                .topTowns(topTowns)
+                .peepsByTown(peepsByTown)
+                .build();
 
         // response 반환
-        return CommonResponse.ok(pagedResponse);
+        return CommonResponse.ok(responseDto);
     }
+
     /*
     사용자가 반응한 핍 리스트 조회
      */
@@ -267,6 +282,10 @@ public class PeepService {
                     .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
                     .build();
         });
+
+        if (responseDtoPage.isEmpty()) {
+            return CommonResponse.failed(CustomError.PEEP_NOT_FOUND);
+        }
 
         // 4. PagedResponse 객체 생성
         PagedResponse<CommonPeepDto> pagedResponse = PagedResponse.create(
@@ -313,6 +332,10 @@ public class PeepService {
                     .build();
         });
 
+        if (responseDtoPage.isEmpty()) {
+            return CommonResponse.failed(CustomError.PEEP_NOT_FOUND);
+        }
+
         // 4. PagedResponse 객체 생성
         PagedResponse<CommonPeepDto> pagedResponse = PagedResponse.create(
                 responseDtoPage.getContent(),
@@ -351,6 +374,10 @@ public class PeepService {
                 .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                 .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
                 .build());
+
+        if (responseDtoPage.isEmpty()) {
+            return CommonResponse.failed(CustomError.PEEP_NOT_FOUND);
+        }
 
         // 3. PagedResponse 객체 생성
         PagedResponse<CommonPeepDto> pagedResponse = PagedResponse.create(
@@ -396,6 +423,10 @@ public class PeepService {
                         .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
                         .build())
                 .toList(); // ✅ 리스트 변환
+
+        if (sortedPeepList.isEmpty()) {
+            return CommonResponse.failed(CustomError.PEEP_NOT_FOUND);
+        }
 
         // 5. 정렬된 데이터를 기반으로 새로운 Page 객체 생성
         Page<CommonPeepDto> sortedPage = new PageImpl<>(sortedPeepList, pageRequest, sortedPeepList.size());
@@ -455,6 +486,10 @@ public class PeepService {
                         .build())
                 .toList();
 
+        if (sortedPeepList.isEmpty()) {
+            return CommonResponse.failed(CustomError.PEEP_NOT_FOUND);
+        }
+
         // 4. 정렬된 데이터를 기반으로 새로운 Page 객체 생성
         Page<CommonPeepDto> sortedPage = new PageImpl<>(sortedPeepList, pageRequest, sortedPeepList.size());
 
@@ -512,6 +547,10 @@ public class PeepService {
                         .build())
                 .toList();
 
+        if (sortedPeepList.isEmpty()) {
+            return CommonResponse.failed(CustomError.PEEP_NOT_FOUND);
+        }
+
         // 4. 정렬된 데이터를 기반으로 새로운 Page 객체 생성
         Page<CommonPeepDto> sortedPage = new PageImpl<>(sortedPeepList, pageRequest, sortedPeepList.size());
 
@@ -568,6 +607,10 @@ public class PeepService {
                         .build())
                 .toList();
 
+        if (peepDtoList.isEmpty()) {
+            return CommonResponse.failed(CustomError.PEEP_NOT_FOUND);
+        }
+
         // 5. DTO 리스트 기반으로 새로운 페이지 객체 생성
         Page<CommonPeepDto> sortedPage = new PageImpl<>(peepDtoList, pageRequest, peepPage.getTotalElements());
 
@@ -582,6 +625,135 @@ public class PeepService {
 
         // 8. 최종 응답 반환
         return CommonResponse.ok(pagedResponse);
+    }
+
+    /*
+    사용자의 모든 유관 핍 리스트 조회
+     */
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getTotalPeepList(int page, int size) {
+        // 현재 로그인 사용자 ID 조회
+        String memberId = userInfo.getCurrentMemberUid();
+
+        // 업로드한 핍
+        List<Peep> uploadedPeeps = peepRepository.findAllByMember_Id(memberId);
+
+
+        // 반응한 핍
+        List<Peep> reactedPeeps = peepReStickerRepository.findAllByMember_Id(memberId)
+                .stream().map(PeepReSticker::getPeep).toList();
+
+        // 댓글단 핍
+        List<Peep> cattedPeeps = chatRepository.findDistinctPeepsByMemberId(memberId)
+                .stream().map(Chat::getPeep).toList();
+
+        // 모든 핍을 하나로 합치고 중복 제거
+        Set<Peep> totalPeepSet = new HashSet<>();
+        totalPeepSet.addAll(uploadedPeeps);
+        totalPeepSet.addAll(reactedPeeps);
+        totalPeepSet.addAll(cattedPeeps);
+
+        // 최신순 정렬
+        List<Peep> sortedPeepList = totalPeepSet.stream()
+                .sorted(Comparator.comparing(Peep::getCreatedAt).reversed())
+                .toList();
+
+        // 페이징 처리
+        int start = page * size;
+        int end = Math.min(start + size, sortedPeepList.size());
+        List<Peep> pagedPeeps = start >= sortedPeepList.size() ? Collections.emptyList() : sortedPeepList.subList(start, end);
+
+        // dto 변환
+        List<CommonPeepDto> dtoList = pagedPeeps.stream().map(p -> CommonPeepDto.builder()
+                .peepId(p.getId())
+                .memberId(p.getMember().getId())
+                .town(p.getTown())
+                .imageUrl(p.getImageUrl())
+                .content(p.getContent())
+                .isEdited(p.getIsEdited())
+                .profileUrl(p.getMember().getProfileImg())
+                .isActive(timeAgoUtils.isActiveWithin24Hours(p.getCreatedAt()))
+                .uploadAt(timeAgoUtils.getTimeAgo(p.getCreatedAt()))
+                .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
+                .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
+                .build()).toList();
+
+        if (pagedPeeps.isEmpty()) {
+            return CommonResponse.failed(CustomError.PEEP_NOT_FOUND);
+        }
+
+        // PagedResponse 생성
+        PagedResponse<CommonPeepDto> pagedResponse = PagedResponse.create(
+                dtoList,
+                page,
+                size,
+                (int) Math.ceil((double) totalPeepSet.size() / size),
+                totalPeepSet.size()
+        );
+
+        // response 반환
+        return CommonResponse.ok(pagedResponse);
+    }
+
+    /*
+    사용자가 댓글단/반응한 핍 리스트 페이지네이션
+    - 개별 동네에 대한 조회
+     */
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getPeepListByTown(String townCode, int page, int size) {
+        String memberId = userInfo.getCurrentMemberUid();
+
+        // 반응한 핍
+        List<Peep> reactedPeeps = peepReStickerRepository.findAllByMember_Id(memberId)
+                .stream().map(PeepReSticker::getPeep).toList();
+
+        // 댓글단 핍
+        List<Peep> cattedPeeps = chatRepository.findDistinctPeepsByMemberId(memberId)
+                .stream().map(Chat::getPeep).toList();
+
+        // 합치고 중복 제거
+        Set<Peep> totalPeepSet = new HashSet<>();
+        totalPeepSet.addAll(reactedPeeps);
+        totalPeepSet.addAll(cattedPeeps);
+
+        // 동네 코드로 필터링
+        List<Peep> filteredPeepList = totalPeepSet.stream()
+                .filter(p -> p.getCode() != null && p.getCode().equals(townCode))
+                .sorted(Comparator.comparing(Peep::getCreatedAt).reversed())
+                .toList();
+
+        // 페이징 처리
+        int start = page * size;
+        int end = Math.min(start + size, filteredPeepList.size());
+        List<Peep> pagedPeeps = start >= filteredPeepList.size() ? List.of() : filteredPeepList.subList(start, end);
+
+        // DTO 변환
+        List<CommonPeepDto> dtoList = pagedPeeps.stream().map(p -> CommonPeepDto.builder()
+                .peepId(p.getId())
+                .memberId(p.getMember().getId())
+                .town(p.getTown())
+                .imageUrl(p.getImageUrl())
+                .content(p.getContent())
+                .isEdited(p.getIsEdited())
+                .profileUrl(p.getMember().getProfileImg())
+                .isActive(timeAgoUtils.isActiveWithin24Hours(p.getCreatedAt()))
+                .uploadAt(timeAgoUtils.getTimeAgo(p.getCreatedAt()))
+                .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
+                .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
+                .build()).toList();
+
+        if (pagedPeeps.isEmpty()) {
+            return CommonResponse.failed(CustomError.PEEP_NOT_FOUND);
+        }
+
+        // 응답 포장
+        PagedResponse<CommonPeepDto> response = PagedResponse.create(
+                dtoList,
+                page,
+                size,
+                (int) Math.ceil((double) filteredPeepList.size() / size),
+                filteredPeepList.size()
+        );
+
+        return CommonResponse.ok(response);
     }
 
 }
