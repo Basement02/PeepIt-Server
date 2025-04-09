@@ -1,5 +1,6 @@
 package com.b02.peep_it.service;
 
+import com.b02.peep_it.common.exception.UnauthorizedException;
 import com.b02.peep_it.common.response.CommonResponse;
 import com.b02.peep_it.common.exception.CustomError;
 import com.b02.peep_it.common.util.CustomUserDetails;
@@ -15,6 +16,8 @@ import com.b02.peep_it.dto.member.ResponseCommonMemberDto;
 import com.b02.peep_it.repository.*;
 import com.b02.peep_it.common.util.JwtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.nurigo.java_sdk.api.Message;
@@ -23,6 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +35,7 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang.math.RandomUtils.nextInt;
 
@@ -166,7 +172,7 @@ public class AuthService {
         // idtoken 유효성 검증
         if (!jwtUtils.validateIdToken(provider, providerId)) {
             log.warn("⚠ 유효하지 않은 id token - provider: {}, providerId: {}", provider, providerId);
-            return CommonResponse.failed(CustomError.ID_TOKEN_UNAUTHORIZED);
+            return CommonResponse.failed(CustomError.TOKEN_UNAUTHORIZED);
         }
 
         log.info("✅ id token 검증 완료");
@@ -385,4 +391,45 @@ public class AuthService {
         if (allStates.isEmpty()) throw new IllegalStateException("State 테이블이 비어 있습니다.");
         return allStates.get(new Random().nextInt(allStates.size()));
     }
+
+    /*
+    로그아웃
+     */
+    public ResponseEntity<CommonResponse<Object>> logout(String bearerToken) {
+        log.info("[로그아웃 요청] Authorization 헤더: {}", bearerToken);
+
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            String token = bearerToken.substring(7);
+            log.info("[로그아웃 처리] Bearer 제거된 access token: {}", token);
+
+            if (!jwtUtils.validateAccessToken(token)) {
+                log.warn("[로그아웃 실패] 유효하지 않은 토큰");
+                return CommonResponse.failed(CustomError.TOKEN_UNAUTHORIZED);
+            }
+
+            Claims claims = jwtUtils.getClaims(token);
+            long expiration = claims.getExpiration().getTime() - System.currentTimeMillis();
+            log.info("[로그아웃 처리] Token 남은 유효 시간(ms): {}", expiration);
+
+            // Redis에 블랙리스트 등록
+            redisTemplate.opsForValue().set(
+                    "blacklist:" + token,
+                    "logout",
+                    expiration,
+                    TimeUnit.MILLISECONDS
+            );
+            log.info("[Redis 등록 완료] 블랙리스트 키: blacklist:{}, TTL: {}ms", token, expiration);
+
+            // Refresh Token도 제거
+            String uid = claims.getSubject();
+            redisTemplate.delete("refresh:" + uid);
+            log.info("[Refresh 삭제 완료] Key: refresh:{}", uid);
+
+            return CommonResponse.ok(null);
+        }
+
+        log.warn("[로그아웃 실패] Authorization 헤더 형식이 잘못됨");
+        return CommonResponse.failed(CustomError.TOKEN_UNAUTHORIZED);
+    }
+
 }

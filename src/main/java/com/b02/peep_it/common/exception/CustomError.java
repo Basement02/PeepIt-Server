@@ -20,7 +20,7 @@ public enum CustomError {
     - 02: 유효하지 않은 계정입니다
     - 03: 유효하지 않은 sms code입니다
      */
-    ID_TOKEN_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "40101", "유효하지 않은 social id token입니다"),
+    TOKEN_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "40101", "유효하지 않은 social id token입니다"),
     MEMBER_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "40102", "유효하지 않은 계정입니다"),
     WRONG_SMS(HttpStatus.UNAUTHORIZED, "40103", "유효하지 않은 sms code입니다"),
 
