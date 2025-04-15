@@ -31,7 +31,7 @@ public class MemberService {
     private final TermsAgreementRepository termsAgreementRepository;
 
     /*
-    아이디로 사용자 정보 반환 (id, name, town, profile)
+    아이디로 사용자 정보 반환 (id, name, town, gender, profile, isAgree)
      */
     @Transactional
     public ResponseEntity<CommonResponse<ResponseCommonMemberDto>> getMemberDetail(String memberId) {
@@ -44,6 +44,22 @@ public class MemberService {
         }
 
         Member member = optionalMember.get();
+        Optional<TermsAgreement> optionalTermsAgreement = termsAgreementRepository.findById(memberId);
+        TermsAgreement termsAgreement;
+
+        termsAgreement = optionalTermsAgreement.orElseGet(() -> TermsAgreement.builder()
+                .member(member)
+                .isAgree(false)
+                .build());
+
+        log.info("termsAgrreement: {}", termsAgreement.getIsAgree());
+
+        if (termsAgreement.getIsAgree() == null) {
+            termsAgreement.setDisAgree();
+        }
+        termsAgreementRepository.save(termsAgreement);
+
+        log.info("termsAgrreement: {}", termsAgreement.getIsAgree());
 
         // responseDto 구성 (id, role, name, gender, town, profile)
         ResponseCommonMemberDto responseDto = ResponseCommonMemberDto.builder()
@@ -53,6 +69,7 @@ public class MemberService {
                 .gender(member.getGender().getValue())
                 .town(member.getTown().getStateName())
                 .profile(member.getProfileImg())
+                .isAgree(termsAgreement.getIsAgree())
                 .build();
 
         // return
@@ -72,6 +89,23 @@ public class MemberService {
             return CommonResponse.failed(CustomError.MEMBER_UNAUTHORIZED); // 유효하지 않은 계정입니다
         }
 
+        Optional<TermsAgreement> optionalTermsAgreement = termsAgreementRepository.findById(member.getId());
+        TermsAgreement termsAgreement;
+
+        termsAgreement = optionalTermsAgreement.orElseGet(() -> TermsAgreement.builder()
+                .member(member)
+                .isAgree(false)
+                .build());
+
+        log.info("termsAgrreement: {}", termsAgreement.getIsAgree());
+
+        if (termsAgreement.getIsAgree() == null) {
+            termsAgreement.setDisAgree();
+        }
+        termsAgreementRepository.save(termsAgreement);
+
+        log.info("termsAgrreement: {}", termsAgreement.getIsAgree());
+
         // responseDto 구성 (id, role, name, gender, town, profile)
         ResponseCommonMemberDto responseDto = ResponseCommonMemberDto.builder()
                 .role(member.getRole().getCode())
@@ -80,6 +114,7 @@ public class MemberService {
                 .gender(member.getGender().getValue())
                 .town(member.getTown().getStateName())
                 .profile(member.getProfileImg())
+                .isAgree(termsAgreement.getIsAgree())
                 .build();
 
         // return
