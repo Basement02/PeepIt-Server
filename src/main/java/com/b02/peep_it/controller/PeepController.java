@@ -252,6 +252,17 @@ public class PeepController {
         return peepService.getUploadedPeepList(page, size);
     }
 
+    // 사용자가 업로드한 핍 리스트 조회 (동네별)
+    @SecurityRequirement(name = "AccessToken")
+    @Operation(summary = "사용자가 업로드한 핍 리스트 조회 (동네별)", description = "사용자가 업로드한 핍을 동네별로 조회합니다.")
+    @GetMapping("/my/upload/{town}")
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMyUploadPeepListByTown(@PathVariable("town") String town,
+                                                                                                 @RequestParam(defaultValue = "0") int page,
+                                                                                                 @RequestParam(defaultValue = "10") int size
+    ) {
+        return peepService.getUploadedPeepListByTown(town, page, size);
+    }
+
     // 사용자가 반응한 핍 리스트 조회 (전체)
     @SecurityRequirement(name = "AccessToken")
     @Operation(summary = "사용자가 반응한 핍 리스트 조회", description = "사용자가 반응한 핍 리스트를 조회합니다.")

@@ -756,4 +756,55 @@ public class PeepService {
         return CommonResponse.ok(response);
     }
 
+    /*
+    업로드한 핍 조회 (동네별)
+     */
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getUploadedPeepListByTown(String townCode, int page, int size) {
+        // 현재 로그인 사용자 ID 조회
+        String memberId = userInfo.getCurrentMemberUid();
+
+        // 업로드한 핍
+        List<Peep> uploadedPeeps = peepRepository.findAllByMember_Id(memberId);
+
+        // 동네 코드로 필터링
+        List<Peep> filteredPeepList = uploadedPeeps.stream()
+                .filter(p -> p.getCode() != null && p.getCode().equals(townCode))
+                .sorted(Comparator.comparing(Peep::getCreatedAt).reversed())
+                .toList();
+
+        // 페이징 처리
+        int start = page * size;
+        int end = Math.min(start + size, filteredPeepList.size());
+        List<Peep> pagedPeeps = start >= filteredPeepList.size() ? List.of() : filteredPeepList.subList(start, end);
+
+        // DTO 변환
+        List<CommonPeepDto> dtoList = pagedPeeps.stream().map(p -> CommonPeepDto.builder()
+                .peepId(p.getId())
+                .memberId(p.getMember().getId())
+                .town(p.getTown())
+                .imageUrl(p.getImageUrl())
+                .content(p.getContent())
+                .isEdited(p.getIsEdited())
+                .profileUrl(p.getMember().getProfileImg())
+                .isActive(timeAgoUtils.isActiveWithin24Hours(p.getCreatedAt()))
+                .uploadAt(timeAgoUtils.getTimeAgo(p.getCreatedAt()))
+                .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
+                .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
+                .build()).toList();
+
+        if (pagedPeeps.isEmpty()) {
+            return CommonResponse.failed(CustomError.PEEP_NOT_FOUND);
+        }
+
+        // 응답 포장
+        PagedResponse<CommonPeepDto> response = PagedResponse.create(
+                dtoList,
+                page,
+                size,
+                (int) Math.ceil((double) filteredPeepList.size() / size),
+                filteredPeepList.size()
+        );
+
+        return CommonResponse.ok(response);
+    }
 }

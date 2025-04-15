@@ -36,9 +36,16 @@ public class TownService {
     public ResponseEntity<CommonResponse<ResponseCommonMemberDto>> updateTownInfo(RequestPatchTownDto requestDto) {
         // 현재 사용자 정보를 불러온다
         Member member = userInfo.getCurrentMember();
+
+        // 형식 검증: 10자리 숫자인지 확인
+        String code = requestDto.legalDistrictCode();
+        if (code == null || !code.matches("^[0-9]{10}$")) {
+            return CommonResponse.failed(CustomError.STATE_NOT_FOUND);
+        }
+
         Optional<State> townName = stateRepository.findByCode(requestDto.legalDistrictCode());
         if (townName.isEmpty()) {
-            return CommonResponse.failed(CustomError.TOWN_NOT_FOUND);
+            return CommonResponse.failed(CustomError.STATE_NOT_FOUND);
         }
 
         // 사용자의 Town 객체를 불러온다
