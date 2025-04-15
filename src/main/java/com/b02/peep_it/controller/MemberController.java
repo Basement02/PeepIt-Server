@@ -141,10 +141,10 @@ public class MemberController {
     @Operation(
             summary = "동네 등록/수정하기 (등록/수정 동일 api)",
             description = """
-            - 등록 동네는 오직 1개만 가능
-            - 입력 가능한 정보:
-                - legalDistrictCode: 법정동 코드 (10자리)
-            """,
+        - 등록 동네는 오직 1개만 가능
+        - 입력 가능한 정보:
+            - legalDistrictCode: 법정동 코드 (10자리)
+        """,
             security = {
                     @SecurityRequirement(name = "AuthToken")
             },
@@ -158,10 +158,10 @@ public class MemberController {
                                     @ExampleObject(
                                             name = "동네 등록/수정 요청 예시",
                                             value = """
-                                            {
-                                                "legalDistrictCode": "1234512345"
-                                            }
-                                    """)
+                                        {
+                                            "legalDistrictCode": "1234512345"
+                                        }
+                                """)
                             }
                     )
             ),
@@ -173,12 +173,12 @@ public class MemberController {
                                     mediaType = "application/json",
                                     examples = @ExampleObject(
                                             value = """
-                                                    {
-                                                        "success": true,
-                                                        "data": null,
-                                                        "error": null
-                                                    }
-                                    """)
+                                                {
+                                                    "success": true,
+                                                    "data": null,
+                                                    "error": null
+                                                }
+                                        """)
                             )
                     ),
                     @ApiResponse(
@@ -187,15 +187,49 @@ public class MemberController {
                             content = @Content(
                                     mediaType = "application/json",
                                     examples = @ExampleObject(value = """
-                    {
-                        "success": false,
-                        "data": {},
-                        "error": {
-                            "code": "40101",
-                            "message": "유효하지 않은 계정입니다"
-                        }
+                {
+                    "success": false,
+                    "data": {},
+                    "error": {
+                        "code": "40101",
+                        "message": "유효하지 않은 계정입니다"
                     }
-                    """)
+                }
+                """)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "40402",
+                            description = "사용자의 동네 정보가 존재하지 않습니다",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(value = """
+                {
+                    "success": false,
+                    "data": {},
+                    "error": {
+                        "code": "40402",
+                        "message": "사용자의 동네 정보가 존재하지 않습니다"
+                    }
+                }
+                """)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "40403",
+                            description = "존재하지 않는 법정동코드입니다",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(value = """
+                {
+                    "success": false,
+                    "data": {},
+                    "error": {
+                        "code": "40403",
+                        "message": "존재하지 않는 법정동코드입니다"
+                    }
+                }
+                """)
                             )
                     ),
                     @ApiResponse(
@@ -204,15 +238,15 @@ public class MemberController {
                             content = @Content(
                                     mediaType = "application/json",
                                     examples = @ExampleObject(value = """
-                    {
-                        "success": false,
-                        "data": {},
-                        "error": {
-                            "code": "50000",
-                            "message": "서버 내부 오류가 발생했습니다"
-                        }
+                {
+                    "success": false,
+                    "data": {},
+                    "error": {
+                        "code": "50000",
+                        "message": "서버 내부 오류가 발생했습니다"
                     }
-                    """)
+                }
+                """)
                             )
                     )
             }
