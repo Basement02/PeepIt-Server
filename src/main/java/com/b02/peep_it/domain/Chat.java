@@ -2,6 +2,7 @@ package com.b02.peep_it.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -24,4 +25,11 @@ public class Chat extends BaseTimeEntity {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member; // 회원 고유 ID
+
+    @Builder
+    public Chat(String content, Peep peep, Member member) {
+        this.content = content;
+        this.peep = peep;
+        this.member = member;
+    }
 }
