@@ -322,11 +322,11 @@ public class PeepController {
     @SecurityRequirement(name = "AccessToken")
     @Operation(summary = "지도 내 핍 리스트 조회", description = "지도 반경 내 노출될 핍 리스트를 조회합니다.")
     @GetMapping("/get/map")
-    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMapPeepList(@RequestParam(defaultValue = "5") int dist,
-                                                                                       @RequestParam(defaultValue = "0") int page,
-                                                                                       @RequestParam(defaultValue = "10") int size,
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMapPeepList(@RequestParam double longitude,
                                                                                        @RequestParam double latitude,
-                                                                                       @RequestParam double longitude) {
+                                                                                       @RequestParam(defaultValue = "5") int dist,
+                                                                                       @RequestParam(defaultValue = "0") int page,
+                                                                                       @RequestParam(defaultValue = "10") int size) {
         return peepService.getMapPeepList(dist, page, size, latitude, longitude);
     }
 }

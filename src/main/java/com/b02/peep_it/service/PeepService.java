@@ -626,8 +626,8 @@ public class PeepService {
     }
 
     /*
-    지도 내 핍 리스트 조회 (최신순)
-     */
+    지도 내 핍 리스트 조회 (인기도순만 적용)
+    */
     public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMapPeepList(int dist, int page, int size, double latitude, double longitude) {
         // 1. 현재 로그인 사용자의 등록 동네(State) 조회
         Member member = userInfo.getCurrentMember();
@@ -635,24 +635,33 @@ public class PeepService {
         Town town = member.getTown();
         if (town == null || town.getState() == null) {
             log.info("error custom 필요");
-//            throw new RuntimeException("사용자의 동네 정보가 없습니다");
             return CommonResponse.failed(CustomError.TOWN_NOT_FOUND);
         }
 
         State memberState = town.getState();
         String memberCode = memberState.getCode();
-        String stateTitle = memberState.getName();
 
-        // 2. 페이징 정보 설정
-        PageRequest pageRequest = PageRequest.of(page, size);
+        // 2. 거리 + 시간 + 지역 조건에 맞는 모든 핍 조회
+        List<Peep> peepList = peepRepository.findAllNearbyPeeps(
+                longitude, latitude,
+                dist,
+                LocalDateTime.now().minusHours(24),
+                memberCode
+        );
 
-        // 3. 지정 거리 이내 + activeTime이 24시간 이내 + 법정동 코드 일치인 핍 조회
-        Page<Peep> peepPage = peepRepository.findNearbyPeeps(latitude, longitude, dist, LocalDateTime.now().minusHours(24), memberCode, pageRequest);
-
-
-        // 4. `Peep`에서 `CommonPeepDto`로 변환 후, 인기도 순으로 정렬
-        List<CommonPeepDto> sortedPeepList = peepPage.getContent().stream()
+        // 3. 인기도 점수 기준 정렬 (내림차순)
+        List<Peep> sorted = peepList.stream()
                 .sorted(Comparator.comparingDouble(Peep::calculatePopularityScore).reversed())
+                .toList();
+
+        // 4. 자바에서 슬라이싱 방식으로 페이징 처리
+        int start = page * size;
+        int end = Math.min(start + size, sorted.size());
+        if (start >= end) {
+            return CommonResponse.failed(CustomError.PEEP_NOT_FOUND);
+        }
+
+        List<CommonPeepDto> pagedDtos = sorted.subList(start, end).stream()
                 .map(p -> CommonPeepDto.builder()
                         .peepId(p.getId())
                         .memberId(p.getMember().getId())
@@ -664,7 +673,7 @@ public class PeepService {
                         .content(p.getContent())
                         .isEdited(p.getIsEdited())
                         .profileUrl(p.getMember().getProfileImg())
-                        .isActive(true)
+                        .isActive(timeAgoUtils.isActiveWithin24Hours(p.getCreatedAt())) // ✅ 활성 상태 계산
                         .uploadAt(timeAgoUtils.getTimeAgo(p.getCreatedAt()))
                         .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                         .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
@@ -672,25 +681,19 @@ public class PeepService {
                         .build())
                 .toList();
 
+        // 5. PageImpl 생성
+        Page<CommonPeepDto> resultPage = new PageImpl<>(pagedDtos, PageRequest.of(page, size), sorted.size());
 
-
-        if (sortedPeepList.isEmpty()) {
-            return CommonResponse.failed(CustomError.PEEP_NOT_FOUND);
-        }
-
-        // 5. DTO 리스트 기반으로 새로운 페이지 객체 생성
-        Page<CommonPeepDto> sortedPage = new PageImpl<>(sortedPeepList, pageRequest, peepPage.getTotalElements());
-
-        // 6. PagedResponse 객체 생성
+        // 6. PagedResponse 생성
         PagedResponse<CommonPeepDto> pagedResponse = PagedResponse.create(
-                sortedPage.getContent(),
-                sortedPage.getNumber(),
-                sortedPage.getSize(),
-                sortedPage.getTotalPages(),
-                sortedPage.getTotalElements()
+                resultPage.getContent(),
+                resultPage.getNumber(),
+                resultPage.getSize(),
+                resultPage.getTotalPages(),
+                resultPage.getTotalElements()
         );
 
-        // 8. 최종 응답 반환
+        // 7. 응답 반환
         return CommonResponse.ok(pagedResponse);
     }
 

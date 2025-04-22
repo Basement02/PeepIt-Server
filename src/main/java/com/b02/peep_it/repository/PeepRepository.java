@@ -33,4 +33,23 @@ public interface PeepRepository extends JpaRepository<Peep, Long> {
                                @Param("cutoffTime") LocalDateTime cutoffTime,
                                @Param("code") String code,
                                Pageable pageable);
+
+    @Query("""
+        SELECT p FROM Peep p
+        JOIN p.peepLocation l
+        WHERE p.activeTime >= :cutoffTime
+        AND p.code.code = :code
+        AND ST_Distance(
+            ST_GeomFromText(CONCAT('POINT(', :latitude, ' ', :longitude, ')'), 4326),
+            ST_GeomFromText(CONCAT('POINT(', l.latitude, ' ', l.longitude, ')'), 4326)
+        ) <= :distance
+    """)
+    List<Peep> findAllNearbyPeeps(
+            @Param("longitude") double longitude,
+            @Param("latitude") double latitude,
+            @Param("distance") int distance,
+            @Param("cutoffTime") LocalDateTime cutoffTime,
+            @Param("code") String code
+    );
+
 }
