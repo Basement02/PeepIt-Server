@@ -418,6 +418,7 @@ public class PeepService {
                         .content(p.getContent())
                         .isEdited(p.getIsEdited())
                         .profileUrl(p.getMember().getProfileImg())
+                        .isActive(true)
                         .uploadAt(timeAgoUtils.getTimeAgo(p.getActiveTime()))
                         .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                         .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
