@@ -97,13 +97,14 @@ public class Peep extends BaseTimeEntity {
                 ? (int) peepReStickerList.stream().filter(r -> r.getCreatedAt().isAfter(twoHoursAgo)).count()
                 : 0;
 
-        // 원점수 계산
         double rawScore = (totalChat * 0.6 + totalReact * 0.4) + (recentChat * 0.6 + recentReact * 0.6);
 
-        // 시그모이드 정규화: 기준점수 8, 경사도 0.4 (a를 줄이면 부드러워짐)
         double a = 0.4;
         double b = 8.0;
-        double normalizedScore = 10.0 / (1.0 + Math.exp(-a * (rawScore - b)));
+        double sigmoid = 10.0 / (1.0 + Math.exp(-a * (rawScore - b)));
+
+        // 강제 1~10 범위로 클리핑
+        double normalizedScore = Math.min(10.0, Math.max(1.0, sigmoid));
 
         return normalizedScore;
     }
