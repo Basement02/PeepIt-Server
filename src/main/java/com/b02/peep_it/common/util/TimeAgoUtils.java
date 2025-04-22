@@ -42,7 +42,8 @@ public class TimeAgoUtils {
         Duration duration = Duration.between(activeTime, now);
 
         // 24시간(= 86,400초) 이내인지 확인
-        return duration.toHours() < 24;
+//        return duration.toHours() < 24;
+        return duration.toHours() < 240; // 10일(개발용)
     }
 }
 
