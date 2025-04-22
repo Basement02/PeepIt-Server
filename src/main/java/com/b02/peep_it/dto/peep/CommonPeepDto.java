@@ -15,6 +15,7 @@ public record CommonPeepDto(
         @NotNull Boolean isActive, // 활성화(24시간 이내) 여부
         @NotNull String uploadAt,
         @NotNull Integer stickerNum,
-        @NotNull Integer chatNum
+        @NotNull Integer chatNum,
+        @NotNull Double popularity // 인기도
         ) {
 }

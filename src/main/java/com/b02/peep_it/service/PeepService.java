@@ -34,7 +34,6 @@ public class PeepService {
     private final PeepLocationRepository peepLocationRepository;
     private final PeepReStickerRepository peepReStickerRepository;
     private final ChatRepository chatRepository;
-    private final TownRepository townRepository;
     private final StateRepository stateRepository;
 
     /*
@@ -93,6 +92,7 @@ public class PeepService {
                     .uploadAt(timeAgoUtils.getTimeAgo(peep.getCreatedAt()))
                     .stickerNum(Optional.ofNullable(peep.getPeepReStickerList()).map(l -> l.size()).orElse(0))
                     .chatNum(Optional.ofNullable(peep.getChatList()).map(l -> l.size()).orElse(0))
+                    .popularity((double) 1)
                     .build();
 
             // 7. response 반환
@@ -129,6 +129,7 @@ public class PeepService {
                 .uploadAt(timeAgoUtils.getTimeAgo(peep.getCreatedAt()))
                 .stickerNum(Optional.ofNullable(peep.getPeepReStickerList()).map(l -> l.size()).orElse(0))
                 .chatNum(Optional.ofNullable(peep.getChatList()).map(l -> l.size()).orElse(0))
+                .popularity(peep.calculatePopularityScore())
                 .build();
 
         // 3. response 반환
@@ -162,6 +163,7 @@ public class PeepService {
                 .uploadAt(timeAgoUtils.getTimeAgo(p.getCreatedAt()))
                 .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                 .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
+                .popularity(p.calculatePopularityScore())
                 .build());
 
         if (responseDtoPage.isEmpty()) {
@@ -176,6 +178,22 @@ public class PeepService {
                 responseDtoPage.getTotalPages(),
                 responseDtoPage.getTotalElements()
         );
+
+        log.info("[📦 DB 원본 Page] page={}, size={}, totalElements={}, totalPages={}, hasNext={}",
+                peepPage.getNumber(), peepPage.getSize(),
+                peepPage.getTotalElements(), peepPage.getTotalPages(),
+                peepPage.hasNext());
+
+        log.info("[📦 변환된 DTO Page] page={}, size={}, totalPages={}, totalElements={}, hasNext={}",
+                responseDtoPage.getNumber(), responseDtoPage.getSize(),
+                responseDtoPage.getTotalPages(), responseDtoPage.getTotalElements(),
+                responseDtoPage.hasNext());
+
+        log.info("[📄 페이징 정보] Total elements: {}", responseDtoPage.getTotalElements());
+        log.info("[📄 페이징 정보] Total pages   : {}", responseDtoPage.getTotalPages());
+        log.info("[📄 페이징 정보] Current page  : {}", responseDtoPage.getNumber());
+        log.info("[📄 페이징 정보] Has next      : {}", responseDtoPage.hasNext());
+        log.info("[📄 페이징 정보] Is last       : {}", responseDtoPage.isLast());
 
         // 5. response 반환
         return CommonResponse.ok(pagedResponse);
@@ -232,6 +250,8 @@ public class PeepService {
                             .isActive(timeAgoUtils.isActiveWithin24Hours(p.getCreatedAt()))
                             .uploadAt(timeAgoUtils.getTimeAgo(p.getCreatedAt()))
                             .stickerNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
+                            .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
+                            .popularity(p.calculatePopularityScore())
                             .build())
                     .toList();
             peepsByTown.put(townCode, dtoList);
@@ -280,6 +300,7 @@ public class PeepService {
                     .uploadAt(timeAgoUtils.getTimeAgo(p.getCreatedAt()))
                     .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                     .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
+                    .popularity(p.calculatePopularityScore())
                     .build();
         });
 
@@ -329,6 +350,7 @@ public class PeepService {
                     .uploadAt(timeAgoUtils.getTimeAgo(p.getCreatedAt()))
                     .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                     .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
+                    .popularity(p.calculatePopularityScore())
                     .build();
         });
 
@@ -373,6 +395,7 @@ public class PeepService {
                 .uploadAt(timeAgoUtils.getTimeAgo(p.getCreatedAt()))
                 .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                 .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
+                .popularity(p.calculatePopularityScore())
                 .build());
 
         if (responseDtoPage.isEmpty()) {
@@ -422,6 +445,7 @@ public class PeepService {
                         .uploadAt(timeAgoUtils.getTimeAgo(p.getActiveTime()))
                         .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                         .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
+                        .popularity(p.calculatePopularityScore())
                         .build())
                 .toList(); // ✅ 리스트 변환
 
@@ -455,13 +479,12 @@ public class PeepService {
         Town town = member.getTown();
         if (town == null || town.getState() == null) {
             log.info("error custom 필요");
-//            throw new RuntimeException("사용자의 동네 정보가 없습니다");
             return CommonResponse.failed(CustomError.TOWN_NOT_FOUND);
         }
 
         State memberState = town.getState();
 
-        // 2. 페이징 처리를 위한 PageRequest 생성 (최신순 정렬 추가)
+        // 2. 페이징 처리를 위한 PageRequest 생성
         PageRequest pageRequest = PageRequest.of(page, size);
 
         // 3. `code`가 `memberState`와 일치 & `activeTime`이 24시간 이내인 Peep 조회
@@ -469,9 +492,8 @@ public class PeepService {
                 memberState, LocalDateTime.now().minusHours(24), pageRequest
         );
 
-        // 3. `Peep`에서 `CommonPeepDto`로 변환 후, 인기도 순으로 정렬
+        // 4. `Peep`에서 `CommonPeepDto`로 변환 후, 인기도 순으로 정렬
         List<CommonPeepDto> sortedPeepList = peepPage.getContent().stream()
-                // 인기순 정렬 (추후 수정 필요)
                 .sorted(Comparator.comparingDouble(Peep::calculatePopularityScore).reversed())
                 .map(p -> CommonPeepDto.builder()
                         .peepId(p.getId())
@@ -485,6 +507,7 @@ public class PeepService {
                         .uploadAt(timeAgoUtils.getTimeAgo(p.getCreatedAt()))
                         .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                         .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
+                        .popularity(p.calculatePopularityScore())
                         .build())
                 .toList();
 
@@ -492,10 +515,10 @@ public class PeepService {
             return CommonResponse.failed(CustomError.PEEP_NOT_FOUND);
         }
 
-        // 4. 정렬된 데이터를 기반으로 새로운 Page 객체 생성
-        Page<CommonPeepDto> sortedPage = new PageImpl<>(sortedPeepList, pageRequest, sortedPeepList.size());
+        // 5. 기존 페이지의 전체 개수를 기준으로 Page 객체 생성 (수정 포인트)
+        Page<CommonPeepDto> sortedPage = new PageImpl<>(sortedPeepList, pageRequest, peepPage.getTotalElements());
 
-        // 5. PagedResponse 객체 생성
+        // 6. PagedResponse 객체 생성
         PagedResponse<CommonPeepDto> pagedResponse = PagedResponse.create(
                 sortedPage.getContent(),
                 sortedPage.getNumber(),
@@ -504,7 +527,7 @@ public class PeepService {
                 sortedPage.getTotalElements()
         );
 
-        // 6. response 반환
+        // 7. response 반환
         return CommonResponse.ok(pagedResponse);
     }
 
@@ -535,6 +558,7 @@ public class PeepService {
 
         // 3. `Peep`에서 `CommonPeepDto`로 변환
         List<CommonPeepDto> sortedPeepList = peepPage.getContent().stream()
+                .sorted(Comparator.comparing(Peep::getCreatedAt).reversed())
                 .map(p -> CommonPeepDto.builder()
                         .peepId(p.getId())
                         .memberId(p.getMember().getId())
@@ -547,6 +571,7 @@ public class PeepService {
                         .uploadAt(timeAgoUtils.getTimeAgo(p.getCreatedAt()))
                         .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                         .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
+                        .popularity(p.calculatePopularityScore())
                         .build())
                 .toList();
 
@@ -571,7 +596,7 @@ public class PeepService {
     }
 
     /*
-    지도 내 핍 리스트 조회
+    지도 내 핍 리스트 조회 (최신순)
      */
     public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMapPeepList(int dist, int page, int size, double latitude, double longitude) {
         // 1. 현재 로그인 사용자의 등록 동네(State) 조회
@@ -588,18 +613,20 @@ public class PeepService {
         String memberCode = memberState.getCode();
         String stateTitle = memberState.getName();
 
-        // 2. 페이징 정보 설정 (최신순 정렬 포함)
+        // 2. 페이징 정보 설정
         PageRequest pageRequest = PageRequest.of(page, size);
 
         // 3. 지정 거리 이내 + activeTime이 24시간 이내 + 법정동 코드 일치인 핍 조회
         Page<Peep> peepPage = peepRepository.findNearbyPeeps(latitude, longitude, dist, LocalDateTime.now().minusHours(24), memberCode, pageRequest);
 
-        // 4. 조회된 핍 데이터를 DTO로 변환
-        List<CommonPeepDto> peepDtoList = peepPage.stream()
+
+        // 4. `Peep`에서 `CommonPeepDto`로 변환 후, 인기도 순으로 정렬
+        List<CommonPeepDto> sortedPeepList = peepPage.getContent().stream()
+                .sorted(Comparator.comparingDouble(Peep::calculatePopularityScore).reversed())
                 .map(p -> CommonPeepDto.builder()
                         .peepId(p.getId())
                         .memberId(p.getMember().getId())
-                        .town(stateTitle)
+                        .town(p.getTown())
                         .imageUrl(p.getImageUrl())
                         .content(p.getContent())
                         .isEdited(p.getIsEdited())
@@ -608,15 +635,18 @@ public class PeepService {
                         .uploadAt(timeAgoUtils.getTimeAgo(p.getCreatedAt()))
                         .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                         .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
+                        .popularity(p.calculatePopularityScore())
                         .build())
                 .toList();
 
-        if (peepDtoList.isEmpty()) {
+
+
+        if (sortedPeepList.isEmpty()) {
             return CommonResponse.failed(CustomError.PEEP_NOT_FOUND);
         }
 
         // 5. DTO 리스트 기반으로 새로운 페이지 객체 생성
-        Page<CommonPeepDto> sortedPage = new PageImpl<>(peepDtoList, pageRequest, peepPage.getTotalElements());
+        Page<CommonPeepDto> sortedPage = new PageImpl<>(sortedPeepList, pageRequest, peepPage.getTotalElements());
 
         // 6. PagedResponse 객체 생성
         PagedResponse<CommonPeepDto> pagedResponse = PagedResponse.create(
@@ -679,6 +709,7 @@ public class PeepService {
                 .uploadAt(timeAgoUtils.getTimeAgo(p.getCreatedAt()))
                 .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                 .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
+                .popularity(p.calculatePopularityScore())
                 .build()).toList();
 
         if (pagedPeeps.isEmpty()) {
@@ -742,6 +773,7 @@ public class PeepService {
                 .uploadAt(timeAgoUtils.getTimeAgo(p.getCreatedAt()))
                 .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                 .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
+                .popularity(p.calculatePopularityScore())
                 .build()).toList();
 
         if (pagedPeeps.isEmpty()) {
@@ -794,6 +826,7 @@ public class PeepService {
                 .uploadAt(timeAgoUtils.getTimeAgo(p.getCreatedAt()))
                 .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                 .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
+                .popularity(p.calculatePopularityScore())
                 .build()).toList();
 
         if (pagedPeeps.isEmpty()) {

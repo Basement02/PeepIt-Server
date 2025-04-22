@@ -83,19 +83,29 @@ public class Peep extends BaseTimeEntity {
     인기도 점수 계산 함수
      */
     public double calculatePopularityScore() {
-        log.info("추후 수정 필요");
-        // 전체 좋아요 수
-        int likeCount = peepReStickerList != null ? peepReStickerList.size() : 0;
-        // 전체 댓글 수
-        int commentCount = chatList != null ? chatList.size() : 0;
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime twoHoursAgo = now.minusHours(2);
 
-        // 사용자 반응(좋아요/댓글)이 있는 경우 1, 없으면 0
-        int hasUserLiked = peepReStickerList.stream()
-                .anyMatch(reaction -> reaction.getMember().getId().equals(this.member.getId())) ? 1 : 0;
-        int hasUserCommented = chatList.stream()
-                .anyMatch(comment -> comment.getMember().getId().equals(this.member.getId())) ? 1 : 0;
+        int totalChat = chatList != null ? chatList.size() : 0;
+        int totalReact = peepReStickerList != null ? peepReStickerList.size() : 0;
 
-        // 인기도 공식 적용 (Plike * Vlike) + (Pcomment * Vcomment)
-        return (hasUserLiked * likeCount) + (hasUserCommented * commentCount);
+        int recentChat = chatList != null
+                ? (int) chatList.stream().filter(chat -> chat.getCreatedAt().isAfter(twoHoursAgo)).count()
+                : 0;
+
+        int recentReact = peepReStickerList != null
+                ? (int) peepReStickerList.stream().filter(r -> r.getCreatedAt().isAfter(twoHoursAgo)).count()
+                : 0;
+
+        double rawScore = (totalChat * 0.6 + totalReact * 0.4) + (recentChat * 0.6 + recentReact * 0.6);
+
+        double a = 0.4;
+        double b = 8.0;
+        double sigmoid = 10.0 / (1.0 + Math.exp(-a * (rawScore - b)));
+
+        // 강제 1~10 범위로 클리핑
+        double normalizedScore = Math.min(10.0, Math.max(1.0, sigmoid));
+
+        return normalizedScore;
     }
 }
