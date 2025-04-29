@@ -60,6 +60,7 @@ public class PeepService {
                     .imageUrl(mediaUrl)
                     .content(requestDto.content())
                     .member(member)
+                    .isVideo(requestDto.isVideo())
                     .build();
 
             // 4. PeepLocation 객체 생성 및 추가
@@ -96,6 +97,7 @@ public class PeepService {
                     .stickerNum(Optional.ofNullable(peep.getPeepReStickerList()).map(l -> l.size()).orElse(0))
                     .chatNum(Optional.ofNullable(peep.getChatList()).map(l -> l.size()).orElse(0))
                     .popularity((double) 1)
+                    .isVideo(peep.getIsVideo())
                     .build();
 
             // 7. response 반환
@@ -136,6 +138,7 @@ public class PeepService {
                 .stickerNum(Optional.ofNullable(peep.getPeepReStickerList()).map(l -> l.size()).orElse(0))
                 .chatNum(Optional.ofNullable(peep.getChatList()).map(l -> l.size()).orElse(0))
                 .popularity(peep.calculatePopularityScore())
+                .isVideo(peep.getIsVideo())
                 .build();
 
         // 3. response 반환
@@ -173,6 +176,7 @@ public class PeepService {
                 .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                 .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
                 .popularity(p.calculatePopularityScore())
+                .isVideo(p.getIsVideo())
                 .build());
 
         if (responseDtoPage.isEmpty()) {
@@ -264,6 +268,7 @@ public class PeepService {
                             .stickerNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
                             .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
                             .popularity(p.calculatePopularityScore())
+                            .isVideo(p.getIsVideo())
                             .build())
                     .toList();
             peepsByTown.put(townCode, dtoList);
@@ -316,6 +321,7 @@ public class PeepService {
                     .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                     .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
                     .popularity(p.calculatePopularityScore())
+                    .isVideo(p.getIsVideo())
                     .build();
         });
 
@@ -369,6 +375,7 @@ public class PeepService {
                     .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                     .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
                     .popularity(p.calculatePopularityScore())
+                    .isVideo(p.getIsVideo())
                     .build();
         });
 
@@ -417,6 +424,7 @@ public class PeepService {
                 .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                 .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
                 .popularity(p.calculatePopularityScore())
+                .isVideo(p.getIsVideo())
                 .build());
 
         if (responseDtoPage.isEmpty()) {
@@ -535,6 +543,7 @@ public class PeepService {
                         .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                         .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
                         .popularity(p.calculatePopularityScore())
+                        .isVideo(p.getIsVideo())
                         .build())
                 .toList();
 
@@ -609,6 +618,7 @@ public class PeepService {
                         .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                         .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
                         .popularity(p.calculatePopularityScore())
+                        .isVideo(p.getIsVideo())
                         .build())
                 .toList();
 
@@ -681,6 +691,7 @@ public class PeepService {
                         .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                         .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
                         .popularity(p.calculatePopularityScore())
+                        .isVideo(p.getIsVideo())
                         .build())
                 .toList();
 
@@ -752,6 +763,8 @@ public class PeepService {
                 .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                 .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
                 .popularity(p.calculatePopularityScore())
+                .isVideo(p.getIsVideo())
+                .isVideo(p.getIsVideo())
                 .build()).toList();
 
         if (pagedPeeps.isEmpty()) {
@@ -819,6 +832,7 @@ public class PeepService {
                 .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                 .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
                 .popularity(p.calculatePopularityScore())
+                .isVideo(p.getIsVideo())
                 .build()).toList();
 
         if (pagedPeeps.isEmpty()) {
@@ -875,6 +889,7 @@ public class PeepService {
                 .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                 .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
                 .popularity(p.calculatePopularityScore())
+                .isVideo(p.getIsVideo())
                 .build()).toList();
 
         if (pagedPeeps.isEmpty()) {

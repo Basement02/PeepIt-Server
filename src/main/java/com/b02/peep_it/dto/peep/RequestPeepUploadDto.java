@@ -29,6 +29,9 @@ public record RequestPeepUploadDto(
         String roadNameCode,
 
         @Schema(description = "건물명", example = "서울시청")
-        String building
+        String building,
+
+        @Schema(description = "비디오 여부", example = "true")
+        Boolean isVideo
 ) {
 }

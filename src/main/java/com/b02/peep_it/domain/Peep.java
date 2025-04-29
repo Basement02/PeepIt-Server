@@ -35,6 +35,9 @@ public class Peep extends BaseTimeEntity {
     @Column(nullable = false, length = 1024, name = "image_url")
     private String imageUrl; // 이미지 or 영상 url
 
+    @Column(nullable = false, name = "is_video")
+    private Boolean isVideo;
+
     @Column(nullable = false)
     private String content; // 본문
 
@@ -59,7 +62,7 @@ public class Peep extends BaseTimeEntity {
      */
     @Builder
     public Peep(State code, String town, String imageUrl,
-                                  String content, Member member) {
+                                  String content, Member member, Boolean isVideo) {
         this.activeTime = LocalDateTime.now();
         this.code = code;
         this.town = town;
@@ -67,6 +70,7 @@ public class Peep extends BaseTimeEntity {
         this.content = content;
         this.isEdited = false;
         this.member = member;
+        this.isVideo = isVideo;
     }
 
     public Peep updateActiveTime() {
