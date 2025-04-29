@@ -19,6 +19,7 @@ public record CommonPeepDto(
         @NotNull String uploadAt,
         @NotNull Integer stickerNum,
         @NotNull Integer chatNum,
-        @NotNull Double popularity // 인기도
+        @NotNull Double popularity, // 인기도
+        @NotNull Boolean isVideo // 비디오(true) / 이미지(false)
         ) {
 }
