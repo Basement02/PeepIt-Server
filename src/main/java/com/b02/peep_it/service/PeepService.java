@@ -576,12 +576,19 @@ public class PeepService {
 
 
         // 2. 페이징 처리를 위한 PageRequest 생성 (최신순 정렬 추가)
-        PageRequest pageRequest = PageRequest.of(page, size);
+//        PageRequest pageRequest = PageRequest.of(page, size);
+        PageRequest pageRequest = PageRequest.of(
+                page, size, Sort.by("createdAt").descending()
+        );
 
         // 3. `code`가 `memberState`와 일치 & `activeTime`이 24시간 이내인 Peep 조회
         Page<Peep> peepPage = peepRepository.findAllByCodeAndActiveTimeAfter(
                 memberState, LocalDateTime.now().minusHours(24), pageRequest
         );
+
+        if (peepPage.isEmpty()) {
+            return CommonResponse.failed(CustomError.PEEP_NOT_FOUND);
+        }
 
         // 3. `Peep`에서 `CommonPeepDto`로 변환
         List<CommonPeepDto> sortedPeepList = peepPage.getContent().stream()
@@ -605,12 +612,8 @@ public class PeepService {
                         .build())
                 .toList();
 
-        if (sortedPeepList.isEmpty()) {
-            return CommonResponse.failed(CustomError.PEEP_NOT_FOUND);
-        }
-
         // 4. 정렬된 데이터를 기반으로 새로운 Page 객체 생성
-        Page<CommonPeepDto> sortedPage = new PageImpl<>(sortedPeepList, pageRequest, sortedPeepList.size());
+        Page<CommonPeepDto> sortedPage = new PageImpl<>(sortedPeepList, pageRequest, peepPage.getTotalElements());
 
         // 5. PagedResponse 객체 생성
         PagedResponse<CommonPeepDto> pagedResponse = PagedResponse.create(
