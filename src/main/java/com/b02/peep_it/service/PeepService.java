@@ -35,6 +35,7 @@ public class PeepService {
     private final PeepReStickerRepository peepReStickerRepository;
     private final ChatRepository chatRepository;
     private final StateRepository stateRepository;
+    private final TownRepository townRepository;
 
     /*
     신규 핍 등록 (텍스트 + 이미지/영상)
@@ -641,24 +642,23 @@ public class PeepService {
     /*
     지도 내 핍 리스트 조회 (인기도순만 적용)
     */
-    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMapPeepList(int dist, int page, int size, double latitude, double longitude) {
+    public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMapPeepList(int dist, int page, int size, double latitude, double longitude, String legalCode) {
         // 1. 현재 로그인 사용자의 등록 동네(State) 조회
-        Member member = userInfo.getCurrentMember();
-
-        Town town = member.getTown();
-        if (town == null || town.getState() == null) {
+//        Member member = userInfo.getCurrentMember();
+        Optional<State> optionalState = stateRepository.findByCode(legalCode);
+        if (optionalState.isEmpty()) {
             log.info("error custom 필요");
             return CommonResponse.failed(CustomError.TOWN_NOT_FOUND);
         }
 
-        State memberState = town.getState();
-        String memberCode = memberState.getCode();
+        String memberCode = optionalState.get().getCode();
 
         // 2. 거리 + 시간 + 지역 조건에 맞는 모든 핍 조회
         List<Peep> peepList = peepRepository.findAllNearbyPeeps(
                 longitude, latitude,
                 dist,
-                LocalDateTime.now().minusHours(24),
+//                LocalDateTime.now().minusHours(24),
+                LocalDateTime.now().minusHours(24000),
                 memberCode
         );
 

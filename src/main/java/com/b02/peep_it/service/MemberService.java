@@ -68,6 +68,7 @@ public class MemberService {
                 .name(member.getNickname())
                 .gender(member.getGender().getValue())
                 .town(member.getTown().getStateName())
+                .legalCode(member.getTown().getState().getCode())
                 .profile(member.getProfileImg())
                 .isAgree(termsAgreement.getIsAgree())
                 .build();
@@ -113,6 +114,7 @@ public class MemberService {
                 .name(member.getNickname())
                 .gender(member.getGender().getValue())
                 .town(member.getTown().getStateName())
+                .legalCode(member.getTown().getState().getCode())
                 .profile(member.getProfileImg())
                 .isAgree(termsAgreement.getIsAgree())
                 .build();

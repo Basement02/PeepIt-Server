@@ -324,9 +324,10 @@ public class PeepController {
     @GetMapping("/get/map")
     public ResponseEntity<CommonResponse<PagedResponse<CommonPeepDto>>> getMapPeepList(@RequestParam double longitude,
                                                                                        @RequestParam double latitude,
+                                                                                       @RequestParam String legalCode,
                                                                                        @RequestParam(defaultValue = "5") int dist,
                                                                                        @RequestParam(defaultValue = "0") int page,
                                                                                        @RequestParam(defaultValue = "10") int size) {
-        return peepService.getMapPeepList(dist, page, size, latitude, longitude);
+        return peepService.getMapPeepList(dist, page, size, latitude, longitude, legalCode);
     }
 }
