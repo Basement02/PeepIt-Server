@@ -1,9 +1,15 @@
 package com.b02.peep_it.common.util;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.auth0.jwt.interfaces.JWTVerifier;
 import com.b02.peep_it.domain.constant.CustomProvider;
 import com.b02.peep_it.dto.member.ResponseCommonMemberDto;
 import com.b02.peep_it.common.exception.CustomError;
 import com.b02.peep_it.common.exception.UnauthorizedException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,12 +19,16 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -36,6 +46,10 @@ public class JwtUtils {
     @Value("${jwt.issuer}")
     private String issuer;
     private final StringRedisTemplate stringRedisTemplate;
+    @Value("${auth.key.kakao}")
+    private String KAKAO_REST_API_KEY = "";
+    @Value("${auth.key.apple}")
+    private String APPLE_CLIENT_ID = "";
 
 
     /*
@@ -171,6 +185,8 @@ public class JwtUtils {
         } catch (UnauthorizedException e) {
             log.warn("❌ Unauthorized JWT: {}", e.getMessage());
             return false;
+        } catch (IOException | InterruptedException e) {
+            throw new UnauthorizedException(CustomError.NEED_TO_CUSTOM);
         }
     }
 
@@ -284,9 +300,9 @@ public class JwtUtils {
         - naver
         - apple
      */
-    public String getSocialUid(CustomProvider provider, String providerId) {
+    public String getSocialUid(CustomProvider provider, String providerId) throws IOException, InterruptedException {
         String socialUid = "";
-        if (validateIdToken(provider, providerId) == false) {
+        if (!validateIdToken(provider, providerId)) {
             log.info("유효하지 않은 id token");
             throw new UnauthorizedException(CustomError.NEED_TO_CUSTOM);
         }
@@ -322,20 +338,20 @@ public class JwtUtils {
         - apple
         - tester
      */
-    public boolean validateIdToken(CustomProvider provider, String providerId) {
+    public boolean validateIdToken(CustomProvider provider, String providerId) throws IOException, InterruptedException {
         // kakao
         if (provider.equals(CustomProvider.KAKAO)) {
-            return true;
+            return validateKakaoIdToken(providerId);
         }
 
         // naver
         if (provider.equals(CustomProvider.NAVER)) {
-            return true;
+            return validateNaverIdToken(providerId);
         }
 
         // apple
         if (provider.equals(CustomProvider.APPLE)) {
-            return true;
+            return validateAppleIdToken(providerId);
         }
 
         // tester
@@ -343,6 +359,74 @@ public class JwtUtils {
             return true;
         }
 
+        return false;
+    }
+
+    private boolean validateKakaoIdToken(String idToken) {
+        // 1. https://kauth.kakao.com/.well-known/jwks.json
+        // 2. JWT Header의 kid 사용해 해당 키 찾아서 RSAPublicKey 생성
+        // 3. com.auth0.jwt로 서명 및 iss/aud 검증
+        return verifyWithJWK(idToken, "https://kauth.kakao.com", "https://kauth.kakao.com/.well-known/jwks.json", KAKAO_REST_API_KEY);
+    }
+
+    private boolean validateNaverIdToken(String idToken) throws IOException, InterruptedException {
+        // 1. 네이버는 idToken을 자체 검증하지 않고 사용자 정보 API 호출을 권장
+        // 2. idToken을 Authorization 헤더에 담아 https://openapi.naver.com/v1/nid/me 호출
+        // 3. 정상 응답 여부로 검증 (401 등 나오면 실패)
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://openapi.naver.com/v1/nid/me"))
+                .header("Authorization", "Bearer " + idToken)
+                .GET().build();
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        return response.statusCode() == 200;
+    }
+
+    private boolean validateAppleIdToken(String idToken) {
+        // 1. https://appleid.apple.com/auth/keys
+        // 2. kid, alg 확인 → 공개키 변환
+        // 3. iss == https://appleid.apple.com, aud == YOUR_APPLE_CLIENT_ID 확인
+        return verifyWithJWK(idToken, "https://appleid.apple.com", "https://appleid.apple.com/auth/keys", APPLE_CLIENT_ID);
+    }
+
+    private boolean verifyWithJWK(String idToken, String expectedIssuer, String jwksUrl, String expectedAudience) {
+        try {
+            DecodedJWT jwt = JWT.decode(idToken);
+            String kid = jwt.getKeyId();
+
+            // JWKS 요청
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(jwksUrl))
+                    .GET()
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                log.error("JWKS 요청 실패: {}", response.statusCode());
+                return false;
+            }
+
+            String jwksJson = response.body();
+            JsonNode jwks = new ObjectMapper().readTree(jwksJson).get("keys");
+
+            for (JsonNode key : jwks) {
+                if (!key.get("kid").asText().equals(kid)) continue;
+
+                RSAPublicKey publicKey = JwkUtils.parseRSAPublicKey(key);  // JWK를 RSAPublicKey로 변환
+                Algorithm algorithm = Algorithm.RSA256(publicKey, null);
+
+                JWTVerifier verifier = JWT.require(algorithm)
+                        .withIssuer(expectedIssuer)
+                        .withAudience(expectedAudience)
+                        .build();
+
+                verifier.verify(idToken); // 여기서 예외 발생 시 검증 실패
+                return true;
+            }
+
+            log.warn("kid {}에 해당하는 공개키를 찾지 못했습니다", kid);
+        } catch (Exception e) {
+            log.error("verifyWithJWK error: {}", e.getMessage());
+        }
         return false;
     }
 

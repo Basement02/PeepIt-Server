@@ -9,7 +9,7 @@ spring:
   application:
     name: peep-it
   profiles:
-    active: jwt, lettuce, swagger, devrds, s3, redis, sms
+    active: jwt, lettuce, swagger, devrds, s3, redis, sms, social
   mvc:
     local: ko_KR
   messages:

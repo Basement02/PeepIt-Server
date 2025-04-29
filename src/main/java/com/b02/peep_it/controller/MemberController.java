@@ -22,6 +22,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -129,7 +131,7 @@ public class MemberController {
             }
     )
     @PostMapping("/sign-up")
-    public ResponseEntity<CommonResponse<ResponseLoginDto>> signUp(@RequestBody RequestCommonMemberDto requestDto){
+    public ResponseEntity<CommonResponse<ResponseLoginDto>> signUp(@RequestBody RequestCommonMemberDto requestDto) throws IOException, InterruptedException {
         log.info("요청받은 DTO: {}", requestDto);
         return authService.createAccount(requestDto);
     }
