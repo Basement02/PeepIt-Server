@@ -31,6 +31,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -94,10 +95,10 @@ public class AuthService {
         CustomProvider provider = CustomProvider.valueOf(requestDto.provider());
 
         // idtoken에서 고유 id 추출
-        String socialUid = jwtUtils.getSocialUid(provider, requestDto.idToken());
+        String providerId = jwtUtils.getSocialUid(provider, requestDto.idToken());
 
         // 기존 회원과 provider 고유 id 중복 확인
-        Optional<MemberSocial> memberSocial = memberSocialRepository.findByProviderAndProviderId(provider, socialUid);
+        Optional<MemberSocial> memberSocial = memberSocialRepository.findByProviderAndProviderId(provider, providerId);
 
         // 기존 회원은 access/refresh token 발급 (로그인)
         if (memberSocial.isPresent()) {
@@ -123,6 +124,15 @@ public class AuthService {
 
         // 신규 회원은 register token 발급 (가입 대기)
         else {
+
+            // idtoken 유효성 검증
+            if (!jwtUtils.validateIdToken(provider, providerId)) {
+                log.warn("유효하지 않은 id token - provider: {}, providerId: {}", provider, providerId);
+                return CommonResponse.failed(CustomError.TOKEN_UNAUTHORIZED);
+            }
+
+            log.info("id token 검증 완료");
+
             // register token 생성
             registerToken = jwtUtils.createRegisterToken(provider.getCode(), requestDto.idToken());
         }
@@ -159,23 +169,23 @@ public class AuthService {
     신규 계정 생성
      */
     @Transactional
-    public ResponseEntity<CommonResponse<ResponseLoginDto>> createAccount(RequestCommonMemberDto requestDto) {
-        log.info("🟢 createAccount 시작 - requestDto: {}", requestDto);
+    public ResponseEntity<CommonResponse<ResponseLoginDto>> createAccount(RequestCommonMemberDto requestDto) throws IOException, InterruptedException {
+        log.info("createAccount 시작 - requestDto: {}", requestDto);
 
         // 레지스터 토큰에서 사용자 정보 추출
         CustomUserDetails userDetails = userInfo.getPrincipal();
-        log.info("🔹 사용자 정보 추출 완료 - provider: {}, providerId: {}", userDetails.getProvider(), userDetails.getProviderId());
+        log.info("사용자 정보 추출 완료 - provider: {}, providerId: {}", userDetails.getProvider(), userDetails.getProviderId());
 
         CustomProvider provider = CustomProvider.valueOf(userDetails.getProvider());
         String providerId = userDetails.getProviderId();
 
         // idtoken 유효성 검증
         if (!jwtUtils.validateIdToken(provider, providerId)) {
-            log.warn("⚠ 유효하지 않은 id token - provider: {}, providerId: {}", provider, providerId);
+            log.warn("유효하지 않은 id token - provider: {}, providerId: {}", provider, providerId);
             return CommonResponse.failed(CustomError.TOKEN_UNAUTHORIZED);
         }
 
-        log.info("✅ id token 검증 완료");
+        log.info("id token 검증 완료");
 
         // 소셜 로그인 객체 생성 & 저장
         MemberSocial memberSocial = MemberSocial.builder()
@@ -184,7 +194,7 @@ public class AuthService {
                 .build();
 
         MemberSocial mergedMemberSocial = memberSocialRepository.save(memberSocial);
-        log.info("✅ 소셜 로그인 정보 저장 완료 - provider: {}, providerId: {}", provider, providerId);
+        log.info("소셜 로그인 정보 저장 완료 - provider: {}, providerId: {}", provider, providerId);
 
         if (requestDto.id() == null || requestDto.id().isEmpty()) {
             log.info("id가 비어있음");
@@ -195,17 +205,7 @@ public class AuthService {
             return CommonResponse.failed(CustomError.NEED_TO_CUSTOM);
         }
 
-        // 회원 객체 생성 & 저장
-//        log.info("‼\uFE0F 프로필 사진 기본 이미지 경로 변경 필요");
-//        Member member = Member.builder()
-//                .id(requestDto.id())
-//                .nickname(requestDto.nickname())
-//                .profileImg(DEFAULT_PROFILE_IMG)
-//                .birth(requestDto.birth())
-//                .gender(new CustomGender(requestDto.gender()))
-//                .memberSocial(memberSocial)
-//                .build();
-        log.info("‼️ 프로필 사진 기본 이미지 경로 변경 필요");
+        log.info("프로필 사진 기본 이미지 경로 변경 필요");
 
         // gender 값이 null이거나 빈 문자열이면 기본값 설정
         String genderValue = (requestDto.gender() == null || requestDto.gender().isEmpty()) ? "other" : requestDto.gender();
@@ -221,7 +221,7 @@ public class AuthService {
         member.setMemberSocial(mergedMemberSocial);
 
         Member mergedMember = memberRepository.save(member);
-        log.info("✅ 회원 정보 저장 완료 - id: {}, nickname: {}", mergedMember.getId(), mergedMember.getNickname());
+        log.info("회원 정보 저장 완료 - id: {}, nickname: {}", mergedMember.getId(), mergedMember.getNickname());
 
         // 약관 동의 객체 생성 & 저장
         TermsAgreement termsAgreement = TermsAgreement.builder()
@@ -230,7 +230,7 @@ public class AuthService {
                 .build();
 
         termsAgreementRepository.save(termsAgreement);
-        log.info("✅ 약관 동의 정보 저장 완료 - isAgree: {}", requestDto.isAgree());
+        log.info("약관 동의 정보 저장 완료 - isAgree: {}", requestDto.isAgree());
 
         // 알림 설정 동의 객체 생성 & 저장 (기본값: 모든 알림 ON)
         PushSetting pushSetting = PushSetting.builder()
@@ -238,7 +238,7 @@ public class AuthService {
                 .build();
 
         pushSettingRepository.save(pushSetting);
-        log.info("✅ 알림 설정 저장 완료 - memberId: {}", mergedMember.getId());
+        log.info("알림 설정 저장 완료 - memberId: {}", mergedMember.getId());
 
         // 동네 객체 생성 & 저장 (기본값: random)
         Town town = Town.builder()
@@ -259,12 +259,12 @@ public class AuthService {
 
         String accessToken = jwtUtils.createAccessToken(responseCommonMemberDto);
         String refreshToken = jwtUtils.createRefreshToken(responseCommonMemberDto);
-        log.info("✅ 토큰 생성 완료 - accessToken: {}, refreshToken: {}", accessToken, refreshToken);
+        log.info("토큰 생성 완료 - accessToken: {}, refreshToken: {}", accessToken, refreshToken);
 
         String name = mergedMember.getNickname();
         String id = mergedMember.getId();
 
-        log.info("🟢 createAccount 완료 - memberId: {}, name: {}", id, name);
+        log.info("createAccount 완료 - memberId: {}, name: {}", id, name);
         return CommonResponse.created(ResponseLoginDto.builder()
                 .isMember(isMember)
                 .registerToken(registerToken)

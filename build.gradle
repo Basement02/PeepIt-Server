@@ -32,6 +32,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	// JWT 파싱 및 서명 검증
+	implementation("com.auth0:java-jwt:4.2.1")
+	// jwks.json 응답 파싱
+	implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
+	// HTTP 요청
+	implementation("org.apache.httpcomponents.client5:httpclient5:5.3")
 	// 전화번호 인증
 	implementation 'net.nurigo:javaSDK:2.2'
 	// open-api (swagger)
