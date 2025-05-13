@@ -511,4 +511,70 @@ public class MemberController {
     public ResponseEntity<CommonResponse<ResponseCommonMemberDto>> patchOwnProfileImg(@ModelAttribute RequestPatchProfileImgDto requestDto) throws Exception {
         return memberService.patchMyProfileImg(requestDto);
     }
+
+    @SecurityRequirement(name = "AccessToken")
+    @Operation(
+            summary = "회원 차단",
+            description = "회원 ID로 회원을 차단합니다",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "성공적으로 사용자 차단",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(
+                                            value = """
+                                                    {
+                                                        "success": true,
+                                                        "data": null,
+                                                        "error": null
+                                                    }
+                                                    """
+                                    )
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "40102",
+                            description = "유효하지 않은 계정",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(
+                                            value = """
+                                                    {
+                                                        "success": false,
+                                                        "data": {},
+                                                        "error": {
+                                                            "code": "40102",
+                                                            "message": "유효하지 않은 계정입니다"
+                                                        }
+                                                    }
+                                                    """
+                                    )
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "50000",
+                            description = "서버 내부 오류",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(
+                                            value = """
+                                                    {
+                                                        "success": false,
+                                                        "data": {},
+                                                        "error": {
+                                                            "code": "50000",
+                                                            "message": "서버 내부 오류가 발생했습니다"
+                                                        }
+                                                    }
+                                                    """
+                                    )
+                            )
+                    )
+            }
+    )
+    @PostMapping(value = "/block")
+    public ResponseEntity<CommonResponse<Object>> blockMember(@RequestParam("memberId") String memberId) throws Exception {
+        return memberService.blockMember(memberId);
+    }
 }
