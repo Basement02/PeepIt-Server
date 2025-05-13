@@ -372,7 +372,7 @@ public class AuthService {
                     .id(member.getId())
                     .name(member.getNickname())
                     .gender(member.getGender().getValue())
-                    .town(member.getTown().getStateName())
+//                    .town(member.getTown().getStateName())
                     .profile(member.getProfileImg())
                     .isAgree(termsAgreement.getIsAgree())
                     .build();
