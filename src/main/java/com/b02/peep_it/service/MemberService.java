@@ -6,6 +6,7 @@ import com.b02.peep_it.common.util.AuthUtils;
 import com.b02.peep_it.common.util.S3Utils;
 import com.b02.peep_it.domain.Member;
 import com.b02.peep_it.domain.MemberBlock;
+import com.b02.peep_it.domain.State;
 import com.b02.peep_it.domain.TermsAgreement;
 import com.b02.peep_it.dto.RequestPatchMemberDto;
 import com.b02.peep_it.dto.RequestPatchProfileImgDto;
@@ -47,9 +48,7 @@ public class MemberService {
 
         Member member = optionalMember.get();
         Optional<TermsAgreement> optionalTermsAgreement = termsAgreementRepository.findById(memberId);
-        TermsAgreement termsAgreement;
-
-        termsAgreement = optionalTermsAgreement.orElseGet(() -> TermsAgreement.builder()
+        TermsAgreement termsAgreement = optionalTermsAgreement.orElseGet(() -> TermsAgreement.builder()
                 .member(member)
                 .isAgree(false)
                 .build());
@@ -63,16 +62,28 @@ public class MemberService {
 
         log.info("termsAgrreement: {}", termsAgreement.getIsAgree());
 
+        Boolean isBlocked = false;
+
+        // 차단한 사용자인지 확인
+        Optional<MemberBlock> optionalMemberBlock = memberBlockRepository.findByBlockerId(member.getId());
+        if(optionalMemberBlock.isPresent() && optionalMemberBlock.get().getBlockedId().getId().equals(memberId)) {
+            isBlocked = true;
+        }
+
+        State state = member.getTown() != null ? member.getTown().getState() : null;
+        String stateName = state != null ? state.getName() : null;
+
         // responseDto 구성 (id, role, name, gender, town, profile)
         ResponseCommonMemberDto responseDto = ResponseCommonMemberDto.builder()
                 .role(member.getRole().getCode())
                 .id(memberId)
                 .name(member.getNickname())
                 .gender(member.getGender().getValue())
-                .town(member.getTown().getStateName())
+                .town(stateName)
                 .legalCode(member.getTown().getState().getCode())
                 .profile(member.getProfileImg())
                 .isAgree(termsAgreement.getIsAgree())
+                .isBlocked(isBlocked)
                 .build();
 
         // return
@@ -109,13 +120,17 @@ public class MemberService {
 
         log.info("termsAgrreement: {}", termsAgreement.getIsAgree());
 
+        State state = member.getTown() != null ? member.getTown().getState() : null;
+        String stateName = state != null ? state.getName() : null;
+
+
         // responseDto 구성 (id, role, name, gender, town, profile)
         ResponseCommonMemberDto responseDto = ResponseCommonMemberDto.builder()
                 .role(member.getRole().getCode())
                 .id(member.getId())
                 .name(member.getNickname())
                 .gender(member.getGender().getValue())
-                .town(member.getTown().getStateName())
+                .town(stateName)
                 .legalCode(member.getTown().getState().getCode())
                 .profile(member.getProfileImg())
                 .isAgree(termsAgreement.getIsAgree())
@@ -157,12 +172,15 @@ public class MemberService {
         // 사용자 정보 수정 (닉네임, 성별, 생일)
         member = member.withPatched(requestDto);
 
+        State state = member.getTown() != null ? member.getTown().getState() : null;
+        String stateName = state != null ? state.getName() : null;
+
         ResponseCommonMemberDto responseDto = ResponseCommonMemberDto.builder()
                 .role(member.getRole().getCode())
                 .id(member.getId())
                 .name(member.getNickname())
                 .gender(member.getGender().getValue())
-                .town(member.getTown().getStateName())
+                .town(stateName)
                 .profile(member.getProfileImg())
                 .isAgree(termsAgreement.getIsAgree())
                 .build();
@@ -198,12 +216,15 @@ public class MemberService {
         TermsAgreement termsAgreement = termsAgreementRepository.findById(member.getId()).orElseThrow(() ->
                 new Exception("termsAgreement 정보가 존재하지 않습니다."));
 
+        State state = member.getTown() != null ? member.getTown().getState() : null;
+        String stateName = state != null ? state.getName() : null;
+
         ResponseCommonMemberDto responseDto = ResponseCommonMemberDto.builder()
                 .role(member.getRole().getCode())
                 .id(member.getId())
                 .name(member.getNickname())
                 .gender(member.getGender().getValue())
-                .town(member.getTown().getStateName())
+                .town(stateName)
                 .profile(member.getProfileImg())
                 .isAgree(termsAgreement.getIsAgree())
                 .build();
