@@ -72,6 +72,7 @@ public class MemberService {
 
         State state = member.getTown() != null ? member.getTown().getState() : null;
         String stateName = state != null ? state.getName() : null;
+        String lecalCode = state != null ? state.getCode() : null;
 
         // responseDto 구성 (id, role, name, gender, town, profile)
         ResponseCommonMemberDto responseDto = ResponseCommonMemberDto.builder()
@@ -80,7 +81,7 @@ public class MemberService {
                 .name(member.getNickname())
                 .gender(member.getGender().getValue())
                 .town(stateName)
-                .legalCode(member.getTown().getState().getCode())
+                .legalCode(lecalCode)
                 .profile(member.getProfileImg())
                 .isAgree(termsAgreement.getIsAgree())
                 .isBlocked(isBlocked)
@@ -122,6 +123,7 @@ public class MemberService {
 
         State state = member.getTown() != null ? member.getTown().getState() : null;
         String stateName = state != null ? state.getName() : null;
+        String lecalCode = state != null ? state.getCode() : null;
 
 
         // responseDto 구성 (id, role, name, gender, town, profile)
@@ -131,7 +133,7 @@ public class MemberService {
                 .name(member.getNickname())
                 .gender(member.getGender().getValue())
                 .town(stateName)
-                .legalCode(member.getTown().getState().getCode())
+                .legalCode(lecalCode)
                 .profile(member.getProfileImg())
                 .isAgree(termsAgreement.getIsAgree())
                 .build();
@@ -174,6 +176,7 @@ public class MemberService {
 
         State state = member.getTown() != null ? member.getTown().getState() : null;
         String stateName = state != null ? state.getName() : null;
+        String lecalCode = state != null ? state.getCode() : null;
 
         ResponseCommonMemberDto responseDto = ResponseCommonMemberDto.builder()
                 .role(member.getRole().getCode())
@@ -181,6 +184,7 @@ public class MemberService {
                 .name(member.getNickname())
                 .gender(member.getGender().getValue())
                 .town(stateName)
+                .legalCode(lecalCode)
                 .profile(member.getProfileImg())
                 .isAgree(termsAgreement.getIsAgree())
                 .build();
@@ -218,6 +222,7 @@ public class MemberService {
 
         State state = member.getTown() != null ? member.getTown().getState() : null;
         String stateName = state != null ? state.getName() : null;
+        String lecalCode = state != null ? state.getCode() : null;
 
         ResponseCommonMemberDto responseDto = ResponseCommonMemberDto.builder()
                 .role(member.getRole().getCode())
@@ -225,6 +230,7 @@ public class MemberService {
                 .name(member.getNickname())
                 .gender(member.getGender().getValue())
                 .town(stateName)
+                .legalCode(lecalCode)
                 .profile(member.getProfileImg())
                 .isAgree(termsAgreement.getIsAgree())
                 .build();

@@ -368,6 +368,7 @@ public class AuthService {
 
             State state = member.getTown() != null ? member.getTown().getState() : null;
             String stateName = state != null ? state.getName() : null;
+            String lecalCode = state != null ? state.getCode() : null;
 
 //            return CommonResponse.ok(null);
             ResponseCommonMemberDto responseDto = ResponseCommonMemberDto.builder()
@@ -376,6 +377,7 @@ public class AuthService {
                     .name(member.getNickname())
                     .gender(member.getGender().getValue())
                     .town(stateName)
+                    .legalCode(lecalCode)
                     .profile(member.getProfileImg())
                     .isAgree(termsAgreement.getIsAgree())
                     .build();
