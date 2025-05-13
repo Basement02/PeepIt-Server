@@ -5,10 +5,12 @@ import com.b02.peep_it.common.response.CommonResponse;
 import com.b02.peep_it.common.util.AuthUtils;
 import com.b02.peep_it.common.util.S3Utils;
 import com.b02.peep_it.domain.Member;
+import com.b02.peep_it.domain.MemberBlock;
 import com.b02.peep_it.domain.TermsAgreement;
 import com.b02.peep_it.dto.RequestPatchMemberDto;
 import com.b02.peep_it.dto.RequestPatchProfileImgDto;
 import com.b02.peep_it.dto.member.ResponseCommonMemberDto;
+import com.b02.peep_it.repository.MemberBlockRepository;
 import com.b02.peep_it.repository.MemberRepository;
 import com.b02.peep_it.repository.TermsAgreementRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.Optional;
 
 @Slf4j
@@ -29,6 +30,7 @@ public class MemberService {
     private final S3Utils s3Utils;
     private final MemberRepository memberRepository;
     private final TermsAgreementRepository termsAgreementRepository;
+    private final MemberBlockRepository memberBlockRepository;
 
     /*
     아이디로 사용자 정보 반환 (id, name, town, gender, profile, isAgree)
@@ -207,5 +209,32 @@ public class MemberService {
                 .build();
 
         return CommonResponse.ok(responseDto);
+    }
+
+    public ResponseEntity<CommonResponse<Object>> blockMember(String memberId) throws Exception {
+        // 로그인한 사용자 조회
+        Member blocker = userInfo.getCurrentMember();
+
+        // 차단할 사용자 조회
+        Optional<Member> optionalBlocked = memberRepository.findById(memberId);
+        if (optionalBlocked.isEmpty()) {
+            throw new Exception("차단 멤버 ID가 유효하지 않습니다.");
+        }
+
+        Member blocked = optionalBlocked.get();
+
+        if(blocker.getId().equals(blocked.getId())) {
+            throw new Exception("차단 멤버 ID와 차단할 멤버 ID가 동일합니다.");
+        }
+
+        // MemberBlock 테이블에 객체 추가
+        MemberBlock memberBlock = MemberBlock.builder()
+                .blockerId(blocker)
+                .blockedId(blocked)
+                .build();
+
+        memberBlockRepository.save(memberBlock);
+
+        return CommonResponse.ok(null);
     }
 }

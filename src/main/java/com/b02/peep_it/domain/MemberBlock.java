@@ -2,6 +2,7 @@ package com.b02.peep_it.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -21,4 +22,10 @@ public class MemberBlock extends BaseTimeEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "blocked_id")
     private Member blockedId; // 차단된 회원 고유 ID
+
+    @Builder
+    MemberBlock(Member blockerId, Member blockedId) {
+        this.blockerId = blockerId;
+        this.blockedId = blockedId;
+    }
 }
