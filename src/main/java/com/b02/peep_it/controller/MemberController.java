@@ -260,6 +260,60 @@ public class MemberController {
     }
 
     @SecurityRequirement(name = "AccessToken")
+    @Operation(
+            summary = "다른 사용자 프로필 조회하기 (아이디/닉네임/동네/프로필이미지/차단여부)",
+            description = """
+                    - 입력 가능한 정보:
+                        - 아이디
+                    - isBlocked:
+                        - true: 차단한 사용자
+                        - false: 차단하지 않은 사용자
+                    """,
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "성공적으로 사용자 정보 조회",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(
+                                            value = """
+                                                                    {
+                                                                                      "success": true,
+                                                                                      "data": {
+                                                                                        "id": "gangjjang5",
+                                                                                        "role": "UNCERTIFIED",
+                                                                                        "gender": "other",
+                                                                                        "name": "gangjjang5",
+                                                                                        "town": "서울특별시",
+                                                                                        "profile": "추후수정필요 프로필 이미지 고정값",
+                                                                                        "isAgree": true,
+                                                                                        "isBlocked": false
+                                                                                      },
+                                                                                      "error": null
+                                                                                    }
+                                                    """)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "50000",
+                            description = "서버 내부 오류",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "success": false,
+                                                "data": {},
+                                                "error": {
+                                                    "code": "50000",
+                                                    "message": "서버 내부 오류가 발생했습니다"
+                                                }
+                                            }
+                                            """)
+                            )
+                    )
+            }
+
+    )
     @GetMapping("/detail/{memberId}")
     public ResponseEntity<CommonResponse<ResponseCommonMemberDto>> getMemberDetail(@PathVariable("memberId") String memberId) {
         return memberService.getMemberDetail(memberId);
@@ -280,9 +334,6 @@ public class MemberController {
                  - MAN("MANAGER", "관리자"),
                  - DEV("DEVELOPER", "개발자")
             """,
-//            security = {
-//                    @SecurityRequirement(name = "AuthToken")
-//            },
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -300,7 +351,8 @@ public class MemberController {
                                                                         "name": "gangjjang5",
                                                                         "town": "서울특별시",
                                                                         "profile": "추후수정필요 프로필 이미지 고정값",
-                                                                        "isAgree": true
+                                                                        "isAgree": true,
+                                                                        "isBlocked": false
                                                                       },
                                                                       "error": null
                                                                     }

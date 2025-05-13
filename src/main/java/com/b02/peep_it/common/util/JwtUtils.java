@@ -75,8 +75,8 @@ public class JwtUtils {
 
     public String createAccessToken(ResponseCommonMemberDto responseCommonMemberDto) {
         Claims claims = Jwts.claims();
-        claims.put("uid", responseCommonMemberDto.id());
-        claims.put("role", responseCommonMemberDto.role());
+        claims.put("uid", responseCommonMemberDto.getId());
+        claims.put("role", responseCommonMemberDto.getRole());
         Date now = new Date();
         return Jwts.builder()
                 .setClaims(claims)
@@ -89,7 +89,7 @@ public class JwtUtils {
 
     public String createRefreshToken(ResponseCommonMemberDto responseCommonMemberDto) {
         Claims claims = Jwts.claims();
-        claims.put("uid", responseCommonMemberDto.id());
+        claims.put("uid", responseCommonMemberDto.getId());
         Date now = new Date();
         String refreshToken =  Jwts.builder()
                 .setClaims(claims)
@@ -121,7 +121,7 @@ public class JwtUtils {
     public void updateUserRefreshToken(ResponseCommonMemberDto responseCommonMemberDto, String refreshToken) {
         // Redis의 set 명령은 지정된 키에 대해 새로운 값을 설정하면서, 기존 값이 있을 경우 자동으로 대체
         // 기존 토큰 삭제 불필요
-        stringRedisTemplate.opsForValue().set(String.valueOf(responseCommonMemberDto.id()), refreshToken, refreshTokenTime, TimeUnit.MILLISECONDS);
+        stringRedisTemplate.opsForValue().set(String.valueOf(responseCommonMemberDto.getId()), refreshToken, refreshTokenTime, TimeUnit.MILLISECONDS);
     }
 
     public String getUserRefreshToken(String uid) {

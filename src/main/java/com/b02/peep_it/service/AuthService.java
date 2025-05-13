@@ -366,13 +366,16 @@ public class AuthService {
                     new Exception("termsAgreement 정보가 존재하지 않습니다.")
             );
 
+            State state = member.getTown() != null ? member.getTown().getState() : null;
+            String stateName = state != null ? state.getName() : null;
+
 //            return CommonResponse.ok(null);
             ResponseCommonMemberDto responseDto = ResponseCommonMemberDto.builder()
                     .role(member.getRole().getCode())
                     .id(member.getId())
                     .name(member.getNickname())
                     .gender(member.getGender().getValue())
-//                    .town(member.getTown().getStateName())
+                    .town(stateName)
                     .profile(member.getProfileImg())
                     .isAgree(termsAgreement.getIsAgree())
                     .build();
