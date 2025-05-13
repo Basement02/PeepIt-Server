@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -43,6 +44,23 @@ public class AccessTokenFilter extends OncePerRequestFilter {
                 log.info("Authorities: " + userDetails.getAuthorities());
             } else {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+                PrintWriter writer = response.getWriter();
+
+                String json = """
+                                {
+                                    "success": false,
+                                    "data": {},
+                                    "error": {
+                                        "code": "40300",
+                                        "message": "유효하지 않은 토큰입니다"
+                                    }
+                                }
+                            """;
+
+                writer.write(json);
+                writer.flush();
+                writer.close();
                 return;
             }
         }
