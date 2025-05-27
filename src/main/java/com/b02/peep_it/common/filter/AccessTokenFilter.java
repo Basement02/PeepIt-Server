@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -43,48 +42,12 @@ public class AccessTokenFilter extends OncePerRequestFilter {
                 log.info("ProviderId (소셜 고유 ID): " + userDetails.getProviderId());
                 log.info("Authorities: " + userDetails.getAuthorities());
             } else {
-                response.setStatus(HttpServletResponse.SC_OK);
-                response.setContentType("application/json;charset=UTF-8");
-                PrintWriter writer = response.getWriter();
-
-                String json = """
-                                {
-                                    "success": false,
-                                    "data": {},
-                                    "error": {
-                                        "code": "40300",
-                                        "message": "유효하지 않은 토큰입니다"
-                                    }
-                                }
-                            """;
-
-                writer.write(json);
-                writer.flush();
-                writer.close();
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
         }
         else {
             log.info("!!!!!!!!!!Authorization header is missing!!!!!!!!!!!");
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.setContentType("application/json;charset=UTF-8");
-            PrintWriter writer = response.getWriter();
-
-            String json = """
-                                {
-                                    "success": false,
-                                    "data": {},
-                                    "error": {
-                                        "code": "40300",
-                                        "message": "유효하지 않은 토큰입니다"
-                                    }
-                                }
-                            """;
-
-            writer.write(json);
-            writer.flush();
-            writer.close();
-            return;
         }
         filterChain.doFilter(request, response);
     }
