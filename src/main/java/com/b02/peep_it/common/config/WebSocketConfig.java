@@ -1,7 +1,6 @@
 package com.b02.peep_it.common.config;
 
-import com.b02.peep_it.common.filter.JwtHandshakeInterceptor;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
@@ -10,22 +9,25 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @Configuration
 @EnableWebSocketMessageBroker
-@RequiredArgsConstructor
-public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer { // STOMP 브로커와 WebSocket 경로 연결 (구독)
 
-    private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
+    @Value("${spring.rabbitmq.host}")
+    private String HOST;
+    @Value("${spring.rabbitmq.username")
+    private String USERNAME;
+    @Value("${spring.rabbitmq.password")
+    private String PASSWORD;
 
-    @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws-chat")
-                .addInterceptors(jwtHandshakeInterceptor)
-                .setAllowedOriginPatterns("*")
-                .withSockJS();
+        registry.addEndpoint("/ws-chat").setAllowedOriginPatterns("*").withSockJS();
     }
 
-    @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/topic");
-        registry.setApplicationDestinationPrefixes("/app");
+        registry.setApplicationDestinationPrefixes("/pub");
+        registry.enableStompBrokerRelay("/exchange") // 구독 (채팅방 입장)
+                .setRelayHost(HOST)
+                .setRelayPort(61613)
+                .setClientLogin(USERNAME)
+                .setClientPasscode(PASSWORD);
     }
 }

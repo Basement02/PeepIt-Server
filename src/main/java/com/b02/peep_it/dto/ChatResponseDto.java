@@ -6,8 +6,10 @@ import java.time.LocalDateTime;
 
 @Builder
 public record ChatResponseDto(
-        String sender,
+        String uid,
+        String nickname,
+        String imgUrl,
         String content,
-        LocalDateTime sentAt
+        String sentAt
 ) {
 }
