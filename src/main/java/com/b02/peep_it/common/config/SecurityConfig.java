@@ -30,6 +30,7 @@ public class SecurityConfig {
     private final RefreshTokenFilter refreshTokenFilter;
 
     private String[] permitList = {
+            "/ws-chat/**", // WebSocket 엔드포인트
             "/api/v1/test/**", // /deploy, /health-check, /upload
             "/api/v1/auth/social", "/api/v1/auth/check/**", // /social, /check/id, /check/phone, /send/sms-code
             "/api/v1/town/**", // /list, /info

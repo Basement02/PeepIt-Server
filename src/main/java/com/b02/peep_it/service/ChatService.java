@@ -1,6 +1,7 @@
 package com.b02.peep_it.service;
 
 import com.b02.peep_it.common.response.CommonResponse;
+import com.b02.peep_it.common.util.TimeAgoUtils;
 import com.b02.peep_it.domain.Chat;
 import com.b02.peep_it.domain.Member;
 import com.b02.peep_it.domain.Peep;
@@ -18,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ChatService {
 
+    private final TimeAgoUtils timeAgoUtils;
     private final ChatRepository chatRepository;
     private final MemberRepository memberRepository;
     private final PeepRepository peepRepository;
@@ -37,9 +39,11 @@ public class ChatService {
         List<ChatResponseDto> chatList = chatRepository.findByPeepIdOrderByCreatedAtAsc(peepId)
                 .stream()
                 .map(chat -> ChatResponseDto.builder()
-                        .sender(chat.getMember().getId())
+                        .uid(chat.getMember().getId())
+                        .nickname(chat.getMember().getNickname())
+                        .imgUrl(chat.getMember().getProfileImg())
                         .content(chat.getContent())
-                        .sentAt(chat.getCreatedAt())
+                        .sentAt(timeAgoUtils.getTimeAgo(chat.getCreatedAt()))
                         .build())
                 .toList();
 
