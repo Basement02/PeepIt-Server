@@ -60,7 +60,7 @@ public class ChatQueueConrtoller {
                 .sendAt(timeAgoUtils.getTimeAgo(requestDto.getRegDate()))
                 .build();
 
-        messagingTemplate.convertAndSend("/sub/chat.room." + requestDto.getPeepId(), responseDto);
+        messagingTemplate.convertAndSend("/sub/chat.receive." + requestDto.getPeepId(), responseDto);
 
 //        // STOMP 구독 경로(/exchange/chat.exchange/room.1)로 메시지를 브로드캐스트
 //        rabbitTemplate.convertAndSend("/exchange/chat.exchange/room." + requestDto.getPeepId(), responseDto);
