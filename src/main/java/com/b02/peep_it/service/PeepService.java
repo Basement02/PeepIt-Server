@@ -36,6 +36,7 @@ public class PeepService {
     private final ChatRepository chatRepository;
     private final StateRepository stateRepository;
     private final TownRepository townRepository;
+    private final ChatService chatService;
 
     /*
     신규 핍 등록 (텍스트 + 이미지/영상)
@@ -101,7 +102,8 @@ public class PeepService {
                     .isVideo(peep.getIsVideo())
                     .build();
 
-            // 7. response 반환
+            // 7. 채팅방 생성 및 response 반환
+            chatService.createRoom(responseDto.peepId());
             return CommonResponse.created(responseDto);
 
         } catch (IOException e) {

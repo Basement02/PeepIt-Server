@@ -10,6 +10,7 @@ import com.b02.peep_it.repository.ChatRepository;
 import com.b02.peep_it.repository.MemberRepository;
 import com.b02.peep_it.repository.PeepRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.core.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,8 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final MemberRepository memberRepository;
     private final PeepRepository peepRepository;
+    private final AmqpAdmin rabbitAdmin;
+    private final TopicExchange chatExchange;
 
     public Chat save(Long peepId, String memberId, String content) {
         Member member = memberRepository.findById(memberId).orElseThrow();
@@ -48,5 +51,18 @@ public class ChatService {
                 .toList();
 
         return CommonResponse.ok(chatList);
+    }
+
+    public void createRoom(Long peepId) {
+        String queueName = "room." + peepId;
+
+        Queue roomQueue = new Queue(queueName, false, false, true);
+        Binding roomBinding = BindingBuilder
+                .bind(roomQueue)
+                .to(chatExchange)
+                .with(queueName); // routing key = room.{peepId}
+
+        rabbitAdmin.declareQueue(roomQueue);
+        rabbitAdmin.declareBinding(roomBinding);
     }
 }

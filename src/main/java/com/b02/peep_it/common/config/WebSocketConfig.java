@@ -9,25 +9,16 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @Configuration
 @EnableWebSocketMessageBroker
-public class WebSocketConfig implements WebSocketMessageBrokerConfigurer { // STOMP 브로커와 WebSocket 경로 연결 (구독)
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    @Value("${spring.rabbitmq.host}")
-    private String HOST;
-    @Value("${spring.rabbitmq.username")
-    private String USERNAME;
-    @Value("${spring.rabbitmq.password")
-    private String PASSWORD;
-
-    public void registerStompEndpoints(StompEndpointRegistry registry) {
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) { // 웹소켓 연결
         registry.addEndpoint("/ws-chat").setAllowedOriginPatterns("*").withSockJS();
     }
 
+    @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.setApplicationDestinationPrefixes("/pub");
-        registry.enableStompBrokerRelay("/exchange") // 구독 (채팅방 입장)
-                .setRelayHost(HOST)
-                .setRelayPort(61613)
-                .setClientLogin(USERNAME)
-                .setClientPasscode(PASSWORD);
+        registry.setApplicationDestinationPrefixes("/pub"); // 입장
+        registry.enableSimpleBroker("/sub"); // 수신
     }
 }
