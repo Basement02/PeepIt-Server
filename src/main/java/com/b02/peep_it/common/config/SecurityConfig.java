@@ -5,6 +5,7 @@ import com.b02.peep_it.common.filter.AccessTokenFilter;
 import com.b02.peep_it.common.filter.RefreshTokenFilter;
 import com.b02.peep_it.common.filter.RegisterTokenFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.socket.config.WebSocketMessageBrokerStats;
 
 import java.util.List;
 
@@ -30,7 +32,7 @@ public class SecurityConfig {
     private final RefreshTokenFilter refreshTokenFilter;
 
     private String[] permitList = {
-            "/ws-chat/**", // WebSocket 엔드포인트
+            "/ws-chat", "/ws-chat/**", // WebSocket 엔드포인트
             "/api/v1/test/**", // /deploy, /health-check, /upload
             "/api/v1/auth/social", "/api/v1/auth/check/**", // /social, /check/id, /check/phone, /send/sms-code
             "/api/v1/town/**", // /list, /info
@@ -67,7 +69,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(List.of("http://localhost:8080", "http://basement02.site", "https://basement02.site", "http://43.200.44.121:8080", "https://43.200.44.121:8080"));
+        configuration.setAllowedOrigins(List.of("https://jiangxy.github.io", "http://localhost:63342", "http://localhost:8080", "http://basement02.site", "https://basement02.site", "http://43.200.44.121:8080", "https://43.200.44.121:8080"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setMaxAge(3600L); // preflight 결과를 캐시하는 시간(초)
@@ -91,4 +93,5 @@ public class SecurityConfig {
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
 }

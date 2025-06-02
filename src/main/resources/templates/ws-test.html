@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+<h1>Spring WebSocket Chat</h1>
+<button onclick="connect()">Connect</button>
+<button onclick="send()">Send</button>
+
+<script>
+    let stompClient;
+
+    function connect() {
+        const socket = new SockJS("http://localhost:8080/ws-chat");
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            console.log("✅ 연결 성공", frame);
+
+            stompClient.subscribe("/sub/chat.room.123", function (msg) {
+                console.log("📥 받은 메시지:", JSON.parse(msg.body));
+            });
+        }, function (error) {
+            console.error("❌ 연결 실패", error);
+        });
+    }
+
+    function send() {
+        stompClient.send("/pub/chat.send", {}, JSON.stringify({
+            roomId: "123",
+            sender: "강희",
+            content: "안녕!",
+            type: "TALK"
+        }));
+    }
+</script>
+</body>
+</html>

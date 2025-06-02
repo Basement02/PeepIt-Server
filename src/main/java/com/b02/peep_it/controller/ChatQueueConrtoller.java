@@ -15,6 +15,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import java.time.LocalDateTime;
@@ -28,8 +29,9 @@ public class ChatQueueConrtoller {
     private final ChatService chatService;
     private final MemberRepository memberRepository;
     private final TimeAgoUtils timeAgoUtils;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    @MessageMapping("mq.send.{peepId}")
+    @MessageMapping("chat.send.{peepId}")
     public void send(@DestinationVariable Long peepId, ChatSendDto requestDto) {
         requestDto.setRegDate(LocalDateTime.now());
         chatService.save(peepId, requestDto.getUid(), requestDto.getContent());
@@ -58,8 +60,10 @@ public class ChatQueueConrtoller {
                 .sendAt(timeAgoUtils.getTimeAgo(requestDto.getRegDate()))
                 .build();
 
-        // STOMP 구독 경로(/exchange/chat.exchange/room.1)로 메시지를 브로드캐스트
-        rabbitTemplate.convertAndSend("/exchange/chat.exchange/room." + requestDto.getPeepId(), responseDto);
+        messagingTemplate.convertAndSend("/sub/chat.room." + requestDto.getPeepId(), responseDto);
+
+//        // STOMP 구독 경로(/exchange/chat.exchange/room.1)로 메시지를 브로드캐스트
+//        rabbitTemplate.convertAndSend("/exchange/chat.exchange/room." + requestDto.getPeepId(), responseDto);
     }
 
 }

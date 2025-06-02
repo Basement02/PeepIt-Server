@@ -22,8 +22,7 @@ public class AccessTokenFilter extends OncePerRequestFilter {
     private final JwtUtils jwtUtils;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             String token = bearerToken.substring(7);
@@ -58,6 +57,7 @@ public class AccessTokenFilter extends OncePerRequestFilter {
         return path.startsWith("/api/v1/auth/check")
                 || path.startsWith("/api/v1/test")
                 || path.startsWith("/api/v1/auth/social")
+                || path.startsWith("/ws-chat")
                 ; // auth 경로로 접근하는 모든 요청은 필터 제외
     }
 }
