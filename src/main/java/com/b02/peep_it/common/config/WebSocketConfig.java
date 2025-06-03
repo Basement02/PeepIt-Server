@@ -19,6 +19,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.setApplicationDestinationPrefixes("/pub"); // 입장
-        registry.enableSimpleBroker("/sub"); // 수신
+//        registry.enableSimpleBroker("/sub"); // 클라이언트에 메세지 전달은 SimpMessagingTemplate.convertAndSend()으로 변경
     }
 }
