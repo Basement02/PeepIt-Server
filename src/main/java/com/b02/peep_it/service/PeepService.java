@@ -37,6 +37,7 @@ public class PeepService {
     private final StateRepository stateRepository;
     private final TownRepository townRepository;
     private final ChatService chatService;
+    private final ChatListener chatListener;
 
     /*
     신규 핍 등록 (텍스트 + 이미지/영상)

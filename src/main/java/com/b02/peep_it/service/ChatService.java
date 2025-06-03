@@ -10,12 +10,15 @@ import com.b02.peep_it.repository.ChatRepository;
 import com.b02.peep_it.repository.MemberRepository;
 import com.b02.peep_it.repository.PeepRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Properties;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatService {
@@ -24,8 +27,8 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final MemberRepository memberRepository;
     private final PeepRepository peepRepository;
-    private final AmqpAdmin rabbitAdmin;
-    private final TopicExchange chatExchange;
+    private final AmqpAdmin amqpAdmin;
+    private final ChatListener chatListener;
 
     public Chat save(Long peepId, String memberId, String content) {
         Member member = memberRepository.findById(memberId).orElseThrow();
@@ -54,15 +57,20 @@ public class ChatService {
     }
 
     public void createRoom(Long peepId) {
-        String queueName = "room." + peepId;
+        String queueName = "chat.room." + peepId;
+        String routingKey = "room." + peepId;
+        String exchangeName = "chat.exchange";
 
-        Queue roomQueue = new Queue(queueName, false, false, true);
-        Binding roomBinding = BindingBuilder
-                .bind(roomQueue)
-                .to(chatExchange)
-                .with(queueName); // routing key = room.{peepId}
+        // 1. AMQP 리소스 선언
+        Queue queue = new Queue(queueName, false, false, true);
+        TopicExchange exchange = new TopicExchange(exchangeName);
+        Binding binding = BindingBuilder.bind(queue).to(exchange).with(routingKey);
 
-        rabbitAdmin.declareQueue(roomQueue);
-        rabbitAdmin.declareBinding(roomBinding);
+        amqpAdmin.declareQueue(queue);
+        amqpAdmin.declareExchange(exchange);
+        amqpAdmin.declareBinding(binding);
+
+        // 2. 동적 리스너 등록
+        chatListener.startListenerForRoom(peepId);
     }
 }
