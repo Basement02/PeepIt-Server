@@ -11,6 +11,8 @@ import com.b02.peep_it.common.exception.UnauthorizedException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,11 +23,14 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Collections;
 import java.util.Date;
@@ -47,9 +52,15 @@ public class JwtUtils {
     private String issuer;
     private final StringRedisTemplate stringRedisTemplate;
     @Value("${auth.key.kakao}")
-    private String KAKAO_REST_API_KEY = "";
+    private String KAKAO_NATIVE_APP_KEY;
     @Value("${auth.key.apple}")
-    private String APPLE_CLIENT_ID = "";
+    private String APPLE_CLIENT_ID;
+    private SecretKey secretKey;
+
+    @PostConstruct
+    public void init() {
+        this.secretKey = Keys.hmacShaKeyFor(jwtSecretKey.getBytes(StandardCharsets.UTF_8));
+    }
 
 
     /*
@@ -64,12 +75,14 @@ public class JwtUtils {
         claims.put("provider", provider);
         claims.put("providerId", providerId);
         Date now = new Date();
+        log.info("RegisterToken 발급 시 SecretKey: {}", secretKey);
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuer(issuer)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + registerTokenTime))
-                .signWith(SignatureAlgorithm.HS256, jwtSecretKey)
+//                .signWith(SignatureAlgorithm.HS256, jwtSecretKey)
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -83,7 +96,8 @@ public class JwtUtils {
                 .setIssuer(issuer)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + accessTokenTime))
-                .signWith(SignatureAlgorithm.HS256, jwtSecretKey)
+//                .signWith(SignatureAlgorithm.HS256, jwtSecretKey)
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -96,7 +110,8 @@ public class JwtUtils {
                 .setIssuer(issuer)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + refreshTokenTime))
-                .signWith(SignatureAlgorithm.HS256, jwtSecretKey)
+//                .signWith(SignatureAlgorithm.HS256, jwtSecretKey)
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
 
         updateUserRefreshToken(responseCommonMemberDto, refreshToken);
@@ -155,7 +170,7 @@ public class JwtUtils {
         }
         try {
             Claims claims = Jwts.parser()
-                    .setSigningKey(jwtSecretKey)
+                    .setSigningKey(secretKey)
                     .parseClaimsJws(token)
                     .getBody();
 
@@ -205,7 +220,7 @@ public class JwtUtils {
         }
         try {
             Claims claims = Jwts.parser()
-                    .setSigningKey(jwtSecretKey)
+                    .setSigningKey(secretKey)
                     .parseClaimsJws(token)
                     .getBody();
 
@@ -314,20 +329,22 @@ public class JwtUtils {
         - apple
         - tester
      */
-    public boolean validateIdToken(CustomProvider provider, String providerId) throws IOException, InterruptedException {
+    public boolean validateIdToken(CustomProvider provider, String idToken) throws IOException, InterruptedException {
+        log.info("id token 검증 함수 진입, provider: " + provider);
+
         // kakao
         if (provider.equals(CustomProvider.KAKAO)) {
-            return validateKakaoIdToken(providerId);
+            return validateKakaoIdToken(idToken);
         }
 
         // naver
         if (provider.equals(CustomProvider.NAVER)) {
-            return validateNaverIdToken(providerId);
+            return validateNaverIdToken(idToken);
         }
 
         // apple
         if (provider.equals(CustomProvider.APPLE)) {
-            return validateAppleIdToken(providerId);
+            return validateAppleIdToken(idToken);
         }
 
         // tester
@@ -342,7 +359,7 @@ public class JwtUtils {
         // 1. https://kauth.kakao.com/.well-known/jwks.json
         // 2. JWT Header의 kid 사용해 해당 키 찾아서 RSAPublicKey 생성
         // 3. com.auth0.jwt로 서명 및 iss/aud 검증
-        return verifyWithJWK(idToken, "https://kauth.kakao.com", "https://kauth.kakao.com/.well-known/jwks.json", KAKAO_REST_API_KEY);
+        return verifyWithJWK(idToken, "https://kauth.kakao.com", "https://kauth.kakao.com/.well-known/jwks.json", KAKAO_NATIVE_APP_KEY);
     }
 
     private boolean validateNaverIdToken(String idToken) throws IOException, InterruptedException {
@@ -480,8 +497,9 @@ public class JwtUtils {
 
     public boolean isIss(String token) {
         try {
+            log.info("RegisterToken 검증 시 SecretKey: {}", secretKey);
             Claims claims = Jwts.parser()
-                    .setSigningKey(jwtSecretKey)
+                    .setSigningKey(secretKey)
                     .parseClaimsJws(token)
                     .getBody();
 
@@ -505,6 +523,6 @@ public class JwtUtils {
     }
 
     public Claims getClaims(String token) {
-        return Jwts.parser().setSigningKey(jwtSecretKey).parseClaimsJws(token).getBody();
+        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
     }
 }

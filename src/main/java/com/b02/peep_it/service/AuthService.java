@@ -89,9 +89,10 @@ public class AuthService {
         String name = "";
         String id = "";
         CustomProvider provider = CustomProvider.valueOf(requestDto.provider());
+        String idToken = requestDto.idToken();
 
         // idtoken 유효성 검증
-        if (!jwtUtils.validateIdToken(provider, requestDto.idToken())) {
+        if (!jwtUtils.validateIdToken(provider, idToken)) {
             log.warn("유효하지 않은 id token - provider: {}, id token: {}", provider, requestDto.idToken());
             return CommonResponse.failed(CustomError.TOKEN_UNAUTHORIZED);
         }
@@ -130,8 +131,8 @@ public class AuthService {
         else {
 
             // idtoken 유효성 검증
-            if (!jwtUtils.validateIdToken(provider, providerId)) {
-                log.warn("유효하지 않은 id token - provider: {}, providerId: {}", provider, providerId);
+            if (!jwtUtils.validateIdToken(provider, requestDto.idToken())) {
+                log.warn("유효하지 않은 id token - provider: {}, id token: {}", provider, idToken);
                 return CommonResponse.failed(CustomError.TOKEN_UNAUTHORIZED);
             }
 
