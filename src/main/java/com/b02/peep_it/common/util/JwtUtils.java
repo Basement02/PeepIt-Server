@@ -190,39 +190,6 @@ public class JwtUtils {
         }
     }
 
-
-//    public boolean validateRegisterToken(String token) {
-//        if (!StringUtils.hasText(token)) {
-//            return false;
-//        }
-//        if (!isIss(token)) {
-//            return false;
-//        }
-//        try {
-//            Claims claims = Jwts.parser()
-//                    .setSigningKey(jwtSecretKey)
-//                    .parseClaimsJws(token)
-//                    .getBody();
-//
-//            // 토큰에서 필드 추출
-//            CustomProvider provider = (CustomProvider) claims.get("provider");
-//            String providerId = (String) claims.get("providerId");
-//
-//            // provider에 따른 social uid 추출 (추출 시, 유효성 검증 거침)
-//            String socialUid = getSocialUid(provider, providerId);
-//
-//            return socialUid != null;
-//
-//
-//        } catch (MalformedJwtException e) {
-//            throw new UnauthorizedException(CustomError.NEED_TO_CUSTOM);
-//        } catch (ExpiredJwtException e) {
-//            throw new UnauthorizedException(CustomError.NEED_TO_CUSTOM);
-//        } catch (UnauthorizedException e) {
-//            return false;
-//        }
-//    }
-
     public boolean validateAccessToken(String token) {
         if (!StringUtils.hasText(token)) {
 //            throw new UnauthorizedException(ErrorCode.JWT_TOKEN_NOT_EXISTS);
@@ -300,31 +267,40 @@ public class JwtUtils {
         - naver
         - apple
      */
-    public String getSocialUid(CustomProvider provider, String providerId) throws IOException, InterruptedException {
+    public String getSocialUid(CustomProvider provider, String idToken) throws IOException, InterruptedException {
         String socialUid = "";
-        if (!validateIdToken(provider, providerId)) {
+        if (!validateIdToken(provider, idToken)) {
             log.info("유효하지 않은 id token");
             throw new UnauthorizedException(CustomError.NEED_TO_CUSTOM);
         }
-        // kakao
-        if (provider.equals(CustomProvider.KAKAO)) {
-
+        // kakao or apple
+        if (provider.equals(CustomProvider.KAKAO) || provider.equals(CustomProvider.APPLE)) {
+            DecodedJWT jwt = JWT.decode(idToken);
+            String uid = jwt.getSubject();
+            socialUid = uid;
+            log.info(provider + " UID from id token: " + uid);
         }
 
         // naver
         if (provider.equals(CustomProvider.NAVER)) {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://openapi.naver.com/v1/nid/me"))
+                    .header("Authorization", "Bearer " + idToken)
+                    .GET().build();
+            HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
-        }
-
-        // apple
-        if (provider.equals(CustomProvider.APPLE)) {
+            if (response.statusCode() == 200) {
+                String uid = new ObjectMapper().readTree(response.body()).get("response").get("id").asText();
+                log.info("Naver UID from REST: " + uid);
+            }
 
         }
 
         // tester
         if (provider.equals(CustomProvider.TESTER)) {
             // 테스터 계정 생성 시, 입력된 값으로 고유 ID를 대체
-            socialUid = providerId;
+            socialUid = idToken;
+            log.info("TESTER UID from id token: " + socialUid);
         }
 
         return socialUid;
@@ -457,7 +433,7 @@ public class JwtUtils {
 //                .username(username)
                 .uid(uid)
                 .provider(provider)
-                .providerId(providerId)
+                .idToken(providerId)
                 .authorities(Collections.singleton(authority))
                 .build();
 
@@ -487,7 +463,7 @@ public class JwtUtils {
 //                .username(username)
                 .uid(uid)
                 .provider(provider)
-                .providerId(providerId)
+                .idToken(providerId)
                 .authorities(Collections.singleton(authority))
                 .build();
 
