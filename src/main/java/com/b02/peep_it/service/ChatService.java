@@ -62,7 +62,7 @@ public class ChatService {
         String exchangeName = "chat.exchange";
 
         // 1. AMQP 리소스 선언
-        Queue queue = new Queue(queueName, false, false, true);
+        Queue queue = new Queue(queueName, true, false, true);
         TopicExchange exchange = new TopicExchange(exchangeName);
         Binding binding = BindingBuilder.bind(queue).to(exchange).with(routingKey);
 
