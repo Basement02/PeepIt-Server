@@ -52,9 +52,9 @@ public class JwtUtils {
     private String issuer;
     private final StringRedisTemplate stringRedisTemplate;
     @Value("${auth.key.kakao}")
-    private String KAKAO_NATIVE_APP_KEY = "";
+    private String KAKAO_NATIVE_APP_KEY;
     @Value("${auth.key.apple}")
-    private String APPLE_CLIENT_ID = "";
+    private String APPLE_CLIENT_ID;
     private SecretKey secretKey;
 
     @PostConstruct
