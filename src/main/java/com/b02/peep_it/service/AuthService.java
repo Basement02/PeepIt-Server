@@ -1,6 +1,5 @@
 package com.b02.peep_it.service;
 
-import com.b02.peep_it.common.exception.UnauthorizedException;
 import com.b02.peep_it.common.response.CommonResponse;
 import com.b02.peep_it.common.exception.CustomError;
 import com.b02.peep_it.common.util.CustomUserDetails;
@@ -17,7 +16,6 @@ import com.b02.peep_it.repository.*;
 import com.b02.peep_it.common.util.JwtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.nurigo.java_sdk.api.Message;
@@ -26,8 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -93,6 +89,14 @@ public class AuthService {
         String name = "";
         String id = "";
         CustomProvider provider = CustomProvider.valueOf(requestDto.provider());
+
+        // idtoken 유효성 검증
+        if (!jwtUtils.validateIdToken(provider, requestDto.idToken())) {
+            log.warn("유효하지 않은 id token - provider: {}, id token: {}", provider, requestDto.idToken());
+            return CommonResponse.failed(CustomError.TOKEN_UNAUTHORIZED);
+        }
+
+        log.info("id token 검증 완료");
 
         // idtoken에서 고유 id 추출
         String providerId = jwtUtils.getSocialUid(provider, requestDto.idToken());
@@ -174,18 +178,20 @@ public class AuthService {
 
         // 레지스터 토큰에서 사용자 정보 추출
         CustomUserDetails userDetails = userInfo.getPrincipal();
-        log.info("사용자 정보 추출 완료 - provider: {}, providerId: {}", userDetails.getProvider(), userDetails.getProviderId());
+        log.info("사용자 정보 추출 완료 - provider: {}, id token: {}", userDetails.getProvider(), userDetails.getIdToken());
 
         CustomProvider provider = CustomProvider.valueOf(userDetails.getProvider());
-        String providerId = userDetails.getProviderId();
+        String idToken = userDetails.getIdToken();
 
         // idtoken 유효성 검증
-        if (!jwtUtils.validateIdToken(provider, providerId)) {
-            log.warn("유효하지 않은 id token - provider: {}, providerId: {}", provider, providerId);
+        if (!jwtUtils.validateIdToken(provider, idToken)) {
+            log.warn("유효하지 않은 id token - provider: {}, providerId: {}", provider, idToken);
             return CommonResponse.failed(CustomError.TOKEN_UNAUTHORIZED);
         }
 
         log.info("id token 검증 완료");
+
+        String providerId = jwtUtils.getSocialUid(provider, idToken);
 
         // 소셜 로그인 객체 생성 & 저장
         MemberSocial memberSocial = MemberSocial.builder()

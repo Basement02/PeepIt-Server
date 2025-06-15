@@ -71,7 +71,7 @@ public class RegisterTokenFilter extends OncePerRequestFilter {
             log.info("User ID (uid): {}", userDetails.getUid());
             log.info("Username (닉네임): {}", userDetails.getUsername());
             log.info("Provider (공급자): {}", userDetails.getProvider());
-            log.info("ProviderId (소셜 고유 ID): {}", userDetails.getProviderId());
+            log.info("ProviderId (소셜 고유 ID): {}", userDetails.getIdToken());
             log.info("Authorities: {}", userDetails.getAuthorities());
         } else {
             log.warn("❌ Authorization 헤더가 'Register '로 시작하지 않음. 값: {}", bearerToken);
