@@ -13,7 +13,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) { // 웹소켓 연결
+        // 1) 브라우저용 SockJS (fallback)
         registry.addEndpoint("/ws-chat").setAllowedOriginPatterns("*").withSockJS();
+        // 2) 모바일용 순수 STOMP over WebSocket
+        registry.addEndpoint("/ws-chat").setAllowedOriginPatterns("*");
     }
 
     @Override
