@@ -180,7 +180,7 @@ public class PeepService {
                 .stickerNum(Optional.ofNullable(p.getPeepReStickerList()).map(List::size).orElse(0))
                 .chatNum(Optional.ofNullable(p.getChatList()).map(List::size).orElse(0))
                 .popularity(p.calculatePopularityScore())
-                .isVideo(p.getIsVideo())
+                .isVideo(p.getIsVideo() != null && p.getIsVideo())
                 .build());
 
         if (responseDtoPage.isEmpty()) {
