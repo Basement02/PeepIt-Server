@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -39,13 +40,19 @@ public class ChatListener { // RabbitMQ로부터 메시지를 읽어옴
 
         String queueName = "chat.room." + peepId;
 
-        Queue queue = new Queue(queueName, false, false, true);
-        amqpAdmin.declareQueue(queue);
+        // 기존에 큐가 존재하지 않으면 생성
+        Properties queueProperties = amqpAdmin.getQueueProperties(queueName);
+        if (queueProperties == null) {
+            Queue queue = new Queue(queueName, true, false, false);
+            amqpAdmin.declareQueue(queue);
+        }
 
-        // 필요한 경우, exchange 바인딩도 여기서 함께
+        // exchange 바인딩도 여기서 함께
         TopicExchange exchange = new TopicExchange("chat.exchange", true, false);
         amqpAdmin.declareExchange(exchange);
-        amqpAdmin.declareBinding(BindingBuilder.bind(queue).to(exchange).with("room." + peepId));
+        amqpAdmin.declareBinding(
+                BindingBuilder.bind(new Queue(queueName)).to(exchange).with("room." + peepId)
+        );
 
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
@@ -55,18 +62,18 @@ public class ChatListener { // RabbitMQ로부터 메시지를 읽어옴
             try {
                 ChatSendDto dto = objectMapper.readValue(message.getBody(), ChatSendDto.class);
 
-                Optional<Member> memberOpt = memberRepository.findById(dto.getUid());
-                if (memberOpt.isEmpty()) return;
+                memberRepository.findById(dto.getUid()).ifPresent(member -> {
+                    ChatReceiveDto responseDto = ChatReceiveDto.builder()
+                            .peepId(dto.getPeepId())
+                            .nickname(member.getNickname())
+                            .imgUrl(member.getProfileImg())
+                            .content(dto.getContent())
+                            .sendAt(timeAgoUtils.getTimeAgo(dto.getRegDate()))
+                            .build();
 
-                ChatReceiveDto responseDto = ChatReceiveDto.builder()
-                        .peepId(dto.getPeepId())
-                        .nickname(memberOpt.get().getNickname())
-                        .imgUrl(memberOpt.get().getProfileImg())
-                        .content(dto.getContent())
-                        .sendAt(timeAgoUtils.getTimeAgo(dto.getRegDate()))
-                        .build();
+                    messagingTemplate.convertAndSend("/sub/chat.receive." + dto.getPeepId(), responseDto);
+                });
 
-                messagingTemplate.convertAndSend("/sub/chat.receive." + dto.getPeepId(), responseDto); // 구독자에게 전송
             } catch (Exception e) {
                 log.error("메시지 처리 실패", e);
             }
