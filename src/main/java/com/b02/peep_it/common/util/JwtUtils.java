@@ -81,7 +81,6 @@ public class JwtUtils {
                 .setIssuer(issuer)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + registerTokenTime))
-//                .signWith(SignatureAlgorithm.HS256, jwtSecretKey)
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -96,7 +95,6 @@ public class JwtUtils {
                 .setIssuer(issuer)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + accessTokenTime))
-//                .signWith(SignatureAlgorithm.HS256, jwtSecretKey)
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -110,7 +108,6 @@ public class JwtUtils {
                 .setIssuer(issuer)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + refreshTokenTime))
-//                .signWith(SignatureAlgorithm.HS256, jwtSecretKey)
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
 
